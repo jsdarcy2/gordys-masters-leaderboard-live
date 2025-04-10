@@ -9,7 +9,7 @@ const NAV_TABS: NavTab[] = [
   { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
   { id: "selections", label: "Player Selections", href: "/selections" },
   { id: "rules", label: "Pool Rules", href: "/rules" },
-  { id: "archive", label: "Archive", href: "/archive" },
+  { id: "archive", label: "Green Robe Winners", href: "/archive" },
 ];
 
 const Header = () => {
@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex justify-between items-center">
           <div className="flex flex-col items-center md:items-start">
             <h1 className="text-2xl md:text-3xl font-serif font-bold">Gordy's Masters Pool</h1>
-            <p className="text-masters-gold font-serif text-sm md:text-base italic">20th Year Edition</p>
+            <p className="text-masters-yellow font-serif text-sm md:text-base italic">20th Year Edition</p>
           </div>
           
           {/* Mobile menu button */}
@@ -45,8 +45,8 @@ const Header = () => {
                     to={tab.href}
                     className={`font-serif ${
                       location.pathname === tab.href
-                        ? "text-masters-gold border-b-2 border-masters-gold"
-                        : "text-white hover:text-masters-gold transition-colors"
+                        ? "text-masters-yellow border-b-2 border-masters-yellow"
+                        : "text-white hover:text-masters-yellow transition-colors"
                     }`}
                   >
                     {tab.label}
@@ -67,8 +67,8 @@ const Header = () => {
                     to={tab.href}
                     className={`block py-2 font-serif ${
                       location.pathname === tab.href
-                        ? "text-masters-gold"
-                        : "text-white hover:text-masters-gold transition-colors"
+                        ? "text-masters-yellow"
+                        : "text-white hover:text-masters-yellow transition-colors"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

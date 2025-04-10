@@ -13,9 +13,9 @@ const Leaderboard = () => {
   const [error, setError] = useState<string | null>(null);
 
   const getScoreClass = (score: number) => {
-    if (score < 0) return "score-under";
-    if (score > 0) return "score-over";
-    return "score-even";
+    if (score < 0) return "text-masters-green font-bold";
+    if (score > 0) return "text-red-600";
+    return "text-black";
   };
 
   const formatScore = (score: number) => {
@@ -56,21 +56,22 @@ const Leaderboard = () => {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <div className="masters-card">
+      <div className="masters-header">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl md:text-2xl font-serif text-masters-green">
+          <h2 className="text-xl md:text-2xl font-serif">
             Masters Tournament Leaderboard
-          </CardTitle>
+          </h2>
           {!loading && lastUpdated && (
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-masters-yellow">
               <Clock size={14} className="mr-1" />
               <span>Updated: {formatLastUpdated(lastUpdated)}</span>
             </div>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      
+      <div className="p-4 bg-white">
         {error && (
           <div className="text-center text-red-500 py-4">{error}</div>
         )}
@@ -92,16 +93,16 @@ const Leaderboard = () => {
             <table className="w-full">
               <thead>
                 <tr className="text-left border-b-2 border-masters-green">
-                  <th className="px-2 py-3 font-serif font-medium text-masters-green">Pos</th>
-                  <th className="px-2 py-3 font-serif font-medium text-masters-green">Player</th>
-                  <th className="px-2 py-3 text-right font-serif font-medium text-masters-green">Score</th>
-                  <th className="px-2 py-3 text-right font-serif font-medium text-masters-green">Today</th>
-                  <th className="px-2 py-3 text-right font-serif font-medium text-masters-green">Thru</th>
+                  <th className="masters-table-header rounded-tl-md">Pos</th>
+                  <th className="masters-table-header">Player</th>
+                  <th className="masters-table-header text-right">Score</th>
+                  <th className="masters-table-header text-right">Today</th>
+                  <th className="masters-table-header text-right rounded-tr-md">Thru</th>
                 </tr>
               </thead>
               <tbody>
                 {leaderboard.map((golfer, index) => (
-                  <tr key={index} className="scoreboard-row">
+                  <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
                     <td className="px-2 py-3 font-medium">{golfer.position}</td>
                     <td className="px-2 py-3 font-medium">{golfer.name}</td>
                     <td className={`px-2 py-3 text-right ${getScoreClass(golfer.score)}`}>
@@ -117,8 +118,8 @@ const Leaderboard = () => {
             </table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

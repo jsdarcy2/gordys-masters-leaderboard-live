@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings } from "@/services/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Award, Clock } from "lucide-react";
 
@@ -13,7 +12,7 @@ const PoolStandings = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const getScoreClass = (score: number) => {
-    if (score < 0) return "text-masters-green";
+    if (score < 0) return "text-masters-green font-bold";
     if (score > 0) return "text-red-600";
     return "";
   };
@@ -56,21 +55,22 @@ const PoolStandings = () => {
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <div className="masters-card">
+      <div className="masters-header">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl md:text-2xl font-serif text-masters-green">
+          <h2 className="text-xl md:text-2xl font-serif">
             Pool Standings
-          </CardTitle>
+          </h2>
           {!loading && lastUpdated && (
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-masters-yellow">
               <Clock size={14} className="mr-1" />
               <span>Updated: {formatLastUpdated(lastUpdated)}</span>
             </div>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      
+      <div className="p-4 bg-white">
         {error && (
           <div className="text-center text-red-500 py-4">{error}</div>
         )}
@@ -90,19 +90,19 @@ const PoolStandings = () => {
             <table className="w-full">
               <thead>
                 <tr className="text-left border-b-2 border-masters-green">
-                  <th className="px-2 py-3 font-serif font-medium text-masters-green">Pos</th>
-                  <th className="px-2 py-3 font-serif font-medium text-masters-green">Name</th>
-                  <th className="px-2 py-3 text-right font-serif font-medium text-masters-green">Points</th>
-                  <th className="px-2 py-3 font-serif font-medium text-masters-green hidden md:table-cell">Picks</th>
+                  <th className="masters-table-header rounded-tl-md">Pos</th>
+                  <th className="masters-table-header">Name</th>
+                  <th className="masters-table-header text-right">Points</th>
+                  <th className="masters-table-header hidden md:table-cell rounded-tr-md">Picks</th>
                 </tr>
               </thead>
               <tbody>
                 {standings.map((participant, index) => (
-                  <tr key={index} className="scoreboard-row">
+                  <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
                     <td className="px-2 py-3 font-medium">
                       {participant.position === 1 && (
                         <span className="inline-flex items-center">
-                          <Award size={16} className="text-masters-gold mr-1" />
+                          <Award size={16} className="text-masters-yellow mr-1" />
                           {participant.position}
                         </span>
                       )}
@@ -139,8 +139,8 @@ const PoolStandings = () => {
             </table>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from "react";
 import { fetchPlayerSelections } from "@/services/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const PlayerSelections = () => {
@@ -27,7 +25,6 @@ const PlayerSelections = () => {
     loadSelections();
   }, []);
 
-  // Count golfer popularity (how many times each golfer was selected)
   const getGolferPopularity = () => {
     const popularity: {[golfer: string]: number} = {};
     
@@ -42,19 +39,18 @@ const PlayerSelections = () => {
 
   const golferPopularity = getGolferPopularity();
   
-  // Sort golfers by popularity
   const sortedGolfers = Object.entries(golferPopularity)
     .sort(([, countA], [, countB]) => countB - countA);
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl md:text-2xl font-serif text-masters-green">
+      <div className="masters-card">
+        <div className="masters-header">
+          <h2 className="text-xl md:text-2xl font-serif">
             Player Selections
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h2>
+        </div>
+        <div className="p-4 bg-white">
           {error && (
             <div className="text-center text-red-500 py-4">{error}</div>
           )}
@@ -75,7 +71,7 @@ const PlayerSelections = () => {
           ) : (
             <div className="space-y-6">
               {Object.entries(selections).map(([participant, picks], index) => (
-                <div key={index} className="border-b pb-4 last:border-0">
+                <div key={index} className={`border-b pb-4 last:border-0 ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-4 px-4"}`}>
                   <h3 className="font-medium text-lg mb-2">{participant}</h3>
                   <div className="flex flex-wrap gap-2">
                     {picks.map((golfer, i) => (
@@ -91,16 +87,16 @@ const PlayerSelections = () => {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl md:text-2xl font-serif text-masters-green">
+      <div className="masters-card">
+        <div className="masters-header">
+          <h2 className="text-xl md:text-2xl font-serif">
             Golfer Popularity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </h2>
+        </div>
+        <div className="p-4 bg-white">
           {loading ? (
             <div className="space-y-2">
               {[...Array(8)].map((_, i) => (
@@ -113,7 +109,7 @@ const PlayerSelections = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {sortedGolfers.map(([golfer, count], index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b">
+                <div key={index} className={`flex justify-between items-center py-2 border-b ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-2 px-2"}`}>
                   <span className="font-medium">{golfer}</span>
                   <span className="bg-masters-green text-white px-2 py-1 rounded-full text-sm">
                     {count} pick{count !== 1 ? 's' : ''}
@@ -122,8 +118,8 @@ const PlayerSelections = () => {
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

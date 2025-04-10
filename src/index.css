@@ -17,7 +17,7 @@
     --primary: 158 100% 20%; /* Masters green */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 44 87% 65%; /* Masters gold */
+    --secondary: 60 90% 60%; /* Masters yellow */
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
@@ -73,15 +73,35 @@
   .scoreboard-row:last-child {
     @apply border-b-0;
   }
+
+  .masters-header {
+    @apply bg-masters-green text-white font-serif p-3 rounded-t-md;
+  }
+  
+  .masters-table-header {
+    @apply bg-masters-green text-white p-2 font-serif;
+  }
+  
+  .masters-table-row-even {
+    @apply bg-white;
+  }
+  
+  .masters-table-row-odd {
+    @apply bg-masters-yellow bg-opacity-20;
+  }
+  
+  .masters-card {
+    @apply rounded-md overflow-hidden border border-gray-200 shadow-sm;
+  }
 }
 
 @layer utilities {
   .score-under {
-    @apply text-red-600;
+    @apply text-masters-green;
   }
   
   .score-over {
-    @apply text-masters-green;
+    @apply text-red-600;
   }
   
   .score-even {

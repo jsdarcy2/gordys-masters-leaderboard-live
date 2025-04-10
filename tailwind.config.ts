@@ -65,7 +65,9 @@ export default {
 				},
 				masters: {
 					green: '#006747',
+					darkgreen: '#005538',
 					gold: '#F2C75C',
+					yellow: '#FFE733',
 					cream: '#F9F6EE',
 					light: '#E8F3ED',
 					dark: '#004530'

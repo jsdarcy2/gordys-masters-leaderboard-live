@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Rules = () => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl md:text-2xl font-serif text-masters-green">
+    <div className="masters-card">
+      <div className="masters-header">
+        <h2 className="text-xl md:text-2xl font-serif">
           Pool Rules - 20th Edition
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="prose max-w-none">
+        </h2>
+      </div>
+      <div className="p-6 bg-white prose max-w-none">
         <div className="space-y-6">
           <section>
             <h3 className="text-lg font-serif font-medium text-masters-green">Entry & Participation</h3>
@@ -59,8 +59,8 @@ const Rules = () => {
             </ul>
           </section>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

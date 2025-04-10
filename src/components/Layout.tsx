@@ -18,7 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
           <p className="text-sm">
             © {new Date().getFullYear()} Gordy's Masters Pool - 20th Year Edition
           </p>
-          <p className="text-xs mt-1 text-gray-300">
+          <p className="text-xs mt-1 text-masters-yellow">
             Updated with real-time data
           </p>
         </div>
