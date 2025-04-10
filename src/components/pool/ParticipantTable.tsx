@@ -22,7 +22,10 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
     return "";
   };
 
-  const formatScore = (score: number) => {
+  const formatScore = (score: number | undefined) => {
+    // Handle undefined or null scores
+    if (score === undefined || score === null) return "E";
+    
     if (score === 0) return "E";
     return score > 0 ? `+${score}` : score.toString();
   };
