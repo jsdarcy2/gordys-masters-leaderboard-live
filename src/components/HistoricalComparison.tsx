@@ -105,39 +105,42 @@ const HistoricalComparison = ({ currentStandings }: HistoricalComparisonProps) =
               <CardContent>
                 <div className="h-[200px]">
                   <ChartContainer config={chartConfig}>
-                    <ChartLegend className="mb-2" />
-                    <RechartsPrimitive.ResponsiveContainer>
-                      <RechartsPrimitive.LineChart 
-                        data={[
-                          { x: "Thu", finalDay: historicalData[0].data[0].y, currentLeader: historicalData[1].data[0].y },
-                          { x: "Fri", finalDay: historicalData[0].data[1].y, currentLeader: historicalData[1].data[1].y },
-                          { x: "Sat", finalDay: historicalData[0].data[2].y, currentLeader: historicalData[1].data[2].y },
-                          { x: "Sun", finalDay: historicalData[0].data[3].y, currentLeader: historicalData[1].data[3].y }
-                        ]}
-                        margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
-                      >
-                        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
-                        <RechartsPrimitive.XAxis dataKey="x" />
-                        <RechartsPrimitive.YAxis reversed />
-                        <RechartsPrimitive.Tooltip />
-                        <RechartsPrimitive.Line 
-                          type="monotone" 
-                          dataKey="finalDay" 
-                          stroke={chartConfig.finalDay.color} 
-                          strokeWidth={2} 
-                          dot={{ r: 4 }}
-                          activeDot={{ r: 6 }}
-                        />
-                        <RechartsPrimitive.Line 
-                          type="monotone" 
-                          dataKey="currentLeader" 
-                          stroke={chartConfig.currentLeader.color} 
-                          strokeWidth={2} 
-                          dot={{ r: 4 }}
-                          activeDot={{ r: 6 }}
-                        />
-                      </RechartsPrimitive.LineChart>
-                    </RechartsPrimitive.ResponsiveContainer>
+                    {/* Wrap the children in a fragment to make it a single React element */}
+                    <>
+                      <ChartLegend className="mb-2" />
+                      <RechartsPrimitive.ResponsiveContainer>
+                        <RechartsPrimitive.LineChart 
+                          data={[
+                            { x: "Thu", finalDay: historicalData[0].data[0].y, currentLeader: historicalData[1].data[0].y },
+                            { x: "Fri", finalDay: historicalData[0].data[1].y, currentLeader: historicalData[1].data[1].y },
+                            { x: "Sat", finalDay: historicalData[0].data[2].y, currentLeader: historicalData[1].data[2].y },
+                            { x: "Sun", finalDay: historicalData[0].data[3].y, currentLeader: historicalData[1].data[3].y }
+                          ]}
+                          margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+                        >
+                          <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+                          <RechartsPrimitive.XAxis dataKey="x" />
+                          <RechartsPrimitive.YAxis reversed />
+                          <RechartsPrimitive.Tooltip />
+                          <RechartsPrimitive.Line 
+                            type="monotone" 
+                            dataKey="finalDay" 
+                            stroke={chartConfig.finalDay.color} 
+                            strokeWidth={2} 
+                            dot={{ r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                          <RechartsPrimitive.Line 
+                            type="monotone" 
+                            dataKey="currentLeader" 
+                            stroke={chartConfig.currentLeader.color} 
+                            strokeWidth={2} 
+                            dot={{ r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </RechartsPrimitive.LineChart>
+                      </RechartsPrimitive.ResponsiveContainer>
+                    </>
                   </ChartContainer>
                 </div>
                 <div className="text-sm text-gray-500 mt-2 text-center">
