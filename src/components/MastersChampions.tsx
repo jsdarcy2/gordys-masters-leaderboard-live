@@ -34,29 +34,29 @@ const TOURNAMENT_HISTORY = [
     title: "Founding Legacy",
     year: "1934",
     description: "The Masters Tournament was founded by Bobby Jones and Clifford Roberts, with Horton Smith becoming the first champion.",
-    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png",
-    caption: "The iconic Augusta National Golf Club, home of the Masters"
+    image: "/lovable-uploads/986e7321-f375-4033-b344-533298c15ed9.png",
+    caption: "Augusta National Golf Club during its early years, home of the Masters since 1934"
   },
   { 
     title: "Champions Dinner",
     year: "1952-Present",
     description: "The Champions Dinner tradition began in 1952 when Ben Hogan hosted a dinner for past champions. Each year, the defending champion selects the menu.",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
-    caption: "The exclusive Champions Dinner brings together golf legends annually" 
+    image: "/lovable-uploads/8d3f3940-0abe-4ff2-8a95-69da3fdfe991.png",
+    caption: "The exclusive Champions Dinner brings together Masters winners annually at Augusta National" 
   },
   { 
     title: "Green Jacket Tradition",
     year: "1949-Present",
     description: "The iconic green jacket was first awarded to Sam Snead in 1949, becoming the symbol of Masters victory and membership at Augusta National.",
-    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&q=80", 
-    caption: "The presentation of the green jacket remains one of golf's most prestigious ceremonies"
+    image: "/lovable-uploads/901c5e70-1860-4dee-9076-58f0c0284cf8.png", 
+    caption: "Tiger Woods receives his fifth green jacket from 2018 champion Patrick Reed"
   },
   { 
     title: "Iconic Champions",
     year: "All-Time Greats",
     description: "Jack Nicklaus (6 wins), Tiger Woods (5), and Arnold Palmer (4) have defined the tournament's rich history with their remarkable achievements.",
-    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png",
-    caption: "The Masters has crowned the greatest players in golf history"
+    image: "/lovable-uploads/912144bb-30e1-461b-afb7-c475e0ebc3a5.png",
+    caption: "Golf's 'Big Three': Jack Nicklaus, Arnold Palmer, and Gary Player at the ceremonial opening tee shot"
   },
 ];
 
@@ -67,28 +67,28 @@ const ICONIC_CHAMPIONS = [
     wins: 5, 
     years: [1997, 2001, 2002, 2005, 2019], 
     achievement: "Youngest Masters champion in 1997, and oldest champion (at time of win) in 2019",
-    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png"
+    image: "/lovable-uploads/b4a27812-b6a2-4381-b500-ec469e430fa9.png"
   },
   { 
     name: "Jack Nicklaus", 
     wins: 6, 
     years: [1963, 1965, 1966, 1972, 1975, 1986], 
     achievement: "Most Masters victories (6) and oldest champion at age 46 in 1986",
-    image: "https://images.unsplash.com/photo-1494232410401-ad00d5433cfa?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/46d56b9a-f59d-4336-9503-64a0cdf20d88.png"
   },
   { 
     name: "Arnold Palmer", 
     wins: 4, 
     years: [1958, 1960, 1962, 1964], 
     achievement: "Won four times in a seven-year span, helped popularize the Masters globally",
-    image: "https://images.unsplash.com/photo-1535131749006-b7f58c99034b?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/80d8cb16-da68-45fb-b9e4-1cb20ff5e9d5.png"
   },
   { 
     name: "Phil Mickelson", 
     wins: 3, 
     years: [2004, 2006, 2010], 
     achievement: "Left-handed champion with iconic leap after winning his first major in 2004",
-    image: "https://images.unsplash.com/photo-1560089001-7a5f26afe81f?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png"
   },
 ];
 
@@ -212,10 +212,19 @@ const MastersChampions = () => {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {ICONIC_CHAMPIONS.map((champion, index) => (
-                      <div key={index} className="bg-white rounded-md p-3 shadow-sm">
-                        <div className="font-medium text-masters-green">{champion.name}</div>
-                        <div className="text-sm text-gray-600">
-                          <span className="text-masters-gold font-medium">{champion.wins} wins</span>: {champion.years.join(', ')}
+                      <div key={index} className="bg-white rounded-md overflow-hidden shadow-sm">
+                        <div className="h-36 overflow-hidden">
+                          <Image 
+                            src={champion.image} 
+                            alt={champion.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <div className="font-medium text-masters-green">{champion.name}</div>
+                          <div className="text-sm text-gray-600">
+                            <span className="text-masters-gold font-medium">{champion.wins} wins</span>: {champion.years.join(', ')}
+                          </div>
                         </div>
                       </div>
                     ))}
