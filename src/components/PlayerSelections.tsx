@@ -1,10 +1,12 @@
 
 import { useState, useEffect, useMemo } from "react";
-import { fetchPlayerSelections } from "@/services/api";
+import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PoolParticipant } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 type TeamSelection = {
   picks: string[];
@@ -14,32 +16,46 @@ type TeamSelection = {
 
 const PlayerSelections = () => {
   const [selections, setSelections] = useState<{[participant: string]: TeamSelection}>({});
+  const [poolStandings, setPoolStandings] = useState<PoolParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [sortBy, setSortBy] = useState<"name" | "golfer">("name");
   const [sortedGolfer, setSortedGolfer] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const PREVIEW_COUNT = 20; // Number of selections to show in preview mode
 
   useEffect(() => {
-    const loadSelections = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await fetchPlayerSelections();
-        setSelections(data);
+        
+        // Load both selections and pool standings data
+        const [selectionsData, standingsData] = await Promise.all([
+          fetchPlayerSelections(),
+          fetchPoolStandings()
+        ]);
+        
+        setSelections(selectionsData);
+        setPoolStandings(standingsData);
         setError(null);
       } catch (err) {
-        setError("Failed to load player selections");
+        setError("Failed to load data");
         console.error(err);
+        toast({
+          title: "Error loading data",
+          description: "There was a problem loading the selections data. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    loadSelections();
-  }, []);
+    loadData();
+  }, [toast]);
 
   const getGolferPopularity = useMemo(() => {
     const popularity: {[golfer: string]: number} = {};
@@ -69,6 +85,15 @@ const PlayerSelections = () => {
     return score > 0 ? `+${score}` : score.toString();
   };
 
+  // Create a map of participant names to their standings position
+  const participantRankMap = useMemo(() => {
+    const rankMap = new Map<string, number>();
+    poolStandings.forEach((participant) => {
+      rankMap.set(participant.name, participant.position);
+    });
+    return rankMap;
+  }, [poolStandings]);
+
   const filteredParticipants = useMemo(() => {
     let filtered = Object.entries(selections);
     
@@ -90,11 +115,22 @@ const PlayerSelections = () => {
       );
     }
     
-    // Alphabetical sort by default
-    filtered = filtered.sort((a, b) => a[0].localeCompare(b[0]));
+    // Sort by pool standings position (if available) or alphabetically as fallback
+    filtered = filtered.sort((a, b) => {
+      const rankA = participantRankMap.get(a[0]) || Infinity;
+      const rankB = participantRankMap.get(b[0]) || Infinity;
+      
+      // First sort by rank
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+      
+      // If ranks are the same or not available, sort alphabetically
+      return a[0].localeCompare(b[0]);
+    });
     
     return filtered;
-  }, [selections, searchTerm, sortBy, sortedGolfer]);
+  }, [selections, searchTerm, sortBy, sortedGolfer, participantRankMap]);
 
   // Display either all selections or just the preview based on showAll state
   const displaySelections = showAll ? filteredParticipants : filteredParticipants.slice(0, PREVIEW_COUNT);
@@ -111,7 +147,7 @@ const PlayerSelections = () => {
             Player Selections
           </h2>
           <p className="text-sm text-white/80 mt-1">
-            View all 132 team selections for The Masters
+            View all team selections for The Masters, ordered by pool position
           </p>
         </div>
         
@@ -168,10 +204,11 @@ const PlayerSelections = () => {
                   <tbody>
                     {displaySelections.map(([participant, data], index) => {
                       const totalRound1 = calculateTotalRoundScore(data.roundScores);
+                      const poolPosition = participantRankMap.get(participant) || index + 1;
                       
                       return (
                         <tr key={participant} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
-                          <td className="px-2 py-3 text-center font-medium">{index + 1}</td>
+                          <td className="px-2 py-3 text-center font-medium">{poolPosition}</td>
                           <td className="px-2 py-3 font-medium">{participant}</td>
                           <td className={`px-2 py-3 text-center ${getScoreClass(totalRound1)}`}>
                             {formatScore(totalRound1)}
@@ -210,11 +247,17 @@ const PlayerSelections = () => {
               <div className="md:hidden space-y-6">
                 {displaySelections.map(([participant, data], index) => {
                   const totalRound1 = calculateTotalRoundScore(data.roundScores);
+                  const poolPosition = participantRankMap.get(participant) || index + 1;
                   
                   return (
                     <div key={participant} className={`border-b pb-4 last:border-0 ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-4 px-4"}`}>
                       <div className="flex justify-between items-center mb-2">
-                        <h3 className="font-medium text-lg">{participant}</h3>
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center justify-center w-8 h-8 mr-2 bg-masters-green text-white rounded-full text-sm font-medium">
+                            {poolPosition}
+                          </span>
+                          <h3 className="font-medium text-lg">{participant}</h3>
+                        </div>
                         <div className={`text-lg ${getScoreClass(totalRound1)}`}>
                           {formatScore(totalRound1)}
                         </div>

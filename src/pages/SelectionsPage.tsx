@@ -17,7 +17,7 @@ const SelectionsPage = () => {
           Player Selections
         </h2>
         <p className="text-gray-600">
-          See who everyone picked for this year's Masters Tournament.
+          See player selections ranked by their current position in the pool standings.
         </p>
       </div>
       
