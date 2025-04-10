@@ -3,13 +3,17 @@ import { useState, useEffect } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Award, Clock } from "lucide-react";
+import { Award, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [showAll, setShowAll] = useState(false);
+  
+  const PREVIEW_COUNT = 5; // Number of standings to show in preview mode
 
   const getScoreClass = (score: number) => {
     if (score < 0) return "text-masters-green font-bold";
@@ -54,6 +58,9 @@ const PoolStandings = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Display either all standings or just the preview based on showAll state
+  const displayStandings = showAll ? standings : standings.slice(0, PREVIEW_COUNT);
+
   return (
     <div className="masters-card">
       <div className="masters-header">
@@ -97,7 +104,7 @@ const PoolStandings = () => {
                 </tr>
               </thead>
               <tbody>
-                {standings.map((participant, index) => (
+                {displayStandings.map((participant, index) => (
                   <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
                     <td className="px-2 py-3 font-medium">
                       {participant.position === 1 && (
@@ -137,6 +144,29 @@ const PoolStandings = () => {
                 ))}
               </tbody>
             </table>
+            
+            {standings.length > PREVIEW_COUNT && (
+              <div className="mt-4 text-center">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowAll(!showAll)}
+                  className="text-masters-green border-masters-green hover:bg-masters-green/10 focus:ring-2 focus:ring-masters-green/30"
+                >
+                  {showAll ? (
+                    <>
+                      <span>Show Less</span>
+                      <ChevronUp className="ml-1 h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <span>Show All ({standings.length} Players)</span>
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
