@@ -1,12 +1,19 @@
+
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, RefreshCw, DollarSign, AlertTriangle } from "lucide-react";
+import { Clock, RefreshCw, DollarSign, AlertTriangle, Trophy, Medal, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const POOL_CONFIG = {
   entryFee: 25, // $25 per entry
@@ -182,6 +189,30 @@ const Leaderboard = () => {
     }
   }, []);
 
+  // Function to get winner icon based on position
+  const getWinnerIcon = (position: number) => {
+    if (position === 1) {
+      return <Trophy className="text-masters-yellow" size={18} />;
+    } else if (position === 2) {
+      return <Medal className="text-gray-400" size={18} />;
+    } else if (position === 3) {
+      return <Award className="text-amber-700" size={18} />;
+    }
+    return null;
+  };
+
+  // Function to get winner tooltip content
+  const getWinnerTooltip = (position: number) => {
+    const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
+    if (!prizeTier) return "";
+
+    const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
+    const winnings = totalPrizePool * prizeTier.percentage;
+    const percentage = prizeTier.percentage * 100;
+
+    return `${percentage}% of pool: $${winnings.toLocaleString()}`;
+  };
+
   return (
     <div className="masters-card">
       <div className="masters-header">
@@ -299,7 +330,24 @@ const Leaderboard = () => {
                             {changedPositions[golfer.name] === 'down' && (
                               <span className="text-red-500 mr-1">▼</span>
                             )}
-                            {golfer.position}
+                            {golfer.position <= 3 ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex items-center space-x-1">
+                                      <span>{golfer.position}</span>
+                                      <span className="ml-1">{getWinnerIcon(golfer.position)}</span>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="bg-white border border-masters-green">
+                                    <p className="font-medium">Position {golfer.position}</p>
+                                    <p className="text-sm text-masters-green">{getWinnerTooltip(golfer.position)}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              golfer.position
+                            )}
                           </div>
                         </td>
                         <td className="px-2 py-3 font-medium">
