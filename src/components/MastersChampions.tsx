@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award, Clock, History } from "lucide-react";
@@ -6,6 +7,7 @@ import Image from "@/components/ui/image";
 
 // Masters Golf Tournament Champions data
 const MASTERS_CHAMPIONS = [
+  { year: 2024, winner: "Scottie Scheffler", country: "United States", score: "-11", runnerUp: "Ludvig Åberg" },
   { year: 2023, winner: "Jon Rahm", country: "Spain", score: "-12", runnerUp: "Brooks Koepka" },
   { year: 2022, winner: "Scottie Scheffler", country: "United States", score: "-10", runnerUp: "Rory McIlroy" },
   { year: 2021, winner: "Hideki Matsuyama", country: "Japan", score: "-10", runnerUp: "Will Zalatoris" },
