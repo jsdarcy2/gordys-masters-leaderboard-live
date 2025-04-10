@@ -1,28 +1,17 @@
+
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, RefreshCw, DollarSign, AlertTriangle, Trophy, Medal, Award } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-const POOL_CONFIG = {
-  entryFee: 25, // $25 per entry
-  estimatedEntrants: 120, // Estimated number of participants
-  prizeTiers: [
-    { position: 1, percentage: 0.7 }, // 70% to 1st place
-    { position: 2, percentage: 0.2 }, // 20% to 2nd place
-    { position: 3, percentage: 0.1 }  // 10% to 3rd place
-  ]
-};
+// Import our new components
+import LoadingState from "./leaderboard/LoadingState";
+import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
+import LeaderboardTable from "./leaderboard/LeaderboardTable";
+import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -35,22 +24,6 @@ const Leaderboard = () => {
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
-  const getScoreClass = (score: number) => {
-    if (score < 0) return "text-masters-green font-bold";
-    if (score > 0) return "text-red-600";
-    return "text-black";
-  };
-
-  const formatScore = (score: number | string) => {
-    if (typeof score === 'string') {
-      score = parseFloat(score);
-      if (isNaN(score)) return "E";
-    }
-    
-    if (score === 0) return "E";
-    return score > 0 ? `+${score}` : score.toString();
-  };
 
   const loadLeaderboardData = async (showToast = false) => {
     try {
@@ -130,6 +103,11 @@ const Leaderboard = () => {
     loadLeaderboardData(true);
   };
 
+  const togglePotentialWinnings = () => {
+    setShowPotentialWinnings(!showPotentialWinnings);
+    localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
+  };
+
   useEffect(() => {
     const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
     const cachedData = localStorage.getItem('leaderboardData');
@@ -157,30 +135,6 @@ const Leaderboard = () => {
     return () => clearInterval(intervalId);
   }, [isMobile]);
 
-  const formatLastUpdated = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
-  const calculatePotentialWinnings = (position: number) => {
-    const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
-    
-    const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
-    
-    if (prizeTier) {
-      const winnings = totalPrizePool * prizeTier.percentage;
-      return winnings.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    } else {
-      return "0";
-    }
-  };
-
-  const togglePotentialWinnings = () => {
-    setShowPotentialWinnings(!showPotentialWinnings);
-    localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
-  };
-
   useEffect(() => {
     const showWinnings = localStorage.getItem('showPotentialWinnings');
     if (showWinnings !== null) {
@@ -188,70 +142,16 @@ const Leaderboard = () => {
     }
   }, []);
 
-  const getWinnerIcon = (position: number) => {
-    if (position === 1) {
-      return <Trophy className="text-yellow-500" size={18} />;
-    } else if (position === 2) {
-      return <Medal className="text-gray-400" size={18} />;
-    } else if (position === 3) {
-      return <Award className="text-amber-700" size={18} />;
-    }
-    return null;
-  };
-
-  const getWinnerTooltip = (position: number) => {
-    const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
-    if (!prizeTier) return "";
-
-    const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
-    const winnings = totalPrizePool * prizeTier.percentage;
-    const percentage = prizeTier.percentage * 100;
-
-    return `${percentage}% of pool: $${winnings.toLocaleString()}`;
-  };
-
   return (
     <div className="masters-card">
-      <div className="masters-header">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl md:text-2xl font-serif">
-            Masters Tournament Leaderboard
-          </h2>
-          <div className="flex items-center gap-2">
-            {!loading && !refreshing && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
-                onClick={handleManualRefresh}
-                disabled={refreshing}
-              >
-                <RefreshCw size={14} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-                <span className="sr-only md:not-sr-only">Refresh</span>
-              </Button>
-            )}
-            {!loading && !refreshing && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
-                onClick={togglePotentialWinnings}
-              >
-                <DollarSign size={14} className="mr-1" />
-                <span className="sr-only md:not-sr-only">
-                  {showPotentialWinnings ? "Hide Winnings" : "Show Winnings"}
-                </span>
-              </Button>
-            )}
-            {!loading && lastUpdated && (
-              <div className="flex items-center text-sm text-masters-yellow">
-                <Clock size={14} className="mr-1" />
-                <span>Updated: {formatLastUpdated(lastUpdated)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <LeaderboardHeader 
+        lastUpdated={lastUpdated}
+        loading={loading}
+        refreshing={refreshing}
+        handleManualRefresh={handleManualRefresh}
+        showPotentialWinnings={showPotentialWinnings}
+        togglePotentialWinnings={togglePotentialWinnings}
+      />
       
       <div className="p-4 bg-white">
         {error && (
@@ -262,122 +162,14 @@ const Leaderboard = () => {
         )}
         
         {loading ? (
-          <div className="space-y-2">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-6 w-10" />
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-6 w-10" />
-                <Skeleton className="h-6 w-10" />
-                <Skeleton className="h-6 w-10" />
-                {showPotentialWinnings && <Skeleton className="h-6 w-20" />}
-              </div>
-            ))}
-          </div>
+          <LoadingState showPotentialWinnings={showPotentialWinnings} />
         ) : (
-          <>
-            {refreshing && (
-              <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
-                <RefreshCw size={24} className="animate-spin text-masters-green" />
-              </div>
-            )}
-            <div className="overflow-x-auto relative">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left border-b-2 border-masters-green">
-                    <th className="masters-table-header rounded-tl-md">Pos</th>
-                    <th className="masters-table-header">Player</th>
-                    <th className="masters-table-header text-right">Score</th>
-                    <th className="masters-table-header text-right">Today</th>
-                    <th className="masters-table-header text-right">Thru</th>
-                    {showPotentialWinnings && (
-                      <th className="masters-table-header text-right rounded-tr-md">
-                        Potential Winnings
-                      </th>
-                    )}
-                    {!showPotentialWinnings && (
-                      <th className="masters-table-header text-right rounded-tr-md"></th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.length === 0 ? (
-                    <tr>
-                      <td colSpan={showPotentialWinnings ? 6 : 5} className="text-center py-8 text-gray-500">
-                        No leaderboard data available
-                      </td>
-                    </tr>
-                  ) : (
-                    leaderboard.map((golfer, index) => (
-                      <tr 
-                        key={`${golfer.name}-${index}`} 
-                        className={`${index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"} ${
-                          changedPositions[golfer.name] === 'up' 
-                            ? 'animate-pulse bg-green-50' 
-                            : changedPositions[golfer.name] === 'down' 
-                            ? 'animate-pulse bg-red-50'
-                            : ''
-                        } transition-all duration-500`}
-                      >
-                        <td className="px-2 py-3 font-medium">
-                          <div className="flex items-center">
-                            {changedPositions[golfer.name] === 'up' && (
-                              <span className="text-masters-green mr-1">▲</span>
-                            )}
-                            {changedPositions[golfer.name] === 'down' && (
-                              <span className="text-red-500 mr-1">▼</span>
-                            )}
-                            {golfer.position <= 3 ? (
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="flex items-center">
-                                      <span>{golfer.position}</span>
-                                      {getWinnerIcon(golfer.position) && (
-                                        <span className="ml-1">{getWinnerIcon(golfer.position)}</span>
-                                      )}
-                                    </div>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="bg-white border border-masters-green">
-                                    <p className="font-medium">Position {golfer.position}</p>
-                                    <p className="text-sm text-masters-green">{getWinnerTooltip(golfer.position)}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            ) : (
-                              golfer.position
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-2 py-3 font-medium">
-                          {golfer.name}
-                          {golfer.status === 'cut' && <span className="ml-2 text-xs text-red-500">(CUT)</span>}
-                          {golfer.status === 'withdrawn' && <span className="ml-2 text-xs text-red-500">(WD)</span>}
-                        </td>
-                        <td className={`px-2 py-3 text-right ${getScoreClass(golfer.score)}`}>
-                          {formatScore(golfer.score)}
-                        </td>
-                        <td className={`px-2 py-3 text-right ${getScoreClass(golfer.today)}`}>
-                          {formatScore(golfer.today)}
-                        </td>
-                        <td className="px-2 py-3 text-right">{golfer.thru}</td>
-                        {showPotentialWinnings && (
-                          <td className="px-2 py-3 text-right font-medium">
-                            {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                              <span className="text-masters-green">${calculatePotentialWinnings(golfer.position)}</span>
-                            ) : (
-                              <span className="text-gray-400">$0</span>
-                            )}
-                          </td>
-                        )}
-                        {!showPotentialWinnings && <td></td>}
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <LeaderboardTable 
+            leaderboard={leaderboard}
+            refreshing={refreshing}
+            changedPositions={changedPositions}
+            showPotentialWinnings={showPotentialWinnings}
+          />
         )}
       </div>
     </div>
