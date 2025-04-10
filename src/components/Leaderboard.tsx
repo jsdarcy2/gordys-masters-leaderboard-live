@@ -9,14 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const POOL_CONFIG = {
-  entryFee: 50, // $50 per entry
+  entryFee: 25, // $25 per entry
   estimatedEntrants: 120, // Estimated number of participants
   prizeTiers: [
-    { position: 1, percentage: 0.5 }, // 50% to 1st place
-    { position: 2, percentage: 0.25 }, // 25% to 2nd place
-    { position: 3, percentage: 0.15 }, // 15% to 3rd place
-    { position: 4, percentage: 0.06 }, // 6% to 4th place
-    { position: 5, percentage: 0.04 }  // 4% to 5th place
+    { position: 1, percentage: 0.7 }, // 70% to 1st place
+    { position: 2, percentage: 0.2 }, // 20% to 2nd place
+    { position: 3, percentage: 0.1 }  // 10% to 3rd place
   ]
 };
 
