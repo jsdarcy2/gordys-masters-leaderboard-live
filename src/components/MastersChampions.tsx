@@ -28,7 +28,7 @@ const MASTERS_CHAMPIONS = [
   { year: 2004, winner: "Phil Mickelson", country: "United States", score: "-9", runnerUp: "Ernie Els" },
 ];
 
-// Tournament History data with rich historical content
+// Tournament History data with rich historical content and authentic Masters photos
 const TOURNAMENT_HISTORY = [
   { 
     title: "Founding Legacy",
@@ -41,7 +41,7 @@ const TOURNAMENT_HISTORY = [
     title: "Champions Dinner",
     year: "1952-Present",
     description: "The Champions Dinner tradition began in 1952 when Ben Hogan hosted a dinner for past champions. Each year, the defending champion selects the menu.",
-    image: "/lovable-uploads/8d3f3940-0abe-4ff2-8a95-69da3fdfe991.png",
+    image: "/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png",
     caption: "The exclusive Champions Dinner brings together Masters winners annually at Augusta National" 
   },
   { 
@@ -55,19 +55,19 @@ const TOURNAMENT_HISTORY = [
     title: "Iconic Champions",
     year: "All-Time Greats",
     description: "Jack Nicklaus (6 wins), Tiger Woods (5), and Arnold Palmer (4) have defined the tournament's rich history with their remarkable achievements.",
-    image: "/lovable-uploads/912144bb-30e1-461b-afb7-c475e0ebc3a5.png",
+    image: "/lovable-uploads/cc5f5185-a821-4142-88d3-584a41df9b56.png",
     caption: "Golf's 'Big Three': Jack Nicklaus, Arnold Palmer, and Gary Player at the ceremonial opening tee shot"
   },
 ];
 
-// Iconic Masters Champions with achievements (keeping for reference data but transforming display)
+// Iconic Masters Champions with achievements
 const ICONIC_CHAMPIONS = [
   { 
     name: "Tiger Woods", 
     wins: 5, 
     years: [1997, 2001, 2002, 2005, 2019], 
     achievement: "Youngest Masters champion in 1997, and oldest champion (at time of win) in 2019",
-    image: "/lovable-uploads/b4a27812-b6a2-4381-b500-ec469e430fa9.png"
+    image: "/lovable-uploads/901c5e70-1860-4dee-9076-58f0c0284cf8.png"
   },
   { 
     name: "Jack Nicklaus", 
@@ -81,14 +81,14 @@ const ICONIC_CHAMPIONS = [
     wins: 4, 
     years: [1958, 1960, 1962, 1964], 
     achievement: "Won four times in a seven-year span, helped popularize the Masters globally",
-    image: "/lovable-uploads/80d8cb16-da68-45fb-b9e4-1cb20ff5e9d5.png"
+    image: "/lovable-uploads/393fdaac-022a-4ace-beb2-de5133016b85.png"
   },
   { 
     name: "Phil Mickelson", 
     wins: 3, 
     years: [2004, 2006, 2010], 
     achievement: "Left-handed champion with iconic leap after winning his first major in 2004",
-    image: "/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png"
+    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png"
   },
 ];
 
