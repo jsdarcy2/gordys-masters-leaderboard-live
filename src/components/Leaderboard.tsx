@@ -1,3 +1,4 @@
+
 import { GolferScore } from "@/types";
 import { useEffect, useState } from "react";
 import { fetchLeaderboardData } from "@/services/api";

@@ -23,7 +23,7 @@ const PoolStandings = () => {
   const [showAll, setShowAll] = useState(false);
   const { toast } = useToast();
   
-  const PREVIEW_COUNT = 10; // Number of entries to show in preview mode
+  const PREVIEW_COUNT = 15; // Increased from 10 to show more in preview
 
   const getScoreClass = (score: number) => {
     if (score < 0) return "text-masters-green font-bold";

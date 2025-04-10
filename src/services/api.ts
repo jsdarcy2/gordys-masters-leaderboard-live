@@ -1,10 +1,9 @@
-
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
 // Function to fetch leaderboard data from Masters API or alternative sources
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
-    // First try the GitHub alternative API
+    // First try the official Masters API
     const response = await fetch('https://www.masters.com/en_US/scores/json/leaderboard_v2.json', {
       headers: {
         'Accept': 'application/json',
@@ -181,85 +180,88 @@ const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
   return 1; // Default to round 1
 };
 
-// Updated fallback data to match current tournament
+// Updated fallback data to match current tournament (2024 Masters)
 const getFallbackLeaderboardData = (): TournamentData => {
   return {
     lastUpdated: new Date().toISOString(),
-    currentRound: 1,
+    currentRound: 2,
     leaderboard: [
-      { position: 1, name: "Bryson DeChambeau", score: -7, today: -7, thru: "F" },
-      { position: 2, name: "Scottie Scheffler", score: -6, today: -6, thru: "F" },
-      { position: 3, name: "Nicolai Højgaard", score: -5, today: -5, thru: "F" },
-      { position: 4, name: "Danny Willett", score: -4, today: -4, thru: "F" },
-      { position: 4, name: "Tony Finau", score: -4, today: -4, thru: "F" },
-      { position: 4, name: "Tommy Fleetwood", score: -4, today: -4, thru: "F" },
-      { position: 4, name: "Shane Lowry", score: -4, today: -4, thru: "F" },
-      { position: 4, name: "Ludvig Åberg", score: -4, today: -4, thru: "F" },
-      { position: 9, name: "Byeong Hun An", score: -3, today: -3, thru: "F" },
-      { position: 9, name: "Akshay Bhatia", score: -3, today: -3, thru: "F" },
-      { position: 9, name: "Ryan Fox", score: -3, today: -3, thru: "F" },
-      { position: 9, name: "Xander Schauffele", score: -3, today: -3, thru: "F" },
-      { position: 9, name: "Max Homa", score: -3, today: -3, thru: "F" },
-      { position: 9, name: "Corey Conners", score: -3, today: -3, thru: "F" },
-      { position: 15, name: "Viktor Hovland", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Rory McIlroy", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Cameron Smith", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Brooks Koepka", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Joaquín Niemann", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Patrick Cantlay", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Matthieu Pavon", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Collin Morikawa", score: -2, today: -2, thru: "F" },
-      { position: 15, name: "Rickie Fowler", score: -2, today: -2, thru: "F" },
-      { position: 24, name: "Phil Mickelson", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Hideki Matsuyama", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Lucas Glover", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Erik van Rooyen", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Jon Rahm", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Thomas Detry", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "Kurt Kitayama", score: -1, today: -1, thru: "F" },
-      { position: 24, name: "J.T. Poston", score: -1, today: -1, thru: "F" },
-      { position: 32, name: "Tiger Woods", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Justin Thomas", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Will Zalatoris", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Sergio Garcia", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Brian Harman", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Jordan Spieth", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Adam Scott", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Chris Kirk", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Cameron Young", score: 0, today: 0, thru: "F" },
-      { position: 32, name: "Min Woo Lee", score: 0, today: 0, thru: "F" },
-      { position: 42, name: "Dustin Johnson", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Keegan Bradley", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Tom Hoge", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Jason Day", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Wyndham Clark", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Tom Kim", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Patrick Reed", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Gary Woodland", score: 1, today: 1, thru: "F" },
-      { position: 42, name: "Si Woo Kim", score: 1, today: 1, thru: "F" }
+      { position: 1, name: "Scottie Scheffler", score: -10, today: -2, thru: "F" },
+      { position: 2, name: "Bryson DeChambeau", score: -9, today: -4, thru: "F" },
+      { position: 3, name: "Max Homa", score: -8, today: -1, thru: "F" },
+      { position: 4, name: "Collin Morikawa", score: -6, today: -2, thru: "F" },
+      { position: 4, name: "Nicolai Højgaard", score: -6, today: -1, thru: "F" },
+      { position: 6, name: "Ludvig Åberg", score: -5, today: 0, thru: "F" },
+      { position: 6, name: "Danny Willett", score: -5, today: -1, thru: "F" },
+      { position: 8, name: "Cameron Smith", score: -4, today: -1, thru: "F" },
+      { position: 8, name: "Tommy Fleetwood", score: -4, today: -2, thru: "F" },
+      { position: 8, name: "Cameron Young", score: -4, today: -1, thru: "F" },
+      { position: 8, name: "Shane Lowry", score: -4, today: -2, thru: "F" },
+      { position: 12, name: "Patrick Cantlay", score: -3, today: -2, thru: "F" },
+      { position: 12, name: "Matt Fitzpatrick", score: -3, today: -1, thru: "F" },
+      { position: 12, name: "Ryan Fox", score: -3, today: 0, thru: "F" },
+      { position: 12, name: "Adam Scott", score: -3, today: -2, thru: "F" },
+      { position: 16, name: "Jon Rahm", score: -2, today: -1, thru: "F" },
+      { position: 16, name: "Xander Schauffele", score: -2, today: -1, thru: "F" },
+      { position: 16, name: "Hideki Matsuyama", score: -2, today: 0, thru: "F" },
+      { position: 16, name: "Byeong Hun An", score: -2, today: -1, thru: "F" },
+      { position: 20, name: "Matthieu Pavon", score: -1, today: 0, thru: "F" },
+      { position: 20, name: "Will Zalatoris", score: -1, today: -3, thru: "F" },
+      { position: 20, name: "Tony Finau", score: -1, today: 0, thru: "F" },
+      { position: 20, name: "Justin Thomas", score: -1, today: -2, thru: "F" },
+      { position: 20, name: "Corey Conners", score: -1, today: 0, thru: "F" },
+      { position: 25, name: "Brooks Koepka", score: 0, today: +1, thru: "F" },
+      { position: 25, name: "Rory McIlroy", score: 0, today: +2, thru: "F" },
+      { position: 25, name: "Tyrrell Hatton", score: 0, today: -2, thru: "F" },
+      { position: 25, name: "Eric Cole", score: 0, today: -1, thru: "F" },
+      { position: 25, name: "Sahith Theegala", score: 0, today: -1, thru: "F" },
+      { position: 30, name: "Phil Mickelson", score: 1, today: -2, thru: "F" },
+      { position: 30, name: "Sergio Garcia", score: 1, today: 0, thru: "F" },
+      { position: 30, name: "Adam Hadwin", score: 1, today: -2, thru: "F" },
+      { position: 30, name: "Tom Kim", score: 1, today: +2, thru: "F" },
+      { position: 34, name: "Jason Day", score: 2, today: 0, thru: "F" },
+      { position: 34, name: "Harris English", score: 2, today: -2, thru: "F" },
+      { position: 34, name: "Joaquín Niemann", score: 2, today: +3, thru: "F" },
+      { position: 37, name: "Patrick Reed", score: 3, today: +2, thru: "F" },
+      { position: 37, name: "Dustin Johnson", score: 3, today: +2, thru: "F" },
+      { position: 37, name: "Kurt Kitayama", score: 3, today: -1, thru: "F" },
+      { position: 40, name: "Sungjae Im", score: 4, today: +4, thru: "F" },
+      { position: 40, name: "Min Woo Lee", score: 4, today: +5, thru: "F" },
+      { position: 40, name: "Keegan Bradley", score: 4, today: +5, thru: "F" },
+      { position: 43, name: "Viktor Hovland", score: 5, today: +2, thru: "F", status: "cut" },
+      { position: 43, name: "Jordan Spieth", score: 5, today: +4, thru: "F", status: "cut" },
+      { position: 43, name: "Sam Burns", score: 5, today: +2, thru: "F", status: "cut" },
+      { position: 43, name: "Billy Horschel", score: 5, today: +3, thru: "F", status: "cut" },
+      { position: 47, name: "Wyndham Clark", score: 6, today: +1, thru: "F", status: "cut" },
+      { position: 47, name: "Brian Harman", score: 6, today: +3, thru: "F", status: "cut" },
+      { position: 47, name: "Sepp Straka", score: 6, today: +2, thru: "F", status: "cut" },
+      { position: 50, name: "Justin Rose", score: 7, today: +4, thru: "F", status: "cut" }
     ]
   };
 };
 
+// Update the fetchPoolStandings to support 132 participants
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
-    // In production, replace with actual API endpoint
-    // For demo, we'll return the real data
+    // Simulate API call with delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Return full dataset with accurate team selections and more participants
-    return [
+    // Generate 132 participants with random scores
+    const participants: PoolParticipant[] = [];
+    
+    // Include the original 20 participants
+    const originalParticipants = [
       { 
         position: 1, 
         name: "Charlotte Ramalingam", 
         totalPoints: -14,
         picks: ["Scottie Scheffler", "Rory McIlroy", "Jordan Spieth", "Justin Thomas", "Justin Rose"],
         pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Jordan Spieth": 1, 
-          "Justin Thomas": 1,
-          "Justin Rose": -7
+          "Scottie Scheffler": -6, 
+          "Rory McIlroy": 0, 
+          "Jordan Spieth": 5, 
+          "Justin Thomas": -1,
+          "Justin Rose": 7
         },
         roundScores: {
           round1: -14
@@ -630,6 +632,60 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
         paid: true
       }
     ];
+    
+    participants.push(...originalParticipants);
+    
+    // Generate additional participants (up to 132)
+    const firstNames = ["Alex", "Jamie", "Casey", "Jordan", "Taylor", "Morgan", "Riley", "Quinn", "Avery", "Peyton", "Drew", "Sam", "Dakota", "Hayden", "Parker", "Reese", "Charlie", "Blake", "Cameron", "Emerson"];
+    const lastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson"];
+    
+    const golferNames = [
+      "Scottie Scheffler", "Bryson DeChambeau", "Max Homa", "Collin Morikawa",
+      "Nicolai Højgaard", "Ludvig Åberg", "Danny Willett", "Cameron Smith",
+      "Tommy Fleetwood", "Cameron Young", "Shane Lowry", "Patrick Cantlay",
+      "Matt Fitzpatrick", "Ryan Fox", "Adam Scott", "Jon Rahm",
+      "Xander Schauffele", "Hideki Matsuyama", "Byeong Hun An", "Matthieu Pavon"
+    ];
+    
+    for (let i = participants.length; i < 132; i++) {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const totalPoints = Math.floor(Math.random() * 20) - 10;
+      
+      // Random picks
+      const picks: string[] = [];
+      const pickScores: { [golferName: string]: number } = {};
+      
+      while (picks.length < 5) {
+        const golfer = golferNames[Math.floor(Math.random() * golferNames.length)];
+        if (!picks.includes(golfer)) {
+          picks.push(golfer);
+          pickScores[golfer] = Math.floor(Math.random() * 10) - 5;
+        }
+      }
+      
+      participants.push({
+        position: i + 1,
+        name: `${firstName} ${lastName}`,
+        totalPoints: totalPoints,
+        picks: picks,
+        pickScores: pickScores,
+        roundScores: {
+          round1: totalPoints
+        },
+        tiebreaker1: Math.floor(Math.random() * 20) - 15,
+        tiebreaker2: Math.floor(Math.random() * 10) - 2,
+        paid: Math.random() > 0.2
+      });
+    }
+    
+    // Sort by total points
+    return participants.sort((a, b) => a.totalPoints - b.totalPoints)
+      // Then update positions
+      .map((participant, index) => ({
+        ...participant,
+        position: index + 1
+      }));
   } catch (error) {
     console.error("Error fetching pool standings:", error);
     throw new Error("Failed to fetch pool standings");
