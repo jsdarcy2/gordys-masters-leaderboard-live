@@ -61,7 +61,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2020, 
     winner: "Goldie Ginkel", 
     quote: "Queen Goldie (of the House Augusta) - The Green Robe Slayer",
-    image: "/lovable-uploads/901c5e70-1860-4dee-9076-58f0c0284cf8.png"
+    image: "/lovable-uploads/cdd8f28a-0a79-44fd-b664-12107b6f8c1e.png"
   },
   {
     year: 2019, 
