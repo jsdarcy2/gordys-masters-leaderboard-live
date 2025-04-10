@@ -11,8 +11,8 @@ const MastersChampionsPage = () => {
 
   return (
     <Layout>
-      <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-masters-green mb-4">
+      <div className="mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-masters-green mb-3 md:mb-4">
           Masters Tournament Champions
         </h2>
         <p className="text-gray-600 mb-2">

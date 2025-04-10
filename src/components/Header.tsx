@@ -3,6 +3,7 @@ import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const NAV_TABS: NavTab[] = [
   { id: "standings", label: "Pool Standings", href: "/" },
@@ -16,6 +17,7 @@ const NAV_TABS: NavTab[] = [
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   
@@ -24,8 +26,8 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-2xl md:text-3xl font-serif font-bold">Gordy's Masters Pool</h1>
-            <p className="text-masters-yellow font-serif text-sm md:text-base italic">20th Year Edition</p>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold">Gordy's Masters Pool 2025</h1>
+            <p className="text-masters-yellow font-serif text-sm md:text-base italic">A tradition unlike any other</p>
           </div>
           
           {/* Mobile menu button */}
@@ -39,12 +41,12 @@ const Header = () => {
           
           {/* Desktop navigation */}
           <nav className="hidden md:block">
-            <ul className="flex space-x-6">
+            <ul className="flex space-x-5">
               {NAV_TABS.map((tab) => (
                 <li key={tab.id}>
                   <Link
                     to={tab.href}
-                    className={`font-serif ${
+                    className={`font-serif text-sm ${
                       location.pathname === tab.href
                         ? "text-masters-yellow border-b-2 border-masters-yellow"
                         : "text-white hover:text-masters-yellow transition-colors"
