@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PoolParticipant } from "@/types";
-import { ChartContainer, ChartLegend, ChartAxis, ChartLineSeries, Chart, ChartLine } from "@/components/ui/chart";
+import { ChartContainer, ChartLegend } from "@/components/ui/chart";
+import * as RechartsPrimitive from "recharts";
 import { Calendar, History, TrendingUp } from "lucide-react";
 
 interface HistoricalComparisonProps {
@@ -23,6 +24,7 @@ const HistoricalComparison = ({ currentStandings }: HistoricalComparisonProps) =
     return [
       {
         name: "Final Day",
+        dataKey: "finalDay",
         data: [
           { x: "Thu", y: Math.floor(Math.random() * 5) + 1 },
           { x: "Fri", y: Math.floor(Math.random() * 5) + 1 },
@@ -32,6 +34,7 @@ const HistoricalComparison = ({ currentStandings }: HistoricalComparisonProps) =
       },
       {
         name: "Current Leader",
+        dataKey: "currentLeader",
         data: [
           { x: "Thu", y: Math.floor(Math.random() * 5) + 1 },
           { x: "Fri", y: Math.floor(Math.random() * 5) + 1 },
@@ -55,6 +58,18 @@ const HistoricalComparison = ({ currentStandings }: HistoricalComparisonProps) =
   
   const historicalData = getHistoricalData();
   const historicalStats = getHistoricalStats();
+  
+  // Create chart config for the recharts library
+  const chartConfig = {
+    finalDay: {
+      label: "Final Day",
+      color: "#2563eb", // blue
+    },
+    currentLeader: {
+      label: "Current Leader",
+      color: "#16a34a", // green
+    }
+  };
   
   return (
     <div className="masters-card mb-6">
@@ -89,13 +104,41 @@ const HistoricalComparison = ({ currentStandings }: HistoricalComparisonProps) =
               </CardHeader>
               <CardContent>
                 <div className="h-[200px]">
-                  <Chart>
+                  <ChartContainer config={chartConfig}>
                     <ChartLegend className="mb-2" />
-                    <ChartContainer>
-                      <ChartAxis />
-                      <ChartLineSeries data={historicalData} />
-                    </ChartContainer>
-                  </Chart>
+                    <RechartsPrimitive.ResponsiveContainer>
+                      <RechartsPrimitive.LineChart 
+                        data={[
+                          { x: "Thu", finalDay: historicalData[0].data[0].y, currentLeader: historicalData[1].data[0].y },
+                          { x: "Fri", finalDay: historicalData[0].data[1].y, currentLeader: historicalData[1].data[1].y },
+                          { x: "Sat", finalDay: historicalData[0].data[2].y, currentLeader: historicalData[1].data[2].y },
+                          { x: "Sun", finalDay: historicalData[0].data[3].y, currentLeader: historicalData[1].data[3].y }
+                        ]}
+                        margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
+                      >
+                        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+                        <RechartsPrimitive.XAxis dataKey="x" />
+                        <RechartsPrimitive.YAxis reversed />
+                        <RechartsPrimitive.Tooltip />
+                        <RechartsPrimitive.Line 
+                          type="monotone" 
+                          dataKey="finalDay" 
+                          stroke={chartConfig.finalDay.color} 
+                          strokeWidth={2} 
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                        <RechartsPrimitive.Line 
+                          type="monotone" 
+                          dataKey="currentLeader" 
+                          stroke={chartConfig.currentLeader.color} 
+                          strokeWidth={2} 
+                          dot={{ r: 4 }}
+                          activeDot={{ r: 6 }}
+                        />
+                      </RechartsPrimitive.LineChart>
+                    </RechartsPrimitive.ResponsiveContainer>
+                  </ChartContainer>
                 </div>
                 <div className="text-sm text-gray-500 mt-2 text-center">
                   Comparing {selectedYear} winner's position progression vs. current leader
