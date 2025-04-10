@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Medal, TrendingUp, DollarSign, Star } from "lucide-react";
@@ -6,6 +5,18 @@ import { PoolParticipant } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+
+const POOL_CONFIG = {
+  entryFee: 50, // $50 per entry
+  estimatedEntrants: 120, // Estimated number of participants
+  prizeTiers: [
+    { position: 1, percentage: 0.5 }, // 50% to 1st place
+    { position: 2, percentage: 0.25 }, // 25% to 2nd place
+    { position: 3, percentage: 0.15 }, // 15% to 3rd place
+    { position: 4, percentage: 0.06 }, // 6% to 4th place
+    { position: 5, percentage: 0.04 }  // 4% to 5th place
+  ]
+};
 
 interface PersonalizedDashboardProps {
   poolStandings: PoolParticipant[];
@@ -18,7 +29,6 @@ const PersonalizedDashboard = ({ poolStandings, loading }: PersonalizedDashboard
   const [userStats, setUserStats] = useState<PoolParticipant | null>(null);
   const { toast } = useToast();
 
-  // Load saved username from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("mastersPoolUsername");
     if (saved) {
@@ -27,7 +37,6 @@ const PersonalizedDashboard = ({ poolStandings, loading }: PersonalizedDashboard
     }
   }, []);
 
-  // Update user stats when standings or username changes
   useEffect(() => {
     if (savedUsername && poolStandings.length > 0) {
       const foundUser = poolStandings.find(
@@ -78,25 +87,23 @@ const PersonalizedDashboard = ({ poolStandings, loading }: PersonalizedDashboard
   };
 
   const getPositionChange = () => {
-    // Simulate position change for now (would be calculated from historical data)
     const posChange = Math.floor(Math.random() * 5) * (Math.random() > 0.5 ? 1 : -1);
     return posChange;
   };
 
-  // Calculate potential winnings
   const calculatePotentialWinnings = () => {
     if (!userStats) return "0";
     
-    // Mock calculation based on position (actual formula would depend on pool rules)
-    const totalPool = 5000; // Example pool amount
-    let winnings = 0;
+    const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
     
-    if (userStats.position === 1) winnings = totalPool * 0.5; // 50% for first place
-    else if (userStats.position === 2) winnings = totalPool * 0.3; // 30% for second place
-    else if (userStats.position === 3) winnings = totalPool * 0.15; // 15% for third place
-    else if (userStats.position <= 5) winnings = totalPool * 0.05 / 3; // Split 5% among 4th-5th
+    const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === userStats.position);
     
-    return winnings.toFixed(2);
+    if (prizeTier) {
+      const winnings = totalPrizePool * prizeTier.percentage;
+      return winnings.toFixed(2);
+    } else {
+      return "0";
+    }
   };
 
   return (

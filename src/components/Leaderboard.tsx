@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
@@ -8,6 +7,18 @@ import { Clock, RefreshCw, DollarSign, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+const POOL_CONFIG = {
+  entryFee: 50, // $50 per entry
+  estimatedEntrants: 120, // Estimated number of participants
+  prizeTiers: [
+    { position: 1, percentage: 0.5 }, // 50% to 1st place
+    { position: 2, percentage: 0.25 }, // 25% to 2nd place
+    { position: 3, percentage: 0.15 }, // 15% to 3rd place
+    { position: 4, percentage: 0.06 }, // 6% to 4th place
+    { position: 5, percentage: 0.04 }  // 4% to 5th place
+  ]
+};
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -29,7 +40,6 @@ const Leaderboard = () => {
 
   const formatScore = (score: number | string) => {
     if (typeof score === 'string') {
-      // Handle case where score comes as a string
       score = parseFloat(score);
       if (isNaN(score)) return "E";
     }
@@ -47,16 +57,13 @@ const Leaderboard = () => {
       
       const data = await fetchLeaderboardData();
       
-      // Store previous leaderboard before updating
       previousLeaderboard.current = [...leaderboard];
       
-      // Sort by position and update state
       const sortedLeaderboard = data.leaderboard.sort((a, b) => a.position - b.position);
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
       setError(null);
       
-      // Check for position changes
       if (previousLeaderboard.current.length > 0) {
         const newChanges: Record<string, 'up' | 'down' | null> = {};
         
@@ -64,12 +71,9 @@ const Leaderboard = () => {
           const previousGolfer = previousLeaderboard.current.find(g => g.name === golfer.name);
           
           if (previousGolfer && previousGolfer.position !== golfer.position) {
-            // Position changed
             if (previousGolfer.position > golfer.position) {
-              // Moved up in ranking (position number decreased)
               newChanges[golfer.name] = 'up';
               
-              // Only show toast for significant improvements (top 10 or big jumps)
               if (golfer.position <= 10 || (previousGolfer.position - golfer.position) >= 3) {
                 toast({
                   title: `${golfer.name} Moving Up!`,
@@ -78,7 +82,6 @@ const Leaderboard = () => {
                 });
               }
             } else {
-              // Moved down in ranking (position number increased)
               newChanges[golfer.name] = 'down';
             }
           } else {
@@ -88,7 +91,6 @@ const Leaderboard = () => {
         
         setChangedPositions(newChanges);
         
-        // Clear animations after 5 seconds
         setTimeout(() => {
           setChangedPositions({});
         }, 5000);
@@ -101,10 +103,8 @@ const Leaderboard = () => {
         });
       }
       
-      // Store the last updated time in localStorage for cross-device consistency
       localStorage.setItem('leaderboardLastUpdated', data.lastUpdated);
       localStorage.setItem('leaderboardData', JSON.stringify(data.leaderboard));
-      
     } catch (err) {
       setError("Failed to load leaderboard data");
       console.error(err);
@@ -127,7 +127,6 @@ const Leaderboard = () => {
   };
 
   useEffect(() => {
-    // First check if we have cached data
     const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
     const cachedData = localStorage.getItem('leaderboardData');
     
@@ -138,18 +137,14 @@ const Leaderboard = () => {
         setLastUpdated(cachedLastUpdated);
         setLoading(false);
         
-        // Then fetch fresh data in the background
         loadLeaderboardData();
       } catch (e) {
-        // If there's an error parsing cached data, load fresh data
         loadLeaderboardData();
       }
     } else {
-      // If no cached data, load fresh data
       loadLeaderboardData();
     }
     
-    // Set up polling for real-time updates (every 60 seconds for desktop, 120 seconds for mobile)
     const intervalTime = isMobile ? 120000 : 60000;
     const intervalId = setInterval(() => {
       loadLeaderboardData();
@@ -164,28 +159,16 @@ const Leaderboard = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Calculate potential winnings for each position
   const calculatePotentialWinnings = (position: number) => {
-    const totalPurse = 20000000; // $20 million total purse (2023 Masters)
+    const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
     
-    // Approximate purse distribution based on recent Masters tournaments
-    switch(position) {
-      case 1: return (totalPurse * 0.18).toLocaleString(); // 18% to winner
-      case 2: return (totalPurse * 0.108).toLocaleString();
-      case 3: return (totalPurse * 0.068).toLocaleString();
-      case 4: return (totalPurse * 0.048).toLocaleString();
-      case 5: return (totalPurse * 0.04).toLocaleString();
-      case 6: return (totalPurse * 0.036).toLocaleString();
-      case 7: return (totalPurse * 0.0335).toLocaleString();
-      case 8: return (totalPurse * 0.031).toLocaleString();
-      case 9: return (totalPurse * 0.029).toLocaleString();
-      case 10: return (totalPurse * 0.027).toLocaleString();
-      default:
-        if (position <= 15) return (totalPurse * 0.02).toLocaleString();
-        if (position <= 20) return (totalPurse * 0.015).toLocaleString();
-        if (position <= 30) return (totalPurse * 0.0075).toLocaleString();
-        if (position <= 50) return (totalPurse * 0.0025).toLocaleString();
-        return "N/A";
+    const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
+    
+    if (prizeTier) {
+      const winnings = totalPrizePool * prizeTier.percentage;
+      return winnings.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    } else {
+      return "0";
     }
   };
 
@@ -194,7 +177,6 @@ const Leaderboard = () => {
     localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
   };
 
-  // Load preference from localStorage
   useEffect(() => {
     const showWinnings = localStorage.getItem('showPotentialWinnings');
     if (showWinnings !== null) {

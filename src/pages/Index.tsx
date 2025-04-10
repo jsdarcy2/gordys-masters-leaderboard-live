@@ -4,7 +4,6 @@ import Layout from "@/components/Layout";
 import PoolStandings from "@/components/PoolStandings";
 import Leaderboard from "@/components/Leaderboard";
 import PersonalizedDashboard from "@/components/PersonalizedDashboard";
-import HistoricalComparison from "@/components/HistoricalComparison";
 import { fetchPoolStandings } from "@/services/api";
 import { PoolParticipant } from "@/types";
 
@@ -12,7 +11,7 @@ const Index = () => {
   const [poolStandings, setPoolStandings] = useState<PoolParticipant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load pool standings for use in personalized dashboard and historical comparison
+  // Load pool standings for use in personalized dashboard
   useEffect(() => {
     const loadPoolStandings = async () => {
       try {
@@ -52,10 +51,6 @@ const Index = () => {
       <PersonalizedDashboard 
         poolStandings={poolStandings}
         loading={loading}
-      />
-      
-      <HistoricalComparison 
-        currentStandings={poolStandings}
       />
       
       <div className="grid grid-cols-1 gap-8">
