@@ -16,6 +16,15 @@ export type PoolParticipant = {
   totalPoints: number;
   picks: string[];
   pickScores?: { [golferName: string]: number };
+  roundScores?: {
+    round1?: number;
+    round2?: number;
+    round3?: number;
+    round4?: number;
+  };
+  total?: number;
+  tiebreaker1?: number;
+  tiebreaker2?: number;
 }
 
 export type TournamentRound = 1 | 2 | 3 | 4;
