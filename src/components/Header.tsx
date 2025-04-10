@@ -8,8 +8,9 @@ const NAV_TABS: NavTab[] = [
   { id: "standings", label: "Pool Standings", href: "/" },
   { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
   { id: "selections", label: "Player Selections", href: "/selections" },
-  { id: "rules", label: "Pool Rules", href: "/rules" },
   { id: "archive", label: "Green Robe Winners", href: "/archive" },
+  { id: "masters-champions", label: "Masters Champions", href: "/masters-champions" },
+  { id: "rules", label: "Pool Rules", href: "/rules" },
 ];
 
 const Header = () => {
