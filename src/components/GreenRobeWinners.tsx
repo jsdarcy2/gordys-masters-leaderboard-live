@@ -1,9 +1,13 @@
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
+import { GreenRobeWinner, GreenRobeCoChampions } from "@/types";
+import Image from "@/components/ui/image";
 
+// Past tournament champions data
 const PAST_WINNERS = [
   { year: 2023, winner: "David Wilson", golfer: "Jon Rahm" },
   { year: 2022, winner: "Sarah Williams", golfer: "Scottie Scheffler" },
@@ -27,28 +31,106 @@ const PAST_WINNERS = [
   { year: 2004, winner: "Emily Clark", golfer: "Phil Mickelson" },
 ];
 
-const GREEN_ROBE_WINNERS = [
-  { year: 2024, winner: "Sarah Kepic", quote: "Girls Just Wanna Green Ro-obe!" },
-  { year: 2023, winner: "Elia Eyaz", quote: "Beeaaauuuutiful read, Steven" },
-  { year: 2022, winner: "Don Schmitt", quote: "Tent? Check. Elk Tag? Check. Fly Rod? Check. Cold Beer? Check. Green Robe? Check. Life Is Good.", nickname: "The People's Champion" },
-  { year: 2021, winner: "Jamie Lockhart", quote: "ABG - Always Be Grinding" },
-  { year: 2020, winner: "Goldie Ginkel", quote: "Queen Goldie (of the House Augusta) - The Green Robe Slayer" },
-  { year: 2019, winner: "Hadley Jones", quote: "Daddy's Little Robe Winner" },
-  { year: 2018, winner: "Brian Ginkel", quote: "Robé All Day Baby!" },
-  { year: 2017, winners: [
-    { name: "Peter Bassett", quote: "Sweetie, could you please be quiet and keep an eye on this for me" },
-    { name: "Jim Jones", quote: "The Robe really does tie the room together Dude" }
-  ]},
-  { year: 2016, winner: "Jack Lenmark", quote: "Chicks totally dig the Green Robe...so I got that goin' for me, which is nice" },
-  { year: 2015, winner: "Rob Furst", quote: "The Green Robe certainly does have its privileges" },
-  { year: 2014, winner: "Greg Capps", quote: "Mornin' friends!" },
-  { year: 2011, winner: "Peggy McClintock", quote: "I think people have always known who wears the Green Robe in this house" },
-  { year: 2010, winner: "Jay Despard", quote: "Hold my calls for the rest of the week...and would someone please freshen up this coffee, I have some streaming to do" },
-  { year: 2008, winner: "J.J. Furst", quote: "I don't always wear my Green Robe, but when I do I prefer to wear it with a cap, USA ascot, socks…and nothing else" },
+// Green robe winners with images
+const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
+  {
+    year: 2024, 
+    winner: "Sarah Kepic", 
+    quote: "Girls Just Wanna Green Ro-obe!",
+    image: "/lovable-uploads/cc5f5185-a821-4142-88d3-584a41df9b56.png"
+  },
+  {
+    year: 2023, 
+    winner: "Elia Eyaz", 
+    quote: "Beeaaauuuutiful read, Steven",
+    image: "/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png"
+  },
+  {
+    year: 2022, 
+    winner: "Don Schmitt", 
+    quote: "Tent? Check. Elk Tag? Check. Fly Rod? Check. Cold Beer? Check. Green Robe? Check. Life Is Good.",
+    nickname: "The People's Champion",
+    image: "/lovable-uploads/46d56b9a-f59d-4336-9503-64a0cdf20d88.png"
+  },
+  {
+    year: 2021, 
+    winner: "Jamie Lockhart", 
+    quote: "ABG - Always Be Grinding",
+    image: "/lovable-uploads/fdc58efd-fccd-4367-9b9f-e5b20693b5b1.png"
+  },
+  {
+    year: 2020, 
+    winner: "Goldie Ginkel", 
+    quote: "Queen Goldie (of the House Augusta) - The Green Robe Slayer",
+    image: "/lovable-uploads/901c5e70-1860-4dee-9076-58f0c0284cf8.png"
+  },
+  {
+    year: 2019, 
+    winner: "Hadley Jones", 
+    quote: "Daddy's Little Robe Winner",
+    image: "/lovable-uploads/986e7321-f375-4033-b344-533298c15ed9.png"
+  },
+  {
+    year: 2018, 
+    winner: "Brian Ginkel", 
+    quote: "Robé All Day Baby!",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2017,
+    winners: [
+      {
+        name: "Peter Bassett",
+        quote: "Sweetie, could you please be quiet and keep an eye on this for me",
+        image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Jim Jones",
+        quote: "The Robe really does tie the room together Dude",
+        image: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?auto=format&fit=crop&w=800&q=80"
+      }
+    ]
+  },
+  {
+    year: 2016, 
+    winner: "Jack Lenmark", 
+    quote: "Chicks totally dig the Green Robe...so I got that goin' for me, which is nice",
+    image: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2015, 
+    winner: "Rob Furst", 
+    quote: "The Green Robe certainly does have its privileges",
+    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2014, 
+    winner: "Greg Capps", 
+    quote: "Mornin' friends!",
+    image: "https://images.unsplash.com/photo-1473177104440-ffee2f376098?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2011, 
+    winner: "Peggy McClintock", 
+    quote: "I think people have always known who wears the Green Robe in this house",
+    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2010, 
+    winner: "Jay Despard", 
+    quote: "Hold my calls for the rest of the week...and would someone please freshen up this coffee, I have some streaming to do",
+    image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    year: 2008, 
+    winner: "J.J. Furst", 
+    quote: "I don't always wear my Green Robe, but when I do I prefer to wear it with a cap, USA ascot, socks…and nothing else",
+    image: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=800&q=80"
+  },
 ];
 
 const GreenRobeWinners = () => {
-  const [expandedSection, setExpandedSection] = useState<'champions' | 'green-robe' | null>('champions');
+  const [expandedSection, setExpandedSection] = useState<'champions' | 'green-robe' | null>('green-robe');
 
   const toggleSection = (section: 'champions' | 'green-robe') => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -147,36 +229,62 @@ const GreenRobeWinners = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {GREEN_ROBE_WINNERS.map((record, index) => (
-                  <Card key={index} className={index === 0 ? "bg-masters-light border-2 border-masters-gold" : ""}>
+                  <Card key={index} className={index === 0 ? "border-2 border-masters-gold" : ""}>
                     <CardContent className="p-4">
-                      <div className="flex items-center mb-2">
-                        {index === 0 && <Award size={16} className="text-masters-gold mr-2" />}
-                        <h3 className="text-lg font-serif font-medium text-masters-green">
-                          {record.year}
-                        </h3>
-                      </div>
-                      
-                      {'winners' in record ? (
-                        <div>
-                          <p className="font-medium">Co-Champions:</p>
-                          {record.winners.map((winner, i) => (
-                            <div key={i} className="mt-1">
-                              <p className="font-medium">{winner.name}</p>
-                              <p className="text-sm text-gray-600 italic">"{winner.quote}"</p>
+                      <div className="flex flex-col h-full">
+                        <div className="mb-2">
+                          <h3 className="text-xl font-serif font-medium text-masters-green">
+                            {record.year} Champion
+                            {record.year === 2017 ? 's' : ''}
+                          </h3>
+                        </div>
+                        
+                        {'winners' in record ? (
+                          <div className="grid grid-cols-1 gap-4">
+                            {record.winners.map((winner, i) => (
+                              <div key={i} className="flex flex-col md:flex-row gap-4">
+                                {winner.image && (
+                                  <div className="w-full md:w-1/2">
+                                    <img 
+                                      src={winner.image} 
+                                      alt={`${winner.name} with Green Robe`}
+                                      className="w-full h-64 object-cover rounded-md"
+                                    />
+                                  </div>
+                                )}
+                                <div className="w-full md:w-1/2 flex flex-col justify-center">
+                                  <p className="text-lg font-medium">{winner.name}</p>
+                                  <p className="text-gray-600 italic">"{winner.quote}"</p>
+                                </div>
+                              </div>
+                            ))}
+                            <p className="text-sm text-gray-500 mt-2">Co-champions this year!</p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col md:flex-row gap-4">
+                            {record.image && (
+                              <div className="w-full md:w-1/2">
+                                <img 
+                                  src={record.image} 
+                                  alt={`${record.winner} with Green Robe`}
+                                  className="w-full h-64 object-cover rounded-md"
+                                />
+                              </div>
+                            )}
+                            <div className="w-full md:w-1/2 flex flex-col justify-center">
+                              <p className="text-lg font-medium">
+                                {record.winner}
+                                {record.nickname && (
+                                  <span className="ml-2 text-sm text-gray-600">({record.nickname})</span>
+                                )}
+                              </p>
+                              <p className="text-gray-600 italic">"{record.quote}"</p>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="font-medium">
-                            {record.winner}
-                            {record.nickname && <span className="ml-1 text-sm">({record.nickname})</span>}
-                          </p>
-                          <p className="text-sm text-gray-600 italic">"{record.quote}"</p>
-                        </div>
-                      )}
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

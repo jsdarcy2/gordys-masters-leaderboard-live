@@ -1,4 +1,3 @@
-
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -40,4 +39,21 @@ export type NavTab = {
   id: string;
   label: string;
   href: string;
+}
+
+export type GreenRobeWinner = {
+  year: number;
+  winner: string;
+  quote: string;
+  nickname?: string;
+  image?: string;
+}
+
+export type GreenRobeCoChampions = {
+  year: number;
+  winners: {
+    name: string;
+    quote: string;
+    image?: string;
+  }[];
 }
