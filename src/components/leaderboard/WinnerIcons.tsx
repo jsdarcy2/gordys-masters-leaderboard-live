@@ -30,15 +30,15 @@ const WinnerIcons: React.FC<WinnerIconsProps> = ({ position }) => {
     return <>{position}</>;
   }
 
+  const icon = getWinnerIcon(position);
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="flex items-center">
             <span>{position}</span>
-            {getWinnerIcon(position) && (
-              <span className="ml-1">{getWinnerIcon(position)}</span>
-            )}
+            {icon && <span className="ml-1">{icon}</span>}
           </div>
         </TooltipTrigger>
         <TooltipContent className="bg-white border border-masters-green">

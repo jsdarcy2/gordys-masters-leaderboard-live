@@ -47,10 +47,6 @@ export const calculatePotentialWinnings = (position: number) => {
   }
 };
 
-export const getWinnerIcon = (position: number) => {
-  return position;
-};
-
 export const getWinnerTooltip = (position: number) => {
   const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
   if (!prizeTier) return "";
