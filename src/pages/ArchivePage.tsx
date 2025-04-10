@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import Layout from "@/components/Layout";
-import Archive from "@/components/Archive";
+import GreenRobeWinners from "@/components/GreenRobeWinners";
 
 const ArchivePage = () => {
   // Log component mount for debugging
@@ -13,7 +13,7 @@ const ArchivePage = () => {
     <Layout>
       <div className="mb-8">
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-masters-green mb-4">
-          Archive & Traditions
+          Green Robe Winners & Traditions
         </h2>
         <p className="text-gray-600 mb-2">
           Past winners, historical data, and the prestigious Green Robe tradition.
@@ -23,7 +23,7 @@ const ArchivePage = () => {
         </p>
       </div>
       
-      <Archive />
+      <GreenRobeWinners />
     </Layout>
   );
 };

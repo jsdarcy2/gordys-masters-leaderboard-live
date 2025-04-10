@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,7 +47,7 @@ const GREEN_ROBE_WINNERS = [
   { year: 2008, winner: "J.J. Furst", quote: "I don't always wear my Green Robe, but when I do I prefer to wear it with a cap, USA ascot, socks…and nothing else" },
 ];
 
-const Archive = () => {
+const GreenRobeWinners = () => {
   const [expandedSection, setExpandedSection] = useState<'champions' | 'green-robe' | null>('champions');
 
   const toggleSection = (section: 'champions' | 'green-robe') => {
@@ -190,4 +189,4 @@ const Archive = () => {
   );
 };
 
-export default Archive;
+export default GreenRobeWinners;

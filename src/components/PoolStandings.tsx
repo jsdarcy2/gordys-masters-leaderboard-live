@@ -13,9 +13,9 @@ const PoolStandings = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   const getScoreClass = (score: number) => {
-    if (score < 0) return "score-under";
-    if (score > 0) return "score-over";
-    return "score-even";
+    if (score < 0) return "text-masters-green";
+    if (score > 0) return "text-red-600";
+    return "";
   };
 
   const formatScore = (score: number) => {
@@ -117,8 +117,10 @@ const PoolStandings = () => {
                             key={i}
                             className={`inline-block px-2 py-1 text-xs rounded-full ${
                               participant.pickScores && participant.pickScores[pick] < 0
-                                ? "bg-red-100 text-red-800"
-                                : "bg-gray-100 text-gray-800"
+                                ? "bg-green-100"
+                                : participant.pickScores && participant.pickScores[pick] > 0
+                                ? "bg-red-100"
+                                : "bg-gray-100"
                             }`}
                           >
                             {pick} 
