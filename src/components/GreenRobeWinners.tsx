@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award } from "lucide-react";
@@ -50,7 +49,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     winner: "Don Schmitt", 
     quote: "Tent? Check. Elk Tag? Check. Fly Rod? Check. Cold Beer? Check. Green Robe? Check. Life Is Good.",
     nickname: "The People's Champion",
-    image: "/lovable-uploads/46d56b9a-f59d-4336-9503-64a0cdf20d88.png"
+    image: "/lovable-uploads/b4a27812-b6a2-4381-b500-ec469e430fa9.png"
   },
   {
     year: 2021, 
@@ -95,7 +94,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2016, 
     winner: "Jack Lenmark", 
     quote: "Chicks totally dig the Green Robe...so I got that goin' for me, which is nice",
-    image: "https://images.unsplash.com/photo-1473091534298-04dcbce3278c?auto=format&fit=crop&w=800&q=80"
+    image: "https://images.unsplash.com/photo-1473091534298-04dcbce32c67?auto=format&fit=crop&w=800&q=80"
   },
   {
     year: 2015, 
