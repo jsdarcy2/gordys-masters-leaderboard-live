@@ -73,7 +73,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2018, 
     winner: "Brian Ginkel", 
     quote: "Robé All Day Baby!",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/92243878-c8e8-44f5-bd63-02f6f04347e4.png"
   },
   {
     year: 2017,
