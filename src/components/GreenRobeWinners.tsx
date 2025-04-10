@@ -125,7 +125,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2008, 
     winner: "J.J. Furst", 
     quote: "I don't always wear my Green Robe, but when I do I prefer to wear it with a cap, USA ascot, socks…and nothing else",
-    image: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/2f22aea0-6f84-4520-846d-93e74a60bbd2.png"
   },
 ];
 
