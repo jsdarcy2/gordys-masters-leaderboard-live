@@ -6,7 +6,6 @@ import WinnerIcons from "./WinnerIcons";
 import { 
   getScoreClass, 
   formatScore, 
-  calculatePotentialWinnings, 
   getMastersPurseAmount 
 } from "@/utils/leaderboardUtils";
 
@@ -40,14 +39,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th className="masters-table-header text-right">Today</th>
               <th className="masters-table-header text-right">Thru</th>
               {showPotentialWinnings && (
-                <>
-                  <th className="masters-table-header text-right">
-                    Pool Winnings
-                  </th>
-                  <th className="masters-table-header text-right rounded-tr-md">
-                    Masters Prize
-                  </th>
-                </>
+                <th className="masters-table-header text-right rounded-tr-md">
+                  Masters Prize
+                </th>
               )}
               {!showPotentialWinnings && (
                 <th className="masters-table-header text-right rounded-tr-md"></th>
@@ -57,7 +51,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           <tbody>
             {leaderboard.length === 0 ? (
               <tr>
-                <td colSpan={showPotentialWinnings ? 7 : 5} className="text-center py-8 text-gray-500">
+                <td colSpan={showPotentialWinnings ? 6 : 5} className="text-center py-8 text-gray-500">
                   No leaderboard data available
                 </td>
               </tr>
@@ -97,22 +91,13 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   </td>
                   <td className="px-2 py-3 text-right">{golfer.thru}</td>
                   {showPotentialWinnings && (
-                    <>
-                      <td className="px-2 py-3 text-right font-medium">
-                        {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                          <span className="text-masters-green">${calculatePotentialWinnings(golfer.position)}</span>
-                        ) : (
-                          <span className="text-gray-400">$0</span>
-                        )}
-                      </td>
-                      <td className="px-2 py-3 text-right font-medium">
-                        {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                          <span className="text-purple-600">${getMastersPurseAmount(golfer.position)}</span>
-                        ) : (
-                          <span className="text-gray-400">$0</span>
-                        )}
-                      </td>
-                    </>
+                    <td className="px-2 py-3 text-right font-medium">
+                      {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
+                        <span className="text-purple-600">${getMastersPurseAmount(golfer.position)}</span>
+                      ) : (
+                        <span className="text-gray-400">$0</span>
+                      )}
+                    </td>
                   )}
                   {!showPotentialWinnings && <td></td>}
                 </tr>

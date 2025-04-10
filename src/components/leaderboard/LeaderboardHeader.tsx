@@ -49,7 +49,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             >
               <DollarSign size={14} className="mr-1" />
               <span className="sr-only md:not-sr-only">
-                {showPotentialWinnings ? "Hide Winnings" : "Show Winnings"}
+                {showPotentialWinnings ? "Hide Prize Money" : "Show Prize Money"}
               </span>
             </Button>
           )}

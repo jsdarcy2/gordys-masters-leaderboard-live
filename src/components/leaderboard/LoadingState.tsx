@@ -17,10 +17,7 @@ const LoadingState: React.FC<LoadingStateProps> = ({ showPotentialWinnings }) =>
           <Skeleton className="h-6 w-10" />
           <Skeleton className="h-6 w-10" />
           {showPotentialWinnings && (
-            <>
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-6 w-20" />
-            </>
+            <Skeleton className="h-6 w-20" />
           )}
         </div>
       ))}

@@ -7,7 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getWinnerTooltip } from "@/utils/leaderboardUtils";
+import { getMastersPurseAmount } from "@/utils/leaderboardUtils";
 
 interface WinnerIconsProps {
   position: number;
@@ -31,6 +31,7 @@ const WinnerIcons: React.FC<WinnerIconsProps> = ({ position }) => {
   }
 
   const icon = getWinnerIcon(position);
+  const prizeAmount = getMastersPurseAmount(position);
 
   return (
     <TooltipProvider>
@@ -44,10 +45,7 @@ const WinnerIcons: React.FC<WinnerIconsProps> = ({ position }) => {
         <TooltipContent className="bg-white border border-masters-green">
           <p className="font-medium">Position {position}</p>
           <div className="text-sm">
-            <p className="text-masters-green">{getWinnerTooltip(position).split('\n')[0]}</p>
-            {getWinnerTooltip(position).includes('Masters Prize') && (
-              <p className="text-purple-600">{getWinnerTooltip(position).split('\n')[1]}</p>
-            )}
+            <p className="text-purple-600">Masters Prize: ${prizeAmount}</p>
           </div>
         </TooltipContent>
       </Tooltip>
