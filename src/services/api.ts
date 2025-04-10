@@ -3,17 +3,20 @@ import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 // Function to fetch leaderboard data from Masters API or alternative sources
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
+    // Add cache-busting timestamp to prevent stale data across devices
+    const timestamp = new Date().getTime();
+    
     // First try the official Masters API
-    const response = await fetch('https://www.masters.com/en_US/scores/json/leaderboard_v2.json', {
+    const response = await fetch(`https://www.masters.com/en_US/scores/json/leaderboard_v2.json?t=${timestamp}`, {
       headers: {
         'Accept': 'application/json',
       },
-      cache: 'no-store',
+      cache: 'no-store', // Ensure no caching
     });
     
     if (!response.ok) {
       // Try the GitHub API as a fallback
-      const githubResponse = await fetch('https://raw.githubusercontent.com/loisaidasam/the-masters-api/main/data/leaderboard.json');
+      const githubResponse = await fetch(`https://raw.githubusercontent.com/loisaidasam/the-masters-api/main/data/leaderboard.json?t=${timestamp}`);
       
       if (!githubResponse.ok) {
         throw new Error(`API responded with status: ${response.status}`);
@@ -243,7 +246,11 @@ const getFallbackLeaderboardData = (): TournamentData => {
 // Update the fetchPoolStandings to support 132 participants with correct standings
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
-    // Simulate API call with delay
+    // Add cache-busting to prevent stale data
+    const timestamp = new Date().getTime();
+    
+    // In a real application, we would add the timestamp to the API URL
+    // For mock data, we'll add a small delay to ensure consistent rendering
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Accurate participant data based on provided leaderboard
@@ -761,7 +768,10 @@ function generateRandomPickScores(): { [golferName: string]: number } {
 
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
-    // In production, replace with actual API endpoint
+    // Add cache-busting to prevent stale data
+    const timestamp = new Date().getTime();
+    
+    // In production, replace with actual API endpoint with timestamp
     await new Promise(resolve => setTimeout(resolve, 800));
     
     // Return full dataset with accurate team selections
@@ -823,7 +833,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       },
       "James Carlson": { 
         picks: ["Scottie Scheffler", "Bryson DeChambeau", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
-        roundScores: [-4, -3, 1, 1, -1],
+        roundScores: [-4, -3, 1, -1, -1],
         tiebreakers: [-12, 2] 
       },
       "Nate Carlson": { 

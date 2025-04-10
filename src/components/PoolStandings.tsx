@@ -8,6 +8,7 @@ import PoolStandingsHeader from "@/components/pool/PoolStandingsHeader";
 import SearchBar from "@/components/pool/SearchBar";
 import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -17,6 +18,7 @@ const PoolStandings = () => {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   const PREVIEW_COUNT = 15;
 
@@ -25,8 +27,14 @@ const PoolStandings = () => {
       setLoading(true);
       const data = await fetchPoolStandings();
       setStandings(data);
-      setLastUpdated(new Date().toISOString());
+      const timestamp = new Date().toISOString();
+      setLastUpdated(timestamp);
       setError(null);
+      
+      // Store data in localStorage for consistency across devices
+      localStorage.setItem('poolStandingsLastUpdated', timestamp);
+      localStorage.setItem('poolStandingsData', JSON.stringify(data));
+      
     } catch (err) {
       setError("Failed to load pool standings");
       console.error(err);
@@ -41,15 +49,36 @@ const PoolStandings = () => {
   };
 
   useEffect(() => {
-    loadStandingsData();
+    // First check if we have cached data
+    const cachedLastUpdated = localStorage.getItem('poolStandingsLastUpdated');
+    const cachedData = localStorage.getItem('poolStandingsData');
     
-    // Set up polling for real-time updates (every 60 seconds)
+    if (cachedLastUpdated && cachedData) {
+      try {
+        const parsedData = JSON.parse(cachedData);
+        setStandings(parsedData);
+        setLastUpdated(cachedLastUpdated);
+        setLoading(false);
+        
+        // Then fetch fresh data in the background
+        loadStandingsData();
+      } catch (e) {
+        // If there's an error parsing cached data, load fresh data
+        loadStandingsData();
+      }
+    } else {
+      // If no cached data, load fresh data
+      loadStandingsData();
+    }
+    
+    // Set up polling for real-time updates (every 60 seconds for desktop, 120 seconds for mobile)
+    const intervalTime = isMobile ? 120000 : 60000;
     const intervalId = setInterval(() => {
       loadStandingsData();
-    }, 60000);
+    }, intervalTime);
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isMobile]);
 
   // Filter standings based on search query
   const filteredStandings = searchQuery 

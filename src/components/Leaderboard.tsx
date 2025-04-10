@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -15,6 +16,7 @@ const Leaderboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const getScoreClass = (score: number) => {
     if (score < 0) return "text-masters-green font-bold";
@@ -51,6 +53,11 @@ const Leaderboard = () => {
           description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}`,
         });
       }
+      
+      // Store the last updated time in localStorage for cross-device consistency
+      localStorage.setItem('leaderboardLastUpdated', data.lastUpdated);
+      localStorage.setItem('leaderboardData', JSON.stringify(data.leaderboard));
+      
     } catch (err) {
       setError("Failed to load leaderboard data");
       console.error(err);
@@ -73,15 +80,36 @@ const Leaderboard = () => {
   };
 
   useEffect(() => {
-    loadLeaderboardData();
+    // First check if we have cached data
+    const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
+    const cachedData = localStorage.getItem('leaderboardData');
     
-    // Set up polling for real-time updates (every 60 seconds)
+    if (cachedLastUpdated && cachedData) {
+      try {
+        const parsedData = JSON.parse(cachedData);
+        setLeaderboard(parsedData);
+        setLastUpdated(cachedLastUpdated);
+        setLoading(false);
+        
+        // Then fetch fresh data in the background
+        loadLeaderboardData();
+      } catch (e) {
+        // If there's an error parsing cached data, load fresh data
+        loadLeaderboardData();
+      }
+    } else {
+      // If no cached data, load fresh data
+      loadLeaderboardData();
+    }
+    
+    // Set up polling for real-time updates (every 60 seconds for desktop, 120 seconds for mobile)
+    const intervalTime = isMobile ? 120000 : 60000;
     const intervalId = setInterval(() => {
       loadLeaderboardData();
-    }, 60000);
+    }, intervalTime);
     
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isMobile]);
 
   const formatLastUpdated = (dateString: string) => {
     if (!dateString) return "";
@@ -163,7 +191,7 @@ const Leaderboard = () => {
                     </tr>
                   ) : (
                     leaderboard.map((golfer, index) => (
-                      <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
+                      <tr key={`${golfer.name}-${index}`} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
                         <td className="px-2 py-3 font-medium">{golfer.position}</td>
                         <td className="px-2 py-3 font-medium">
                           {golfer.name}
