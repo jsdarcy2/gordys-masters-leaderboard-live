@@ -13,7 +13,7 @@ const PoolStandings = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [showAll, setShowAll] = useState(false);
   
-  const PREVIEW_COUNT = 5; // Number of standings to show in preview mode
+  const PREVIEW_COUNT = 10; // Increased from 5 to show more in preview mode
 
   const getScoreClass = (score: number) => {
     if (score < 0) return "text-masters-green font-bold";
@@ -155,12 +155,12 @@ const PoolStandings = () => {
                 >
                   {showAll ? (
                     <>
-                      <span>Show Less</span>
+                      <span>Show Preview</span>
                       <ChevronUp className="ml-1 h-4 w-4" />
                     </>
                   ) : (
                     <>
-                      <span>Show All ({standings.length} Players)</span>
+                      <span>Show All {standings.length} Players</span>
                       <ChevronDown className="ml-1 h-4 w-4" />
                     </>
                   )}
