@@ -1,11 +1,27 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+type TeamSelection = {
+  picks: string[];
+  roundScores: number[];
+  tiebreakers: [number, number];
+};
 
 const PlayerSelections = () => {
-  const [selections, setSelections] = useState<{[participant: string]: string[]}>({});
+  const [selections, setSelections] = useState<{[participant: string]: TeamSelection}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const [sortBy, setSortBy] = useState<"name" | "golfer">("name");
+  const [sortedGolfer, setSortedGolfer] = useState<string | null>(null);
+  
+  const PREVIEW_COUNT = 20; // Number of selections to show in preview mode
 
   useEffect(() => {
     const loadSelections = async () => {
@@ -25,22 +41,67 @@ const PlayerSelections = () => {
     loadSelections();
   }, []);
 
-  const getGolferPopularity = () => {
+  const getGolferPopularity = useMemo(() => {
     const popularity: {[golfer: string]: number} = {};
     
-    Object.values(selections).forEach(picks => {
+    Object.values(selections).forEach(({picks}) => {
       picks.forEach(golfer => {
         popularity[golfer] = (popularity[golfer] || 0) + 1;
       });
     });
     
     return popularity;
+  }, [selections]);
+
+  const sortedGolfers = useMemo(() => 
+    Object.entries(getGolferPopularity)
+      .sort(([, countA], [, countB]) => countB - countA),
+  [getGolferPopularity]);
+
+  const getScoreClass = (score: number) => {
+    if (score < 0) return "text-masters-green font-bold";
+    if (score > 0) return "text-red-600";
+    return "";
   };
 
-  const golferPopularity = getGolferPopularity();
-  
-  const sortedGolfers = Object.entries(golferPopularity)
-    .sort(([, countA], [, countB]) => countB - countA);
+  const formatScore = (score: number) => {
+    if (score === 0) return "E";
+    return score > 0 ? `+${score}` : score.toString();
+  };
+
+  const filteredParticipants = useMemo(() => {
+    let filtered = Object.entries(selections);
+    
+    // Filter by search term
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter(([name, data]) => {
+        return (
+          name.toLowerCase().includes(lowerSearchTerm) || 
+          data.picks.some(pick => pick.toLowerCase().includes(lowerSearchTerm))
+        );
+      });
+    }
+    
+    // Filter by specific golfer if in golfer sort mode
+    if (sortBy === "golfer" && sortedGolfer) {
+      filtered = filtered.filter(([, data]) => 
+        data.picks.includes(sortedGolfer)
+      );
+    }
+    
+    // Alphabetical sort by default
+    filtered = filtered.sort((a, b) => a[0].localeCompare(b[0]));
+    
+    return filtered;
+  }, [selections, searchTerm, sortBy, sortedGolfer]);
+
+  // Display either all selections or just the preview based on showAll state
+  const displaySelections = showAll ? filteredParticipants : filteredParticipants.slice(0, PREVIEW_COUNT);
+
+  const calculateTotalRoundScore = (roundScores: number[]) => {
+    return roundScores.reduce((sum, score) => sum + score, 0);
+  };
 
   return (
     <div className="space-y-8">
@@ -49,11 +110,33 @@ const PlayerSelections = () => {
           <h2 className="text-xl md:text-2xl font-serif">
             Player Selections
           </h2>
+          <p className="text-sm text-white/80 mt-1">
+            View all 132 team selections for The Masters
+          </p>
         </div>
+        
         <div className="p-4 bg-white">
           {error && (
             <div className="text-center text-red-500 py-4">{error}</div>
           )}
+          
+          {/* Search bar */}
+          <div className="mb-6 relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                placeholder="Search by name or golfer..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-masters-green/30 focus-visible:ring-masters-green/30"
+              />
+            </div>
+            <div className="text-sm text-gray-500 mt-2">
+              Showing {displaySelections.length} of {filteredParticipants.length} teams
+              {searchTerm && ` (filtered by "${searchTerm}")`}
+              {sortBy === "golfer" && sortedGolfer && ` showing only teams with ${sortedGolfer}`}
+            </div>
+          </div>
           
           {loading ? (
             <div className="space-y-4">
@@ -61,7 +144,7 @@ const PlayerSelections = () => {
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-6 w-40" />
                   <div className="flex flex-wrap gap-2">
-                    {[...Array(4)].map((_, j) => (
+                    {[...Array(5)].map((_, j) => (
                       <Skeleton key={j} className="h-8 w-24" />
                     ))}
                   </div>
@@ -70,21 +153,122 @@ const PlayerSelections = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {Object.entries(selections).map(([participant, picks], index) => (
-                <div key={index} className={`border-b pb-4 last:border-0 ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-4 px-4"}`}>
-                  <h3 className="font-medium text-lg mb-2">{participant}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {picks.map((golfer, i) => (
-                      <span 
-                        key={i} 
-                        className="inline-block px-3 py-1 bg-masters-light text-masters-green rounded-full text-sm"
-                      >
-                        {golfer}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left border-b-2 border-masters-green">
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tl-md">Pos</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium">Name</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">Rd 1</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB1</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB2</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displaySelections.map(([participant, data], index) => {
+                      const totalRound1 = calculateTotalRoundScore(data.roundScores);
+                      
+                      return (
+                        <tr key={participant} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
+                          <td className="px-2 py-3 text-center font-medium">{index + 1}</td>
+                          <td className="px-2 py-3 font-medium">{participant}</td>
+                          <td className={`px-2 py-3 text-center ${getScoreClass(totalRound1)}`}>
+                            {formatScore(totalRound1)}
+                          </td>
+                          <td className="px-2 py-3 text-center">{data.tiebreakers[0]}</td>
+                          <td className="px-2 py-3 text-center">{data.tiebreakers[1]}</td>
+                          <td className="px-2 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {data.picks.map((pick, i) => (
+                                <span 
+                                  key={i}
+                                  className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                    data.roundScores[i] < 0
+                                      ? "bg-green-100"
+                                      : data.roundScores[i] > 0
+                                      ? "bg-red-100"
+                                      : "bg-gray-100"
+                                  }`}
+                                >
+                                  {pick} 
+                                  <span className={getScoreClass(data.roundScores[i])}>
+                                    {" "}({formatScore(data.roundScores[i])})
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Mobile view */}
+              <div className="md:hidden space-y-6">
+                {displaySelections.map(([participant, data], index) => {
+                  const totalRound1 = calculateTotalRoundScore(data.roundScores);
+                  
+                  return (
+                    <div key={participant} className={`border-b pb-4 last:border-0 ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-4 px-4"}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-medium text-lg">{participant}</h3>
+                        <div className={`text-lg ${getScoreClass(totalRound1)}`}>
+                          {formatScore(totalRound1)}
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {data.picks.map((pick, i) => (
+                          <span 
+                            key={i} 
+                            className={`inline-block px-3 py-1 rounded-full text-sm ${
+                              data.roundScores[i] < 0
+                                ? "bg-green-100"
+                                : data.roundScores[i] > 0
+                                ? "bg-red-100"
+                                : "bg-gray-100"
+                            }`}
+                          >
+                            {pick}
+                            <span className={getScoreClass(data.roundScores[i])}>
+                              {" "}({formatScore(data.roundScores[i])})
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        Tiebreakers: {data.tiebreakers[0]} / {data.tiebreakers[1]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          
+          {/* Show More/Less button */}
+          {filteredParticipants.length > PREVIEW_COUNT && (
+            <div className="mt-6 text-center">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAll(!showAll)}
+                className="text-masters-green border-masters-green hover:bg-masters-green/10 focus:ring-2 focus:ring-masters-green/30"
+              >
+                {showAll ? (
+                  <>
+                    <span>Show Less</span>
+                    <ChevronUp className="ml-1 h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    <span>Show All ({filteredParticipants.length} Teams)</span>
+                    <ChevronDown className="ml-1 h-4 w-4" />
+                  </>
+                )}
+              </Button>
             </div>
           )}
         </div>
@@ -109,8 +293,25 @@ const PlayerSelections = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {sortedGolfers.map(([golfer, count], index) => (
-                <div key={index} className={`flex justify-between items-center py-2 border-b ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10 -mx-2 px-2"}`}>
-                  <span className="font-medium">{golfer}</span>
+                <div 
+                  key={index} 
+                  className={`flex justify-between items-center py-2 px-2 border-b ${index % 2 === 0 ? "" : "bg-masters-yellow bg-opacity-10"} cursor-pointer hover:bg-masters-green/5 transition-colors`}
+                  onClick={() => {
+                    if (sortBy === "golfer" && sortedGolfer === golfer) {
+                      setSortBy("name");
+                      setSortedGolfer(null);
+                    } else {
+                      setSortBy("golfer");
+                      setSortedGolfer(golfer);
+                    }
+                  }}
+                >
+                  <span className="font-medium">
+                    {golfer}
+                    {sortBy === "golfer" && sortedGolfer === golfer && 
+                      <span className="ml-2 text-xs text-masters-green">(click to clear filter)</span>
+                    }
+                  </span>
                   <span className="bg-masters-green text-white px-2 py-1 rounded-full text-sm">
                     {count} pick{count !== 1 ? 's' : ''}
                   </span>

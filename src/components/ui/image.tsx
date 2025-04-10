@@ -6,10 +6,19 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: string;
   overlay?: React.ReactNode;
   overlayClassName?: string;
+  overlayOpacity?: number;
 }
 
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
-  ({ className, fallback = "/placeholder.svg", alt = "", overlay, overlayClassName, ...props }, ref) => {
+  ({ 
+    className, 
+    fallback = "/placeholder.svg", 
+    alt = "", 
+    overlay, 
+    overlayClassName, 
+    overlayOpacity = 40,
+    ...props 
+  }, ref) => {
     const [src, setSrc] = React.useState<string | undefined>(props.src);
     const [error, setError] = React.useState(false);
     const [loaded, setLoaded] = React.useState(false);
@@ -49,7 +58,15 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
           <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
         )}
         {overlay && loaded && (
-          <div className={cn("absolute inset-0", overlayClassName)}>{overlay}</div>
+          <div 
+            className={cn(
+              "absolute inset-0", 
+              `bg-opacity-${overlayOpacity}`,
+              overlayClassName
+            )}
+          >
+            {overlay}
+          </div>
         )}
       </div>
     );
