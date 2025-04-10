@@ -58,14 +58,15 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
           <TableRow className="border-b-2 border-masters-green">
             <TableHead className="masters-table-header rounded-tl-md w-[80px]">Pos</TableHead>
             <TableHead className="masters-table-header">Name</TableHead>
-            <TableHead className="masters-table-header text-right w-[100px]">Points</TableHead>
-            <TableHead className="masters-table-header hidden md:table-cell rounded-tr-md">Picks</TableHead>
+            <TableHead className="masters-table-header text-right w-[100px]">Score</TableHead>
+            <TableHead className="masters-table-header hidden md:table-cell">Picks</TableHead>
+            <TableHead className="masters-table-header hidden md:table-cell text-right rounded-tr-md">Today</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {displayStandings.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                 {searchQuery 
                   ? "No participants match your search" 
                   : "No standings data available"}
@@ -123,6 +124,13 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
                       </span>
                     ))}
                   </div>
+                </TableCell>
+                <TableCell className="py-3 hidden md:table-cell text-right">
+                  {participant.roundScores && participant.roundScores.round1 !== undefined && (
+                    <span className={getScoreClass(participant.roundScores.round1)}>
+                      {formatScore(participant.roundScores.round1)}
+                    </span>
+                  )}
                 </TableCell>
               </TableRow>
             ))

@@ -18,7 +18,7 @@ const PoolStandingsHeader = ({ lastUpdated, totalParticipants, loading }: PoolSt
     <div className="masters-header">
       <div className="flex justify-between items-center">
         <h2 className="text-xl md:text-2xl font-serif">
-          Pool Standings
+          Gordy's Masters Pool Standings
         </h2>
         <div className="flex items-center gap-2">
           {!loading && totalParticipants > 0 && (
