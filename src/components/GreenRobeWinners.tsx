@@ -95,7 +95,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2016, 
     winner: "Jack Lenmark", 
     quote: "Chicks totally dig the Green Robe...so I got that goin' for me, which is nice",
-    image: "https://images.unsplash.com/photo-1473091534298-04dcbce32c67?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/912144bb-30e1-461b-afb7-c475e0ebc3a5.png"
   },
   {
     year: 2015, 
