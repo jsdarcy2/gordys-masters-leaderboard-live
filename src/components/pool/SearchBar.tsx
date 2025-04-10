@@ -1,5 +1,5 @@
 
-import { Search, ChevronUp } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +28,7 @@ const SearchBar = ({ searchQuery, setSearchQuery, filteredCount }: SearchBarProp
             className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
             onClick={() => setSearchQuery("")}
           >
-            <ChevronUp className="h-4 w-4" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
