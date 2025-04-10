@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award } from "lucide-react";
@@ -81,7 +82,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
       {
         name: "Peter Bassett",
         quote: "Sweetie, could you please be quiet and keep an eye on this for me",
-        image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=80"
+        image: "/lovable-uploads/062daa4d-0f0c-43a9-83d0-e86b0a830415.png"
       },
       {
         name: "Jim Jones",
