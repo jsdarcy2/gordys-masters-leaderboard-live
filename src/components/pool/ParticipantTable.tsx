@@ -34,6 +34,7 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
   const highlightSearchText = (name: string, query: string) => {
     if (!query) return name;
     
+    // Make case-insensitive comparison for search
     const regex = new RegExp(`(${query})`, 'gi');
     const parts = name.split(regex);
     
@@ -73,7 +74,7 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
           ) : (
             displayStandings.map((participant, index) => (
               <TableRow 
-                key={index} 
+                key={participant.name} // Use name as key instead of index for more stable rendering
                 className={`${index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"} ${
                   searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
                     ? "bg-yellow-50"
