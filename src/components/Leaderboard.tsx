@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
@@ -189,10 +188,9 @@ const Leaderboard = () => {
     }
   }, []);
 
-  // Function to get winner icon based on position
   const getWinnerIcon = (position: number) => {
     if (position === 1) {
-      return <Trophy className="text-masters-yellow" size={18} />;
+      return <Trophy className="text-yellow-500" size={18} />;
     } else if (position === 2) {
       return <Medal className="text-gray-400" size={18} />;
     } else if (position === 3) {
@@ -201,7 +199,6 @@ const Leaderboard = () => {
     return null;
   };
 
-  // Function to get winner tooltip content
   const getWinnerTooltip = (position: number) => {
     const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
     if (!prizeTier) return "";
@@ -334,9 +331,11 @@ const Leaderboard = () => {
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <div className="flex items-center space-x-1">
+                                    <div className="flex items-center">
                                       <span>{golfer.position}</span>
-                                      <span className="ml-1">{getWinnerIcon(golfer.position)}</span>
+                                      {getWinnerIcon(golfer.position) && (
+                                        <span className="ml-1">{getWinnerIcon(golfer.position)}</span>
+                                      )}
                                     </div>
                                   </TooltipTrigger>
                                   <TooltipContent className="bg-white border border-masters-green">
