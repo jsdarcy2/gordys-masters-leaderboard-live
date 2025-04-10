@@ -18,8 +18,20 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
       
-      <footer className="bg-masters-green text-white py-4 md:py-6 mt-10 border-t-4 border-masters-gold">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <footer className="bg-masters-green text-white py-4 md:py-6 mt-10 border-t-4 border-masters-gold relative overflow-hidden">
+        {/* Subtle footer bridge image */}
+        <div className="absolute inset-0 opacity-15">
+          <img 
+            src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
+            alt="Augusta National Bridge" 
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+        
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark opacity-85"></div>
+        
+        <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-sm md:text-base font-serif">
