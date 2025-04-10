@@ -106,7 +106,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2014, 
     winner: "Greg Capps", 
     quote: "Mornin' friends!",
-    image: "https://images.unsplash.com/photo-1473177104440-ffee2f376098?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/221b6e15-2d1c-49e9-8807-b8d5f9caefc8.png"
   },
   {
     year: 2011, 
