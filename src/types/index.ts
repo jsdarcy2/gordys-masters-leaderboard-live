@@ -25,6 +25,7 @@ export type PoolParticipant = {
   total?: number;
   tiebreaker1?: number;
   tiebreaker2?: number;
+  paid?: boolean;
 }
 
 export type TournamentRound = 1 | 2 | 3 | 4;

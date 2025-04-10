@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import Layout from "@/components/Layout";
 import PlayerSelections from "@/components/PlayerSelections";
+import PaymentStatus from "@/components/PaymentStatus";
 
 const SelectionsPage = () => {
   // Log component mount for debugging
@@ -20,7 +21,14 @@ const SelectionsPage = () => {
         </p>
       </div>
       
-      <PlayerSelections />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PlayerSelections />
+        </div>
+        <div>
+          <PaymentStatus />
+        </div>
+      </div>
     </Layout>
   );
 };
