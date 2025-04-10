@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Award } from "lucide-react";
@@ -101,7 +100,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2015, 
     winner: "Rob Furst", 
     quote: "The Green Robe certainly does have its privileges",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/0725b00b-c74c-4806-9981-cb752e635f7a.png"
   },
   {
     year: 2014, 
