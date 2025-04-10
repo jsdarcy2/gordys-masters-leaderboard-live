@@ -67,7 +67,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2019, 
     winner: "Hadley Jones", 
     quote: "Daddy's Little Robe Winner",
-    image: "/lovable-uploads/986e7321-f375-4033-b344-533298c15ed9.png"
+    image: "/lovable-uploads/a9375daa-e3f9-4325-8bd9-0addcc4bdca1.png"
   },
   {
     year: 2018, 
