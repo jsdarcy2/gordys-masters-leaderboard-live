@@ -37,7 +37,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2024, 
     winner: "Sarah Kepic", 
     quote: "Girls Just Wanna Green Ro-obe!",
-    image: "/lovable-uploads/cc5f5185-a821-4142-88d3-584a41df9b56.png"
+    image: "/lovable-uploads/1e4f20a3-33c8-4c5c-aba1-cc9b244e571d.png"
   },
   {
     year: 2023, 
@@ -247,7 +247,7 @@ const GreenRobeWinners = () => {
                               <div key={i} className="flex flex-col md:flex-row gap-4">
                                 {winner.image && (
                                   <div className="w-full md:w-1/2">
-                                    <img 
+                                    <Image 
                                       src={winner.image} 
                                       alt={`${winner.name} with Green Robe`}
                                       className="w-full h-64 object-cover rounded-md"
@@ -266,7 +266,7 @@ const GreenRobeWinners = () => {
                           <div className="flex flex-col md:flex-row gap-4">
                             {record.image && (
                               <div className="w-full md:w-1/2">
-                                <img 
+                                <Image 
                                   src={record.image} 
                                   alt={`${record.winner} with Green Robe`}
                                   className="w-full h-64 object-cover rounded-md"
