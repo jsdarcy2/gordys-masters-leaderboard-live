@@ -55,7 +55,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2021, 
     winner: "Jamie Lockhart", 
     quote: "ABG - Always Be Grinding",
-    image: "/lovable-uploads/fdc58efd-fccd-4367-9b9f-e5b20693b5b1.png"
+    image: "/lovable-uploads/fad075a8-28dc-45ad-9b89-d872e71f50be.png"
   },
   {
     year: 2020, 
