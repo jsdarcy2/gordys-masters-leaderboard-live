@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState } from "react";
 import { fetchLeaderboardData } from "@/services/api";
@@ -41,7 +40,7 @@ const Leaderboard = () => {
       }
       
       const data = await fetchLeaderboardData();
-      setLeaderboard(data.leaderboard);
+      setLeaderboard(data.leaderboard.sort((a, b) => a.position - b.position));
       setLastUpdated(data.lastUpdated);
       setError(null);
       

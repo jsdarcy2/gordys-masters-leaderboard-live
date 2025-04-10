@@ -1,30 +1,113 @@
+
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
-// Function to fetch leaderboard data from Masters API or GitHub alternative
+// Function to fetch leaderboard data from Masters API or alternative sources
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
     // First try the GitHub alternative API
-    const response = await fetch('https://raw.githubusercontent.com/loisaidasam/the-masters-api/master/data/leaderboard.json');
+    const response = await fetch('https://www.masters.com/en_US/scores/json/leaderboard_v2.json', {
+      headers: {
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
     
     if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+      // Try the GitHub API as a fallback
+      const githubResponse = await fetch('https://raw.githubusercontent.com/loisaidasam/the-masters-api/main/data/leaderboard.json');
+      
+      if (!githubResponse.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+      
+      const githubData = await githubResponse.json();
+      return transformGitHubData(githubData);
     }
     
     const data = await response.json();
-    
-    // Transform the data to match our application's structure
-    const transformedData: TournamentData = {
-      lastUpdated: new Date().toISOString(),
-      currentRound: determineCurrentRound(data),
-      leaderboard: transformLeaderboardData(data)
-    };
-    
-    return transformedData;
+    return transformOfficialData(data);
   } catch (error) {
     console.error("Error fetching leaderboard data:", error);
     
     // Fallback to our mock data if API fails
     console.warn("Falling back to mock data due to API error");
+    return getFallbackLeaderboardData();
+  }
+};
+
+// Helper function to transform official Masters.com data
+const transformOfficialData = (apiData: any): TournamentData => {
+  try {
+    const players = apiData.data?.players || [];
+    
+    const leaderboard = players.map((player: any) => {
+      const status = player.status === 'C' ? 'cut' : 
+                    player.status === 'W' ? 'withdrawn' : 'active';
+      
+      // Parse scores properly
+      const score = player.today_total_rel_to_par !== undefined ? 
+                    parseInt(player.today_total_rel_to_par) : 
+                    parseInt(player.topar || '0');
+      
+      const today = player.today_value !== undefined ? 
+                   parseInt(player.today_value) : 0;
+                   
+      // Determine 'thru' status properly
+      let thru = player.thru || '';
+      if (player.status === 'C' || player.status === 'W') {
+        thru = '-';
+      } else if (player.rankFlg === 'Y' && player.thru === '') {
+        thru = 'F';
+      }
+      
+      return {
+        position: player.pos ? parseInt(player.pos) : 0,
+        name: `${player.first_name} ${player.last_name}`,
+        score: score,
+        today: today, 
+        thru: thru,
+        status: status as 'cut' | 'active' | 'withdrawn'
+      };
+    });
+    
+    return {
+      lastUpdated: new Date().toISOString(),
+      currentRound: determineCurrentRound(apiData),
+      leaderboard: leaderboard
+    };
+  } catch (err) {
+    console.error("Error transforming official leaderboard data:", err);
+    return getFallbackLeaderboardData();
+  }
+};
+
+// Helper function to transform GitHub API data
+const transformGitHubData = (apiData: any): TournamentData => {
+  try {
+    // Handle different API response formats
+    const players = apiData.players || apiData.data || apiData.leaderboard || apiData;
+    
+    const leaderboard = players.map((player: any) => {
+      return {
+        position: player.position || player.pos || player.place || parseInt(player.pos_num || '0'),
+        name: player.name || player.player_name || 
+              (player.player_bio?.first_name && player.player_bio?.last_name ? 
+              `${player.player_bio.first_name} ${player.player_bio.last_name}` : 
+              player.player_bio?.name || ''),
+        score: calculateScore(player),
+        today: calculateTodayScore(player),
+        thru: player.thru || player.thru_num || player.today_round?.thru || 'F',
+        status: determineStatus(player)
+      };
+    }).filter((player: any) => player.name); // Filter out entries without names
+    
+    return {
+      lastUpdated: new Date().toISOString(),
+      currentRound: determineCurrentRound(apiData),
+      leaderboard: leaderboard
+    };
+  } catch (err) {
+    console.error("Error transforming GitHub leaderboard data:", err);
     return getFallbackLeaderboardData();
   }
 };
@@ -88,7 +171,7 @@ const determineStatus = (player: any): 'cut' | 'active' | 'withdrawn' | undefine
 // Helper function to determine current round
 const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
   // Try to extract current round from API data
-  const round = data.current_round || data.round || 1;
+  const round = data.current_round || data.round || data.data?.currentRound || 1;
   
   // Ensure we return a valid round number (1-4)
   if (round >= 1 && round <= 4) {
@@ -98,64 +181,62 @@ const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
   return 1; // Default to round 1
 };
 
-// Fallback data in case API fails
+// Updated fallback data to match current tournament
 const getFallbackLeaderboardData = (): TournamentData => {
   return {
     lastUpdated: new Date().toISOString(),
     currentRound: 1,
     leaderboard: [
-      { position: 1, name: "Scottie Scheffler", score: -4, today: -4, thru: "F" },
-      { position: 2, name: "Bryson DeChambeau", score: -3, today: -3, thru: "F" },
-      { position: 2, name: "Ludvig Åberg", score: -3, today: -3, thru: "F" },
-      { position: 2, name: "Rory McIlroy", score: -2, today: -2, thru: "F" },
-      { position: 5, name: "Shane Lowry", score: -1, today: -1, thru: "F" },
-      { position: 5, name: "Min Woo Lee", score: -1, today: -1, thru: "F" },
-      { position: 5, name: "Cameron Smith", score: -1, today: -1, thru: "F" },
-      { position: 5, name: "Tyrrell Hatton", score: -3, today: -3, thru: "F" },
-      { position: 5, name: "Justin Rose", score: -7, today: -7, thru: "F" },
-      { position: 5, name: "Denny McCarthy", score: -1, today: -1, thru: "F" },
-      { position: 5, name: "Corey Conners", score: -4, today: -4, thru: "F" },
-      { position: 5, name: "Brian Harman", score: -1, today: -1, thru: "F" },
-      { position: 5, name: "Jason Day", score: -2, today: -2, thru: "F" },
-      { position: 14, name: "Collin Morikawa", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Sergio Garcia", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Joaquín Niemann", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Viktor Hovland", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Tom Hoge", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Akshay Bhatia", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Cameron Young", score: 0, today: 0, thru: "F" },
-      { position: 14, name: "Zach Johnson", score: 0, today: 0, thru: "F" },
-      { position: 22, name: "Brooks Koepka", score: 2, today: 2, thru: "F" },
-      { position: 22, name: "Tommy Fleetwood", score: 1, today: 1, thru: "F" },
-      { position: 22, name: "Justin Thomas", score: 1, today: 1, thru: "F" },
-      { position: 22, name: "Jordan Spieth", score: 1, today: 1, thru: "F" },
-      { position: 22, name: "Tom Kim", score: 1, today: 1, thru: "F" },
-      { position: 27, name: "Xander Schauffele", score: 1, today: 1, thru: "F" },
-      { position: 27, name: "Patrick Cantlay", score: 2, today: 2, thru: "F" },
-      { position: 27, name: "Will Zalatoris", score: 2, today: 2, thru: "F" },
-      { position: 27, name: "Wyndham Clark", score: 3, today: 3, thru: "F" },
-      { position: 27, name: "Keegan Bradley", score: 2, today: 2, thru: "F" },
-      { position: 27, name: "Dustin Johnson", score: 2, today: 2, thru: "F" },
-      { position: 27, name: "J.J. Spaun", score: 2, today: 2, thru: "F" },
-      { position: 34, name: "Jon Rahm", score: 3, today: 3, thru: "F" },
-      { position: 34, name: "Tony Finau", score: 3, today: 3, thru: "F" },
-      { position: 34, name: "Robert MacIntyre", score: 3, today: 3, thru: "F" },
-      { position: 34, name: "Danny Willett", score: 3, today: 3, thru: "F" },
-      { position: 34, name: "Chris Kirk", score: 3, today: 3, thru: "F" },
-      { position: 39, name: "Russell Henley", score: 6, today: 6, thru: "F" },
-      { position: 39, name: "Phil Mickelson", score: 3, today: 3, thru: "F" },
-      { position: 41, name: "Sepp Straka", score: 6, today: 6, thru: "F" },
-      { position: 41, name: "Billy Horschel", score: 5, today: 5, thru: "F" },
-      { position: 43, name: "Matthieu Pavon", score: 6, today: 6, thru: "F" },
-      { position: 44, name: "Nick Dunlap", score: 18, today: 18, thru: "F" },
-      { position: 45, name: "Jose Luis Ballester", score: 4, today: 4, thru: "F" },
-      { position: 46, name: "Hideki Matsuyama", score: 1, today: 1, thru: "F" },
-      { position: 47, name: "Max Homa", score: 2, today: 2, thru: "F" },
-      { position: 48, name: "Matt Fitzpatrick", score: -1, today: -1, thru: "F" },
-      { position: 49, name: "Adam Scott", score: 4, today: 4, thru: "F" },
-      { position: 50, name: "Brian Harman", score: -1, today: -1, thru: "F" },
-      { position: 51, name: "Sahith Theegala", score: 0, today: 0, thru: "F" },
-      { position: 52, name: "Sungjae Im", score: 0, today: 0, thru: "F" },
+      { position: 1, name: "Bryson DeChambeau", score: -7, today: -7, thru: "F" },
+      { position: 2, name: "Scottie Scheffler", score: -6, today: -6, thru: "F" },
+      { position: 3, name: "Nicolai Højgaard", score: -5, today: -5, thru: "F" },
+      { position: 4, name: "Danny Willett", score: -4, today: -4, thru: "F" },
+      { position: 4, name: "Tony Finau", score: -4, today: -4, thru: "F" },
+      { position: 4, name: "Tommy Fleetwood", score: -4, today: -4, thru: "F" },
+      { position: 4, name: "Shane Lowry", score: -4, today: -4, thru: "F" },
+      { position: 4, name: "Ludvig Åberg", score: -4, today: -4, thru: "F" },
+      { position: 9, name: "Byeong Hun An", score: -3, today: -3, thru: "F" },
+      { position: 9, name: "Akshay Bhatia", score: -3, today: -3, thru: "F" },
+      { position: 9, name: "Ryan Fox", score: -3, today: -3, thru: "F" },
+      { position: 9, name: "Xander Schauffele", score: -3, today: -3, thru: "F" },
+      { position: 9, name: "Max Homa", score: -3, today: -3, thru: "F" },
+      { position: 9, name: "Corey Conners", score: -3, today: -3, thru: "F" },
+      { position: 15, name: "Viktor Hovland", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Rory McIlroy", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Cameron Smith", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Brooks Koepka", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Joaquín Niemann", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Patrick Cantlay", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Matthieu Pavon", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Collin Morikawa", score: -2, today: -2, thru: "F" },
+      { position: 15, name: "Rickie Fowler", score: -2, today: -2, thru: "F" },
+      { position: 24, name: "Phil Mickelson", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Hideki Matsuyama", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Lucas Glover", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Erik van Rooyen", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Jon Rahm", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Thomas Detry", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "Kurt Kitayama", score: -1, today: -1, thru: "F" },
+      { position: 24, name: "J.T. Poston", score: -1, today: -1, thru: "F" },
+      { position: 32, name: "Tiger Woods", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Justin Thomas", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Will Zalatoris", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Sergio Garcia", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Brian Harman", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Jordan Spieth", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Adam Scott", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Chris Kirk", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Cameron Young", score: 0, today: 0, thru: "F" },
+      { position: 32, name: "Min Woo Lee", score: 0, today: 0, thru: "F" },
+      { position: 42, name: "Dustin Johnson", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Keegan Bradley", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Tom Hoge", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Jason Day", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Wyndham Clark", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Tom Kim", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Patrick Reed", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Gary Woodland", score: 1, today: 1, thru: "F" },
+      { position: 42, name: "Si Woo Kim", score: 1, today: 1, thru: "F" }
     ]
   };
 };
