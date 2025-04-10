@@ -3,8 +3,17 @@ import { useState, useEffect } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Award, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Award, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -12,8 +21,9 @@ const PoolStandings = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [showAll, setShowAll] = useState(false);
+  const { toast } = useToast();
   
-  const PREVIEW_COUNT = 10; // Increased from 5 to show more in preview mode
+  const PREVIEW_COUNT = 10; // Number of entries to show in preview mode
 
   const getScoreClass = (score: number) => {
     if (score < 0) return "text-masters-green font-bold";
@@ -36,6 +46,11 @@ const PoolStandings = () => {
     } catch (err) {
       setError("Failed to load pool standings");
       console.error(err);
+      toast({
+        title: "Error",
+        description: "Failed to load pool standings data. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -60,6 +75,7 @@ const PoolStandings = () => {
 
   // Display either all standings or just the preview based on showAll state
   const displayStandings = showAll ? standings : standings.slice(0, PREVIEW_COUNT);
+  const totalParticipants = standings.length;
 
   return (
     <div className="masters-card">
@@ -68,12 +84,20 @@ const PoolStandings = () => {
           <h2 className="text-xl md:text-2xl font-serif">
             Pool Standings
           </h2>
-          {!loading && lastUpdated && (
-            <div className="flex items-center text-sm text-masters-yellow">
-              <Clock size={14} className="mr-1" />
-              <span>Updated: {formatLastUpdated(lastUpdated)}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {!loading && totalParticipants > 0 && (
+              <div className="flex items-center text-sm text-masters-yellow">
+                <Users size={14} className="mr-1" />
+                <span>{totalParticipants} Participants</span>
+              </div>
+            )}
+            {!loading && lastUpdated && (
+              <div className="flex items-center text-sm text-masters-yellow">
+                <Clock size={14} className="mr-1" />
+                <span>Updated: {formatLastUpdated(lastUpdated)}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
@@ -94,58 +118,75 @@ const PoolStandings = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left border-b-2 border-masters-green">
-                  <th className="masters-table-header rounded-tl-md">Pos</th>
-                  <th className="masters-table-header">Name</th>
-                  <th className="masters-table-header text-right">Points</th>
-                  <th className="masters-table-header hidden md:table-cell rounded-tr-md">Picks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayStandings.map((participant, index) => (
-                  <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
-                    <td className="px-2 py-3 font-medium">
-                      {participant.position === 1 && (
-                        <span className="inline-flex items-center">
-                          <Award size={16} className="text-masters-yellow mr-1" />
-                          {participant.position}
-                        </span>
-                      )}
-                      {participant.position !== 1 && participant.position}
-                    </td>
-                    <td className="px-2 py-3 font-medium">{participant.name}</td>
-                    <td className="px-2 py-3 text-right font-medium">{participant.totalPoints}</td>
-                    <td className="px-2 py-3 hidden md:table-cell">
-                      <div className="flex flex-wrap gap-1">
-                        {participant.picks.map((pick, i) => (
-                          <span 
-                            key={i}
-                            className={`inline-block px-2 py-1 text-xs rounded-full ${
-                              participant.pickScores && participant.pickScores[pick] < 0
-                                ? "bg-green-100"
-                                : participant.pickScores && participant.pickScores[pick] > 0
-                                ? "bg-red-100"
-                                : "bg-gray-100"
-                            }`}
-                          >
-                            {pick} 
-                            {participant.pickScores && (
-                              <span className={getScoreClass(participant.pickScores[pick])}>
-                                {" "}({formatScore(participant.pickScores[pick])})
-                              </span>
-                            )}
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b-2 border-masters-green">
+                  <TableHead className="masters-table-header rounded-tl-md w-[80px]">Pos</TableHead>
+                  <TableHead className="masters-table-header">Name</TableHead>
+                  <TableHead className="masters-table-header text-right w-[100px]">Points</TableHead>
+                  <TableHead className="masters-table-header hidden md:table-cell rounded-tr-md">Picks</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayStandings.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                      No standings data available
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  displayStandings.map((participant, index) => (
+                    <TableRow key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
+                      <TableCell className="py-3 font-medium">
+                        {participant.position === 1 && (
+                          <span className="inline-flex items-center">
+                            <Award size={16} className="text-masters-yellow mr-1" />
+                            {participant.position}
                           </span>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        )}
+                        {participant.position !== 1 && participant.position}
+                      </TableCell>
+                      <TableCell className="py-3 font-medium">
+                        {participant.name}
+                        {!participant.paid && (
+                          <span className="ml-2 text-xs text-red-500">(Unpaid)</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="py-3 text-right font-medium">
+                        <span className={getScoreClass(participant.totalPoints)}>
+                          {formatScore(participant.totalPoints)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-3 hidden md:table-cell">
+                        <div className="flex flex-wrap gap-1">
+                          {participant.picks.map((pick, i) => (
+                            <span 
+                              key={i}
+                              className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                participant.pickScores && participant.pickScores[pick] < 0
+                                  ? "bg-green-100"
+                                  : participant.pickScores && participant.pickScores[pick] > 0
+                                  ? "bg-red-100"
+                                  : "bg-gray-100"
+                              }`}
+                            >
+                              {pick} 
+                              {participant.pickScores && (
+                                <span className={getScoreClass(participant.pickScores[pick])}>
+                                  {" "}({formatScore(participant.pickScores[pick])})
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
             
-            {standings.length > PREVIEW_COUNT && (
+            {totalParticipants > PREVIEW_COUNT && (
               <div className="mt-4 text-center">
                 <Button 
                   variant="outline" 
@@ -160,7 +201,7 @@ const PoolStandings = () => {
                     </>
                   ) : (
                     <>
-                      <span>Show All {standings.length} Players</span>
+                      <span>Show All {totalParticipants} Participants</span>
                       <ChevronDown className="ml-1 h-4 w-4" />
                     </>
                   )}

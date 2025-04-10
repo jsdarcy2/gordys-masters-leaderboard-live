@@ -166,7 +166,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // For demo, we'll return the real data
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // This now uses real data from the dataset
+    // Return full dataset with accurate team selections and more participants
     return [
       { 
         position: 1, 
@@ -320,6 +320,234 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
         tiebreaker2: 1,
         paid: false
       },
+      { 
+        position: 9, 
+        name: "Ben Applebaum", 
+        totalPoints: -9,
+        picks: ["Rory McIlroy", "Xander Schauffele", "Shane Lowry", "Tommy Fleetwood", "Robert MacIntyre"],
+        pickScores: { 
+          "Rory McIlroy": -2, 
+          "Xander Schauffele": 1, 
+          "Shane Lowry": -1, 
+          "Tommy Fleetwood": 1,
+          "Robert MacIntyre": 3
+        },
+        roundScores: {
+          round1: -9
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 0,
+        paid: true
+      },
+      { 
+        position: 10, 
+        name: "Louis Baker", 
+        totalPoints: -8,
+        picks: ["Scottie Scheffler", "Collin Morikawa", "Shane Lowry", "Joaquín Niemann", "Min Woo Lee"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Collin Morikawa": 0, 
+          "Shane Lowry": -1, 
+          "Joaquín Niemann": 0,
+          "Min Woo Lee": -1
+        },
+        roundScores: {
+          round1: -8
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 3,
+        paid: true
+      },
+      { 
+        position: 11, 
+        name: "Ted Beckman", 
+        totalPoints: -7,
+        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Keegan Bradley", "Wyndham Clark", "Sahith Theegala"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Bryson DeChambeau": -3, 
+          "Keegan Bradley": 2, 
+          "Wyndham Clark": 3,
+          "Sahith Theegala": 0
+        },
+        roundScores: {
+          round1: -7
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 3,
+        paid: true
+      },
+      { 
+        position: 12, 
+        name: "James Carlson", 
+        totalPoints: -6,
+        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Bryson DeChambeau": -3, 
+          "Tommy Fleetwood": 1, 
+          "Hideki Matsuyama": 1,
+          "Shane Lowry": -1
+        },
+        roundScores: {
+          round1: -6
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 13, 
+        name: "Nate Carlson", 
+        totalPoints: -5,
+        picks: ["Scottie Scheffler", "Collin Morikawa", "Tommy Fleetwood", "Cameron Smith", "Justin Thomas"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Collin Morikawa": 0, 
+          "Tommy Fleetwood": 1, 
+          "Cameron Smith": -1,
+          "Justin Thomas": 1
+        },
+        roundScores: {
+          round1: -5
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 14, 
+        name: "Peter Bassett", 
+        totalPoints: -4,
+        picks: ["Joaquín Niemann", "Bryson DeChambeau", "Sepp Straka", "Akshay Bhatia", "Rory McIlroy"],
+        pickScores: { 
+          "Joaquín Niemann": 0, 
+          "Bryson DeChambeau": -3, 
+          "Sepp Straka": 6, 
+          "Akshay Bhatia": 0,
+          "Rory McIlroy": -2
+        },
+        roundScores: {
+          round1: -4
+        },
+        tiebreaker1: -13,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 15, 
+        name: "Hadley Carlson", 
+        totalPoints: -4,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Cameron Smith", "Russell Henley"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Rory McIlroy": -2, 
+          "Tommy Fleetwood": 1, 
+          "Cameron Smith": -1,
+          "Russell Henley": 6
+        },
+        roundScores: {
+          round1: -4
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 16, 
+        name: "Elia Ayaz", 
+        totalPoints: -3,
+        picks: ["Jon Rahm", "Bryson DeChambeau", "Cameron Smith", "Sergio Garcia", "Joaquín Niemann"],
+        pickScores: { 
+          "Jon Rahm": 3, 
+          "Bryson DeChambeau": -3, 
+          "Cameron Smith": -1, 
+          "Sergio Garcia": 0,
+          "Joaquín Niemann": 0
+        },
+        roundScores: {
+          round1: -3
+        },
+        tiebreaker1: -11,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 17, 
+        name: "Chuck Corbett Sr", 
+        totalPoints: -3,
+        picks: ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Tommy Fleetwood"],
+        pickScores: { 
+          "Rory McIlroy": -2, 
+          "Scottie Scheffler": -4, 
+          "Will Zalatoris": 2, 
+          "Joaquín Niemann": 0,
+          "Tommy Fleetwood": 1
+        },
+        roundScores: {
+          round1: -3
+        },
+        tiebreaker1: -13,
+        tiebreaker2: -1,
+        paid: true
+      },
+      { 
+        position: 18, 
+        name: "Ed Corbett", 
+        totalPoints: -2,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Shane Lowry", "Will Zalatoris", "Sepp Straka"],
+        pickScores: { 
+          "Scottie Scheffler": -4, 
+          "Rory McIlroy": -2, 
+          "Shane Lowry": -1, 
+          "Will Zalatoris": 2,
+          "Sepp Straka": 6
+        },
+        roundScores: {
+          round1: -2
+        },
+        tiebreaker1: -5,
+        tiebreaker2: 5,
+        paid: true
+      },
+      { 
+        position: 19, 
+        name: "Justin Darcy", 
+        totalPoints: -1,
+        picks: ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Robert MacIntyre", "Sepp Straka"],
+        pickScores: { 
+          "Rory McIlroy": -2, 
+          "Collin Morikawa": 0, 
+          "Shane Lowry": -1, 
+          "Robert MacIntyre": 3,
+          "Sepp Straka": 6
+        },
+        roundScores: {
+          round1: -1
+        },
+        tiebreaker1: -14,
+        tiebreaker2: 4,
+        paid: true
+      },
+      { 
+        position: 20, 
+        name: "Mike Baker", 
+        totalPoints: 0,
+        picks: ["Rory McIlroy", "Scottie Scheffler", "Sepp Straka", "Russell Henley", "Joaquín Niemann"],
+        pickScores: { 
+          "Rory McIlroy": -2, 
+          "Scottie Scheffler": -4, 
+          "Sepp Straka": 6, 
+          "Russell Henley": 6,
+          "Joaquín Niemann": 0
+        },
+        roundScores: {
+          round1: 0
+        },
+        tiebreaker1: -12,
+        tiebreaker2: 3,
+        paid: true
+      }
     ];
   } catch (error) {
     console.error("Error fetching pool standings:", error);
