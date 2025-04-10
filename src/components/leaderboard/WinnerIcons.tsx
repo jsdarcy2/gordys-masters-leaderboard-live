@@ -43,7 +43,12 @@ const WinnerIcons: React.FC<WinnerIconsProps> = ({ position }) => {
         </TooltipTrigger>
         <TooltipContent className="bg-white border border-masters-green">
           <p className="font-medium">Position {position}</p>
-          <p className="text-sm text-masters-green">{getWinnerTooltip(position)}</p>
+          <div className="text-sm">
+            <p className="text-masters-green">{getWinnerTooltip(position).split('\n')[0]}</p>
+            {getWinnerTooltip(position).includes('Masters Prize') && (
+              <p className="text-purple-600">{getWinnerTooltip(position).split('\n')[1]}</p>
+            )}
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
