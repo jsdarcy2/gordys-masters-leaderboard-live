@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Award, Clock, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Award, Clock, ChevronDown, ChevronUp, Users, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ const PoolStandings = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [showAll, setShowAll] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   
   const PREVIEW_COUNT = 15; // Increased from 10 to show more in preview
@@ -73,9 +75,19 @@ const PoolStandings = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Filter standings based on search query
+  const filteredStandings = searchQuery 
+    ? standings.filter(participant => 
+        participant.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : standings;
+
   // Display either all standings or just the preview based on showAll state
-  const displayStandings = showAll ? standings : standings.slice(0, PREVIEW_COUNT);
+  const displayStandings = showAll 
+    ? filteredStandings 
+    : filteredStandings.slice(0, PREVIEW_COUNT);
+    
   const totalParticipants = standings.length;
+  const filteredCount = filteredStandings.length;
 
   return (
     <div className="masters-card">
@@ -106,6 +118,37 @@ const PoolStandings = () => {
           <div className="text-center text-red-500 py-4">{error}</div>
         )}
         
+        {/* Search bar */}
+        {!loading && standings.length > 0 && (
+          <div className="mb-4 relative">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+              <Input
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 border-masters-green border-opacity-50 focus-visible:ring-masters-green"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="text-sm text-gray-500 mt-1">
+                Found {filteredCount} {filteredCount === 1 ? 'participant' : 'participants'}
+              </p>
+            )}
+          </div>
+        )}
+        
         {loading ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -131,7 +174,9 @@ const PoolStandings = () => {
                 {displayStandings.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center py-8 text-gray-500">
-                      No standings data available
+                      {searchQuery 
+                        ? "No participants match your search" 
+                        : "No standings data available"}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -186,7 +231,7 @@ const PoolStandings = () => {
               </TableBody>
             </Table>
             
-            {totalParticipants > PREVIEW_COUNT && (
+            {filteredStandings.length > PREVIEW_COUNT && !searchQuery && (
               <div className="mt-4 text-center">
                 <Button 
                   variant="outline" 
@@ -201,7 +246,7 @@ const PoolStandings = () => {
                     </>
                   ) : (
                     <>
-                      <span>Show All {totalParticipants} Participants</span>
+                      <span>Show All {filteredStandings.length} Participants</span>
                       <ChevronDown className="ml-1 h-4 w-4" />
                     </>
                   )}
