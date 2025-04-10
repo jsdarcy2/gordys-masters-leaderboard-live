@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Award } from "lucide-react";
+import { Trophy, Award, Clock, History } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Image from "@/components/ui/image";
 
@@ -29,7 +28,39 @@ const MASTERS_CHAMPIONS = [
   { year: 2004, winner: "Phil Mickelson", country: "United States", score: "-9", runnerUp: "Ernie Els" },
 ];
 
-// Iconic Masters Champions with achievements
+// Tournament History data with rich historical content
+const TOURNAMENT_HISTORY = [
+  { 
+    title: "Founding Legacy",
+    year: "1934",
+    description: "The Masters Tournament was founded by Bobby Jones and Clifford Roberts, with Horton Smith becoming the first champion.",
+    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png",
+    caption: "The iconic Augusta National Golf Club, home of the Masters"
+  },
+  { 
+    title: "Champions Dinner",
+    year: "1952-Present",
+    description: "The Champions Dinner tradition began in 1952 when Ben Hogan hosted a dinner for past champions. Each year, the defending champion selects the menu.",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+    caption: "The exclusive Champions Dinner brings together golf legends annually" 
+  },
+  { 
+    title: "Green Jacket Tradition",
+    year: "1949-Present",
+    description: "The iconic green jacket was first awarded to Sam Snead in 1949, becoming the symbol of Masters victory and membership at Augusta National.",
+    image: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=800&q=80", 
+    caption: "The presentation of the green jacket remains one of golf's most prestigious ceremonies"
+  },
+  { 
+    title: "Iconic Champions",
+    year: "All-Time Greats",
+    description: "Jack Nicklaus (6 wins), Tiger Woods (5), and Arnold Palmer (4) have defined the tournament's rich history with their remarkable achievements.",
+    image: "/lovable-uploads/d67f073e-cc05-44af-a4eb-2e7778b4c7be.png",
+    caption: "The Masters has crowned the greatest players in golf history"
+  },
+];
+
+// Iconic Masters Champions with achievements (keeping for reference data but transforming display)
 const ICONIC_CHAMPIONS = [
   { 
     name: "Tiger Woods", 
@@ -62,7 +93,7 @@ const ICONIC_CHAMPIONS = [
 ];
 
 const MastersChampions = () => {
-  const [activeTab, setActiveTab] = useState<'recent' | 'iconic'>('recent');
+  const [activeTab, setActiveTab] = useState<'champions' | 'history'>('champions');
   
   return (
     <div className="space-y-8">
@@ -78,28 +109,28 @@ const MastersChampions = () => {
           <div className="mb-4">
             <div className="flex space-x-2 mb-6">
               <button
-                onClick={() => setActiveTab('recent')}
+                onClick={() => setActiveTab('champions')}
                 className={`px-4 py-2 rounded-md font-serif ${
-                  activeTab === 'recent' 
+                  activeTab === 'champions' 
                     ? "bg-masters-green text-white" 
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Recent Champions
+                Past Masters Champions
               </button>
               <button
-                onClick={() => setActiveTab('iconic')}
+                onClick={() => setActiveTab('history')}
                 className={`px-4 py-2 rounded-md font-serif ${
-                  activeTab === 'iconic' 
+                  activeTab === 'history' 
                     ? "bg-masters-green text-white" 
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                Iconic Champions
+                Tournament History
               </button>
             </div>
             
-            {activeTab === 'recent' && (
+            {activeTab === 'champions' && (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -137,37 +168,66 @@ const MastersChampions = () => {
               </div>
             )}
             
-            {activeTab === 'iconic' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {ICONIC_CHAMPIONS.map((champion, index) => (
+            {activeTab === 'history' && (
+              <div className="space-y-8">
+                {TOURNAMENT_HISTORY.map((item, index) => (
                   <Card key={index} className="overflow-hidden">
-                    <div className="flex flex-col h-full">
-                      {champion.image && (
-                        <div className="w-full h-56">
-                          <Image 
-                            src={champion.image} 
-                            alt={`${champion.name} - Masters Champion`}
-                            className="w-full h-full object-cover"
-                          />
+                    <div className="md:flex">
+                      <div className="md:w-1/2 h-64 md:h-auto">
+                        <Image 
+                          src={item.image} 
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                          overlay={
+                            <div className="p-4 absolute bottom-0 left-0 text-white">
+                              <h4 className="text-lg font-serif font-medium">{item.title}</h4>
+                              <p className="text-sm opacity-90">{item.year}</p>
+                            </div>
+                          }
+                          overlayClassName="bg-gradient-to-t from-black to-transparent"
+                          overlayOpacity={70}
+                        />
+                      </div>
+                      <div className="p-6 md:w-1/2">
+                        <div className="mb-2 flex items-center">
+                          <History size={18} className="text-masters-green mr-2" />
+                          <h3 className="text-xl font-serif font-medium text-masters-green">{item.title}</h3>
                         </div>
-                      )}
-                      <div className="p-4">
-                        <h3 className="text-xl font-serif font-medium text-masters-green">{champion.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          <span className="font-medium">{champion.wins} wins:</span>{" "}
-                          {champion.years.join(", ")}
-                        </p>
-                        <p className="mt-2 text-gray-700">{champion.achievement}</p>
+                        <div className="mb-4">
+                          <span className="inline-block bg-masters-light text-masters-green text-sm px-2 py-1 rounded font-medium">
+                            {item.year}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 mb-3">{item.description}</p>
+                        <p className="text-sm text-gray-500 italic">{item.caption}</p>
                       </div>
                     </div>
                   </Card>
                 ))}
+
+                <div className="mt-4 bg-masters-light rounded-lg p-5">
+                  <h3 className="font-serif text-lg font-medium text-masters-green mb-3 flex items-center">
+                    <Award className="mr-2 text-masters-gold" size={20} /> 
+                    Multiple Champions
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    {ICONIC_CHAMPIONS.map((champion, index) => (
+                      <div key={index} className="bg-white rounded-md p-3 shadow-sm">
+                        <div className="font-medium text-masters-green">{champion.name}</div>
+                        <div className="text-sm text-gray-600">
+                          <span className="text-masters-gold font-medium">{champion.wins} wins</span>: {champion.years.join(', ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
           
           <div className="mt-8 p-4 bg-masters-light rounded-md">
-            <h3 className="text-lg font-serif font-medium text-masters-green mb-4">
+            <h3 className="text-lg font-serif font-medium text-masters-green mb-4 flex items-center">
+              <Clock className="mr-2 text-masters-gold" size={18} />
               Tournament Facts
             </h3>
             <ul className="space-y-2">

@@ -16,7 +16,7 @@ const MastersChampionsPage = () => {
           Masters Tournament Champions
         </h2>
         <p className="text-gray-600 mb-2">
-          Historical data of Augusta National's finest golfers.
+          Celebrating the historic legacy of golf's most prestigious event.
         </p>
         <p className="text-sm text-gray-500 italic">
           "A tradition unlike any other" - Jim Nantz
