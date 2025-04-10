@@ -30,34 +30,34 @@ const MASTERS_CHAMPIONS = [
   { year: 2004, winner: "Phil Mickelson", country: "United States", score: "-9", runnerUp: "Ernie Els" },
 ];
 
-// Tournament History data with rich historical content and authentic Masters photos
+// Tournament History data with iconic Masters Tournament photos
 const TOURNAMENT_HISTORY = [
   { 
     title: "Founding Legacy",
     year: "1934",
     description: "The Masters Tournament was founded by Bobby Jones and Clifford Roberts, with Horton Smith becoming the first champion.",
-    image: "/lovable-uploads/986e7321-f375-4033-b344-533298c15ed9.png",
+    image: "/lovable-uploads/80d8cb16-da68-45fb-b9e4-1cb20ff5e9d5.png",
     caption: "Augusta National Golf Club during its early years, home of the Masters since 1934"
   },
   { 
     title: "Champions Dinner",
     year: "1952-Present",
     description: "The Champions Dinner tradition began in 1952 when Ben Hogan hosted a dinner for past champions. Each year, the defending champion selects the menu.",
-    image: "/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png",
-    caption: "The exclusive Champions Dinner brings together Masters winners annually at Augusta National" 
+    image: "/lovable-uploads/912144bb-30e1-461b-afb7-c475e0ebc3a5.png",
+    caption: "Past Masters champions gather for the annual Champions Dinner at Augusta National" 
   },
   { 
     title: "Green Jacket Tradition",
     year: "1949-Present",
     description: "The iconic green jacket was first awarded to Sam Snead in 1949, becoming the symbol of Masters victory and membership at Augusta National.",
-    image: "/lovable-uploads/901c5e70-1860-4dee-9076-58f0c0284cf8.png", 
-    caption: "Tiger Woods receives his fifth green jacket from 2018 champion Patrick Reed"
+    image: "/lovable-uploads/1cefd83b-9727-417a-a746-3573ce16bc41.png", 
+    caption: "The iconic green jacket ceremony - a tradition unlike any other in golf"
   },
   { 
     title: "Iconic Champions",
     year: "All-Time Greats",
     description: "Jack Nicklaus (6 wins), Tiger Woods (5), and Arnold Palmer (4) have defined the tournament's rich history with their remarkable achievements.",
-    image: "/lovable-uploads/cc5f5185-a821-4142-88d3-584a41df9b56.png",
+    image: "/lovable-uploads/5ca946ca-52b2-4847-82cf-94bac53763cf.png",
     caption: "Golf's 'Big Three': Jack Nicklaus, Arnold Palmer, and Gary Player at the ceremonial opening tee shot"
   },
 ];
