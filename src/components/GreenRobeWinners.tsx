@@ -112,7 +112,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2011, 
     winner: "Peggy McClintock", 
     quote: "I think people have always known who wears the Green Robe in this house",
-    image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80"
+    image: "/lovable-uploads/7f7b62c0-03c1-4a50-87a1-2d0ad365face.png"
   },
   {
     year: 2010, 
