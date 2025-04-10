@@ -43,7 +43,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2023, 
     winner: "Elia Eyaz", 
     quote: "Beeaaauuuutiful read, Steven",
-    image: "/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png"
+    image: "/lovable-uploads/27bba8b8-7174-4a8b-8a6f-32b3e6e6958c.png"
   },
   {
     year: 2022, 
