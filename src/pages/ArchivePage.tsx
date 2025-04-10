@@ -16,7 +16,7 @@ const ArchivePage = () => {
           Green Robe Winners & Traditions
         </h2>
         <p className="text-gray-600 mb-2">
-          Past winners, historical data, and the prestigious Green Robe tradition.
+          Past winners, historical data, their hometowns, and the prestigious Green Robe tradition.
         </p>
         <p className="text-sm text-gray-500 italic">
           "A tradition unlike any other" - Jim Nantz

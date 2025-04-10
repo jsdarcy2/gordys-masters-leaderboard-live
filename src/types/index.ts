@@ -1,3 +1,4 @@
+
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -47,6 +48,7 @@ export type GreenRobeWinner = {
   quote: string;
   nickname?: string;
   image?: string;
+  hometown?: string;
 }
 
 export type GreenRobeCoChampions = {
@@ -55,5 +57,6 @@ export type GreenRobeCoChampions = {
     name: string;
     quote: string;
     image?: string;
+    hometown?: string;
   }[];
 }
