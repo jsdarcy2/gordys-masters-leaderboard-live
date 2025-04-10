@@ -1,10 +1,34 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import PoolStandings from "@/components/PoolStandings";
 import Leaderboard from "@/components/Leaderboard";
+import PersonalizedDashboard from "@/components/PersonalizedDashboard";
+import HistoricalComparison from "@/components/HistoricalComparison";
+import { fetchPoolStandings } from "@/services/api";
+import { PoolParticipant } from "@/types";
 
 const Index = () => {
+  const [poolStandings, setPoolStandings] = useState<PoolParticipant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load pool standings for use in personalized dashboard and historical comparison
+  useEffect(() => {
+    const loadPoolStandings = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchPoolStandings();
+        setPoolStandings(data);
+      } catch (err) {
+        console.error("Failed to load pool standings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPoolStandings();
+  }, []);
+
   // Log component mount for debugging
   useEffect(() => {
     console.log("Pool Standings page mounted");
@@ -24,6 +48,15 @@ const Index = () => {
           participants or just the top entries.
         </p>
       </div>
+      
+      <PersonalizedDashboard 
+        poolStandings={poolStandings}
+        loading={loading}
+      />
+      
+      <HistoricalComparison 
+        currentStandings={poolStandings}
+      />
       
       <div className="grid grid-cols-1 gap-8">
         <PoolStandings />
