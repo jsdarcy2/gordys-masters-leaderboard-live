@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Award, Flag } from "lucide-react";
@@ -69,7 +70,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
       {
         name: "Jim Jones",
         quote: "The Robe really does tie the room together Dude",
-        image: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?auto=format&fit=crop&w=800&q=80",
+        image: "/lovable-uploads/0ba4d01d-96da-4d1d-9e29-e2dc2e2c1d29.png",
         hometown: "Glenview, IL"
       }
     ]
@@ -99,14 +100,14 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2013, 
     winner: "Sylas Stofer", 
     quote: "Green Robe Excellence",
-    image: "https://images.unsplash.com/photo-1619221882266-0b5c20fd0628?auto=format&fit=crop&w=800&q=80",
+    image: "/lovable-uploads/35ea853e-d7b7-4299-92bb-bf0e43f7fef3.png", // Pimento cheese sandwich
     hometown: "Orono, MN"
   },
   {
     year: 2012, 
     winner: "Jim Jones", 
     quote: "Robe Life",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80",
+    image: "/lovable-uploads/26aaf9e9-bca2-43f5-8a6f-cd34ef493ff4.png", // Egg salad sandwich
     hometown: "Chicago, IL"
   },
   {
@@ -127,7 +128,7 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2009, 
     winner: "Todd Goergen", 
     quote: "Masters of the Universe",
-    image: "https://images.unsplash.com/photo-1609167830220-7164aa360951?auto=format&fit=crop&w=800&q=80",
+    image: "/lovable-uploads/80d8cb16-da68-45fb-b9e4-1cb20ff5e9d5.png", // Menu board
     hometown: "New York, NY"
   },
   {
@@ -141,27 +142,27 @@ const GREEN_ROBE_WINNERS: Array<GreenRobeWinner | GreenRobeCoChampions> = [
     year: 2007, 
     winner: "Dave Hierholzer", 
     quote: "Robe On, Game On",
-    image: "https://images.unsplash.com/photo-1551782450-17144efb9c50?auto=format&fit=crop&w=800&q=80",
+    image: "/lovable-uploads/8d3f3940-0abe-4ff2-8a95-69da3fdfe991.png", // Ice tea and sandwich
     hometown: "Denver, CO"
   },
   {
     year: 2006, 
     winner: "Justin Thomas", 
     quote: "Green Robe Glory",
-    image: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=800&q=80",
-    hometown: "Cincinatti, OH"
+    image: "/lovable-uploads/1cefd83b-9727-417a-a746-3573ce16bc41.png", // Buffet spread
+    hometown: "Cincinnati, OH"
   },
 ];
 
-// Map of state abbreviation to flag rendering component
+// State flags using Emoji flags for better representation
 const stateFlags: Record<string, React.ReactNode> = {
-  MI: <Flag size={14} className="text-blue-600" />,
-  MN: <Flag size={14} className="text-blue-500" />,
-  CO: <Flag size={14} className="text-red-500" />,
-  IL: <Flag size={14} className="text-orange-500" />,
-  NC: <Flag size={14} className="text-red-600" />,
-  NY: <Flag size={14} className="text-purple-500" />,
-  OH: <Flag size={14} className="text-red-700" />
+  MI: <span className="ml-1" role="img" aria-label="Michigan">🇺🇸 MI</span>,
+  MN: <span className="ml-1" role="img" aria-label="Minnesota">🇺🇸 MN</span>,
+  CO: <span className="ml-1" role="img" aria-label="Colorado">🇺🇸 CO</span>,
+  IL: <span className="ml-1" role="img" aria-label="Illinois">🇺🇸 IL</span>,
+  NC: <span className="ml-1" role="img" aria-label="North Carolina">🇺🇸 NC</span>,
+  NY: <span className="ml-1" role="img" aria-label="New York">🇺🇸 NY</span>,
+  OH: <span className="ml-1" role="img" aria-label="Ohio">🇺🇸 OH</span>
 };
 
 const GreenRobeWinners = () => {
@@ -230,7 +231,7 @@ const GreenRobeWinners = () => {
                                     <p className="text-sm text-gray-500 mt-1 flex items-center">
                                       Hometown: {winner.hometown} 
                                       {winner.hometown.slice(-2) && stateFlags[winner.hometown.slice(-2)] && (
-                                        <span className="ml-1">{stateFlags[winner.hometown.slice(-2)]}</span>
+                                        <span>{stateFlags[winner.hometown.slice(-2)]}</span>
                                       )}
                                     </p>
                                   )}
@@ -262,7 +263,7 @@ const GreenRobeWinners = () => {
                                 <p className="text-sm text-gray-500 mt-1 flex items-center">
                                   Hometown: {record.hometown} 
                                   {record.hometown.slice(-2) && stateFlags[record.hometown.slice(-2)] && (
-                                    <span className="ml-1">{stateFlags[record.hometown.slice(-2)]}</span>
+                                    <span>{stateFlags[record.hometown.slice(-2)]}</span>
                                   )}
                                 </p>
                               )}
