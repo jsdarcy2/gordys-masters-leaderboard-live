@@ -1,24 +1,41 @@
-
 import { PoolParticipant } from "@/types";
 import { fetchLeaderboardData, buildGolferScoreMap } from "../leaderboard";
 import { calculatePoolStandings } from "./participantUtils";
 import { getBaseSampleTeams } from "./teamData";
 import { generateParticipantName } from "./participantUtils";
+import { getFromCache, saveToCache } from "@/utils/cacheUtils";
+
+// Cache keys
+const POOL_STANDINGS_CACHE_KEY = "poolStandingsData";
+const PLAYER_SELECTIONS_CACHE_KEY = "playerSelectionsData";
 
 /**
- * Fetch pool standings with no historical data fallbacks
+ * Fetch pool standings with smart caching and fallbacks
  */
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
     console.log("Fetching pool standings...");
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Check for recent cache first (valid for 2 minutes)
+    const cachedStandings = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 2 * 60 * 1000);
+    
+    if (cachedStandings.data && cachedStandings.data.length > 0) {
+      console.log(`Using cached standings data (${Math.round(cachedStandings.age / 1000)}s old)`);
+      return cachedStandings.data;
+    }
     
     // First get the current leaderboard to ensure scores match
     const { leaderboard } = await fetchLeaderboardData();
     
     if (!leaderboard || leaderboard.length === 0) {
+      // If no leaderboard data, check for any cached standings (even if expired)
+      const fallbackCache = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
+      
+      if (fallbackCache.data && fallbackCache.data.length > 0) {
+        console.log(`Using expired cache as fallback (${Math.round(fallbackCache.age / 60000)}m old)`);
+        return fallbackCache.data;
+      }
+      
       throw new Error("No leaderboard data available to calculate pool standings");
     }
     
@@ -32,6 +49,15 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     
     if (Object.keys(selectionsData).length === 0) {
       console.error("No player selections data received");
+      
+      // Check for any cached standings as fallback
+      const fallbackCache = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
+      
+      if (fallbackCache.data && fallbackCache.data.length > 0) {
+        console.log(`Using expired cache as fallback (${Math.round(fallbackCache.age / 60000)}m old)`);
+        return fallbackCache.data;
+      }
+      
       throw new Error("No player selections data");
     }
     
@@ -39,32 +65,93 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     const standings = calculatePoolStandings(selectionsData, golferScores);
     
     // Cache the calculated standings
-    localStorage.setItem('poolStandingsData', JSON.stringify(standings));
-    localStorage.setItem('poolStandingsTimestamp', new Date().getTime().toString());
+    saveToCache(POOL_STANDINGS_CACHE_KEY, standings, "calculation");
     
     console.log(`Returning ${standings.length} processed participants for standings`);
     return standings;
   } catch (error) {
     console.error('Error fetching pool standings:', error);
-    // Don't fall back to cached or historical data
+    
+    // Try to get any cached standings, even if expired
+    const cachedStandings = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
+    
+    if (cachedStandings.data && cachedStandings.data.length > 0) {
+      console.log(`Using expired cache due to error (${Math.round(cachedStandings.age / 60000)}m old)`);
+      return cachedStandings.data;
+    }
+    
+    // If no cache available, return empty array
     return [];
   }
 };
 
 /**
- * Fetch player selections with all 134 participants
+ * Fetch player selections with all 134 participants and smart caching
  */
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
     console.log("Fetching player selections...");
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Check for recent cache first (valid for 5 minutes)
+    const cachedSelections = getFromCache<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}>(
+      PLAYER_SELECTIONS_CACHE_KEY, 
+      5 * 60 * 1000
+    );
+    
+    if (cachedSelections.data && Object.keys(cachedSelections.data).length > 0) {
+      console.log(`Using cached player selections (${Math.round(cachedSelections.age / 1000)}s old)`);
+      
+      // Get current leaderboard data to update scores
+      try {
+        const { leaderboard } = await fetchLeaderboardData();
+        
+        if (leaderboard && leaderboard.length > 0) {
+          // Create a map of golfer names to their current scores
+          const golferScoreMap: Record<string, number> = {};
+          leaderboard.forEach(golfer => {
+            golferScoreMap[golfer.name] = golfer.score;
+          });
+          
+          // Update the cached selections with fresh scores
+          const updatedSelections = { ...cachedSelections.data };
+          
+          Object.keys(updatedSelections).forEach(participant => {
+            const team = updatedSelections[participant];
+            team.picks.forEach((golfer, index) => {
+              // Use the golfer's current score, or keep existing if not found
+              if (golferScoreMap[golfer] !== undefined) {
+                team.roundScores[index] = golferScoreMap[golfer];
+              }
+            });
+          });
+          
+          // Cache the updated selections
+          saveToCache(PLAYER_SELECTIONS_CACHE_KEY, updatedSelections, "cache-update");
+          
+          return updatedSelections;
+        }
+      } catch (error) {
+        console.warn("Could not update cached selections with fresh scores:", error);
+      }
+      
+      return cachedSelections.data;
+    }
     
     // Get current leaderboard data to calculate real scores
     const { leaderboard } = await fetchLeaderboardData();
     
     if (!leaderboard || leaderboard.length === 0) {
+      // If no leaderboard, try to use any cached selections
+      const fallbackCache = getFromCache<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}>(
+        PLAYER_SELECTIONS_CACHE_KEY, 
+        0
+      ); // 0 = ignore expiration
+      
+      if (fallbackCache.data && Object.keys(fallbackCache.data).length > 0) {
+        console.log(`Using expired player selections cache as fallback (${Math.round(fallbackCache.age / 60000)}m old)`);
+        return fallbackCache.data;
+      }
+      
       throw new Error("No leaderboard data available to process player selections");
     }
     
@@ -153,9 +240,24 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       console.warn(`Expected 134 teams but generated ${finalCount}`);
     }
     
+    // Cache the selections
+    saveToCache(PLAYER_SELECTIONS_CACHE_KEY, teamsData, "generation");
+    
     return teamsData;
   } catch (error) {
     console.error('Error fetching player selections:', error);
+    
+    // Try to get any cached selections, even if expired
+    const cachedSelections = getFromCache<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}>(
+      PLAYER_SELECTIONS_CACHE_KEY, 
+      0
+    ); // 0 = ignore expiration
+    
+    if (cachedSelections.data && Object.keys(cachedSelections.data).length > 0) {
+      console.log(`Using expired player selections cache due to error (${Math.round(cachedSelections.age / 60000)}m old)`);
+      return cachedSelections.data;
+    }
+    
     // Instead of falling back to cached data, create mock data
     // that matches the team selections
     const completeTeamSelectionsData = getCompleteTeamSelections();

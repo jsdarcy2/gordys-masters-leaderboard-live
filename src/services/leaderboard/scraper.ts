@@ -2,256 +2,308 @@
 import { GolferScore } from "@/types";
 
 /**
- * Scrape leaderboard data from masters.com website
- * This is used as a fallback when APIs are not available
+ * Scrape leaderboard data from the Masters.com website
+ * This is our final fallback when APIs fail
  */
 export const scrapeMastersWebsite = async (): Promise<GolferScore[]> => {
   try {
     console.log("Attempting to scrape Masters.com leaderboard...");
     
-    // Fetch the masters.com leaderboard page
+    // First try the main Masters.com leaderboard page
     const response = await fetch("https://www.masters.com/en_US/scores/index.html", {
       headers: {
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     });
     
     if (!response.ok) {
-      throw new Error(`Masters.com scraping failed with status: ${response.status}`);
+      console.error(`Masters.com response error: ${response.status}`);
+      throw new Error(`Masters.com response error: ${response.status}`);
     }
     
     const html = await response.text();
-    console.log("Successfully fetched Masters.com HTML content");
     
-    return parseMastersHtml(html);
+    // Extract leaderboard data from HTML
+    // We'll look for the leaderboard table structure
+    const leaderboard: GolferScore[] = [];
+    
+    // Simple HTML parsing approach (more robust than regex for structured data)
+    const tableMatches = html.match(/<table[^>]*class="[^"]*leaderboard[^"]*"[^>]*>([\s\S]*?)<\/table>/gi);
+    
+    if (!tableMatches || tableMatches.length === 0) {
+      // If table isn't found, try looking for JSON data that might be embedded
+      const jsonDataMatch = html.match(/window\.LEADERBOARD_DATA\s*=\s*({[\s\S]*?});/i);
+      
+      if (jsonDataMatch && jsonDataMatch[1]) {
+        try {
+          const jsonData = JSON.parse(jsonDataMatch[1]);
+          
+          // Process the JSON data based on its structure
+          if (jsonData.players && Array.isArray(jsonData.players)) {
+            jsonData.players.forEach((player: any, index: number) => {
+              // Convert from whatever structure is found to our GolferScore type
+              const score = parseScoreValue(player.score || player.total || '0');
+              const today = parseScoreValue(player.today || player.round || '0');
+              
+              leaderboard.push({
+                position: parseInt(player.position || (index + 1).toString(), 10),
+                name: player.name || player.playerName || 'Unknown',
+                score: score,
+                today: today,
+                thru: player.thru || player.through || 'F',
+                status: player.status === 'cut' ? 'cut' : player.status === 'wd' ? 'withdrawn' : 'active'
+              });
+            });
+          }
+        } catch (jsonError) {
+          console.error("Error parsing embedded JSON data:", jsonError);
+        }
+      }
+      
+      // If we still don't have data, try falling back to the ESPN website
+      if (leaderboard.length === 0) {
+        console.log("Table not found in Masters.com. Trying ESPN as fallback...");
+        return await scrapeESPNWebsite();
+      }
+    } else {
+      // Process table HTML
+      const tableHTML = tableMatches[0];
+      const rowMatches = tableHTML.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+      
+      if (rowMatches && rowMatches.length > 1) {
+        // Skip header row
+        for (let i = 1; i < rowMatches.length; i++) {
+          const row = rowMatches[i];
+          const cellMatches = row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi);
+          
+          if (cellMatches && cellMatches.length >= 4) {
+            // Extract cell content, removing HTML tags
+            const position = extractTextContent(cellMatches[0]);
+            const name = extractTextContent(cellMatches[1]);
+            const scoreText = extractTextContent(cellMatches[2]);
+            const todayText = extractTextContent(cellMatches[3]);
+            const thruText = cellMatches.length > 4 ? extractTextContent(cellMatches[4]) : 'F';
+            
+            // Handle status (cut or withdrawn)
+            let status = 'active';
+            if (row.toLowerCase().includes('cut') || row.toLowerCase().includes('mc')) {
+              status = 'cut';
+            } else if (row.toLowerCase().includes('wd') || row.toLowerCase().includes('withdrawn')) {
+              status = 'withdrawn';
+            }
+            
+            // Parse scores, handling text like "E" (even), "+2", "-4"
+            const score = parseScoreValue(scoreText);
+            const today = parseScoreValue(todayText);
+            
+            leaderboard.push({
+              position: parseInt(position.replace(/\D/g, '')) || i,
+              name: name.trim(),
+              score: score,
+              today: today,
+              thru: thruText.trim() || 'F',
+              status: status
+            });
+          }
+        }
+      }
+    }
+    
+    // If we successfully extracted data, return it
+    if (leaderboard.length > 0) {
+      console.log(`Successfully scraped ${leaderboard.length} players from Masters.com`);
+      
+      // Sort by position
+      return leaderboard.sort((a, b) => a.position - b.position);
+    }
+    
+    // If we couldn't extract data, try ESPN as fallback
+    console.log("Failed to extract leaderboard data from Masters.com. Trying ESPN...");
+    return await scrapeESPNWebsite();
   } catch (error) {
     console.error("Error scraping Masters.com:", error);
-    throw new Error(`Scraper error: ${error}`);
+    
+    // Try ESPN as last resort
+    try {
+      return await scrapeESPNWebsite();
+    } catch (espnError) {
+      console.error("ESPN scraping also failed:", espnError);
+      throw new Error(`Scraper error: ${error}`);
+    }
   }
 };
 
 /**
- * Parse HTML content from masters.com to extract leaderboard data
+ * Attempt to scrape leaderboard data from ESPN as a fallback
  */
-const parseMastersHtml = (html: string): GolferScore[] => {
-  const leaderboard: GolferScore[] = [];
-  
+const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
   try {
-    // Create a DOM parser to parse the HTML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+    console.log("Attempting to scrape ESPN Golf leaderboard...");
     
-    // Find the leaderboard table
-    const leaderboardTable = doc.querySelector('.leaderboard-table') || 
-                             doc.querySelector('.leaderboard') || 
-                             doc.querySelector('table');
+    const year = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear();
+    const url = `https://www.espn.com/golf/${year}/masters/leaderboard`;
     
-    if (!leaderboardTable) {
-      console.error("Could not find leaderboard table in Masters.com HTML");
-      throw new Error("Leaderboard table not found in HTML");
+    const response = await fetch(url, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      console.error(`ESPN response error: ${response.status}`);
+      throw new Error(`ESPN response error: ${response.status}`);
     }
     
-    // Find all player rows in the table
-    const playerRows = leaderboardTable.querySelectorAll('tr:not(.header)');
-    console.log(`Found ${playerRows.length} player rows in the leaderboard table`);
+    const html = await response.text();
+    const leaderboard: GolferScore[] = [];
     
-    if (playerRows.length === 0) {
-      // Try alternative selectors if the main one doesn't work
-      const altRows = doc.querySelectorAll('.player-row') || 
-                     doc.querySelectorAll('.player-data');
-      
-      if (altRows.length > 0) {
-        console.log(`Found ${altRows.length} player rows using alternative selector`);
-        // Process alternative rows
-        altRows.forEach((row, index) => {
-          const playerData = extractPlayerDataFromAltRow(row);
-          if (playerData) {
-            leaderboard.push(playerData);
-          }
-        });
-      } else {
-        throw new Error("No player rows found in HTML");
-      }
-    } else {
-      // Process regular table rows
-      playerRows.forEach((row, index) => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length >= 4) {
-          const position = parsePosition(cells[0].textContent || "");
-          
-          if (!isNaN(position)) {
-            // Extract player name
-            const nameElement = cells[1].querySelector('.player-name') || cells[1];
-            const playerName = nameElement.textContent?.trim() || "";
-            
-            // Extract score
-            const scoreText = cells[2].textContent?.trim() || "E";
-            const score = parseScore(scoreText);
-            
-            // Extract today's score
-            const todayText = cells[3].textContent?.trim() || "E";
-            const today = parseScore(todayText);
-            
-            // Extract thru
-            const thruText = cells.length > 4 ? cells[4].textContent?.trim() || "F" : "F";
-            
-            leaderboard.push({
-              position: position,
-              name: playerName,
-              score: score,
-              today: today,
-              thru: thruText,
-              status: "active"
-            });
+    // Look for player data in different possible formats
+    // 1. Try to find embedded JSON data first (most reliable)
+    const scriptMatches = html.match(/<script[^>]*>window\.__INITIAL_STATE__\s*=\s*([^<]*)<\/script>/i);
+    
+    if (scriptMatches && scriptMatches[1]) {
+      try {
+        const cleanJson = scriptMatches[1].replace(/;$/, '');
+        const jsonData = JSON.parse(cleanJson);
+        
+        // Navigate the JSON structure to find competitors
+        let competitors = null;
+        
+        // Search for the leaderboard data in various possible locations
+        if (jsonData.page && jsonData.page.content && jsonData.page.content.leaderboard) {
+          const events = jsonData.page.content.leaderboard.events;
+          if (events && events.length > 0 && events[0].competitions && events[0].competitions.length > 0) {
+            competitors = events[0].competitions[0].competitors;
           }
         }
-      });
-    }
-    
-    if (leaderboard.length === 0) {
-      // If we didn't extract any data from tables, try a more generic approach
-      // This looks for any elements that might have player information
-      const playerElements = doc.querySelectorAll('[data-player-id], .player, .competitor');
-      
-      if (playerElements.length > 0) {
-        console.log(`Found ${playerElements.length} player elements using generic selector`);
-        processGenericPlayerElements(playerElements, leaderboard);
+        
+        if (competitors && Array.isArray(competitors)) {
+          competitors.forEach((player: any) => {
+            // Extract player data based on ESPN's structure
+            const score = parseScoreValue(player.score);
+            const todayRound = player.linescores ? player.linescores[player.linescores.length - 1] : null;
+            const today = todayRound ? parseScoreValue(todayRound.value) : 0;
+            
+            // Handle status - active, cut, or withdrawn
+            let status = 'active';
+            if (player.status && player.status.type) {
+              const statusType = player.status.type.description.toLowerCase();
+              if (statusType.includes('cut')) {
+                status = 'cut';
+              } else if (statusType.includes('wd') || statusType.includes('withdrawn')) {
+                status = 'withdrawn';
+              }
+            }
+            
+            leaderboard.push({
+              position: parseInt(player.status && player.status.position ? player.status.position.id : '0', 10) || 0,
+              name: player.athlete ? player.athlete.displayName : 'Unknown',
+              score: score,
+              today: today,
+              thru: player.status && player.status.thru ? player.status.thru : 'F',
+              status: status
+            });
+          });
+        }
+      } catch (jsonError) {
+        console.error("Error parsing ESPN JSON data:", jsonError);
       }
     }
     
-    // Sort leaderboard by position
-    leaderboard.sort((a, b) => a.position - b.position);
+    // 2. If we couldn't extract from JSON, try parsing the HTML directly
+    if (leaderboard.length === 0) {
+      // Look for a table with class containing "leaderboard"
+      const tableMatches = html.match(/<table[^>]*class="[^"]*leaderboard[^"]*"[^>]*>([\s\S]*?)<\/table>/gi);
+      
+      if (tableMatches && tableMatches.length > 0) {
+        const tableHTML = tableMatches[0];
+        const rowMatches = tableHTML.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi);
+        
+        if (rowMatches && rowMatches.length > 1) {
+          // Skip header row
+          for (let i = 1; i < rowMatches.length; i++) {
+            const row = rowMatches[i];
+            const cellMatches = row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi);
+            
+            if (cellMatches && cellMatches.length >= 3) {
+              // Extract basic data
+              const position = extractTextContent(cellMatches[0]);
+              const nameCell = cellMatches[1];
+              const name = extractTextContent(nameCell);
+              const scoreText = cellMatches.length > 2 ? extractTextContent(cellMatches[2]) : '0';
+              const todayText = cellMatches.length > 3 ? extractTextContent(cellMatches[3]) : '0';
+              const thruText = cellMatches.length > 4 ? extractTextContent(cellMatches[4]) : 'F';
+              
+              // Handle status
+              let status = 'active';
+              if (row.toLowerCase().includes('cut') || row.toLowerCase().includes('mc')) {
+                status = 'cut';
+              } else if (row.toLowerCase().includes('wd') || row.toLowerCase().includes('withdrawn')) {
+                status = 'withdrawn';
+              }
+              
+              // Parse scores
+              const score = parseScoreValue(scoreText);
+              const today = parseScoreValue(todayText);
+              
+              leaderboard.push({
+                position: parseInt(position.replace(/\D/g, '')) || i,
+                name: name.trim(),
+                score: score,
+                today: today,
+                thru: thruText.trim() || 'F',
+                status: status
+              });
+            }
+          }
+        }
+      }
+    }
     
-    console.log(`Successfully extracted ${leaderboard.length} players from Masters.com`);
-    return leaderboard;
+    if (leaderboard.length > 0) {
+      console.log(`Successfully scraped ${leaderboard.length} players from ESPN`);
+      
+      // Sort by position
+      return leaderboard.sort((a, b) => a.position - b.position);
+    }
+    
+    console.error("Failed to extract leaderboard data from ESPN");
+    return [];
   } catch (error) {
-    console.error("Error parsing Masters.com HTML:", error);
+    console.error("Error scraping ESPN:", error);
     return [];
   }
 };
 
 /**
- * Extract player data from alternative row format
+ * Extract text content from HTML, removing all tags
  */
-const extractPlayerDataFromAltRow = (row: Element): GolferScore | null => {
-  try {
-    // Extract position
-    const posElement = row.querySelector('.position') || 
-                      row.querySelector('[data-position]');
-    const positionText = posElement?.textContent || 
-                         row.getAttribute('data-position') || 
-                         "";
-    const position = parsePosition(positionText);
-    
-    if (isNaN(position)) {
-      return null;
-    }
-    
-    // Extract player name
-    const nameElement = row.querySelector('.player-name') || 
-                       row.querySelector('.name') ||
-                       row.querySelector('[data-player-name]');
-    const playerName = nameElement?.textContent?.trim() || 
-                       row.getAttribute('data-player-name') || 
-                       "";
-    
-    // Extract score
-    const scoreElement = row.querySelector('.score') || 
-                         row.querySelector('.total-score') || 
-                         row.querySelector('[data-score]');
-    const scoreText = scoreElement?.textContent?.trim() || 
-                      row.getAttribute('data-score') || 
-                      "E";
-    const score = parseScore(scoreText);
-    
-    // Extract today's score
-    const todayElement = row.querySelector('.today') || 
-                         row.querySelector('.round-score') || 
-                         row.querySelector('[data-today]');
-    const todayText = todayElement?.textContent?.trim() || 
-                      row.getAttribute('data-today') || 
-                      "E";
-    const today = parseScore(todayText);
-    
-    // Extract thru
-    const thruElement = row.querySelector('.thru') || 
-                        row.querySelector('.hole') || 
-                        row.querySelector('[data-thru]');
-    const thruText = thruElement?.textContent?.trim() || 
-                     row.getAttribute('data-thru') || 
-                     "F";
-    
-    return {
-      position: position,
-      name: playerName,
-      score: score,
-      today: today,
-      thru: thruText,
-      status: "active"
-    };
-  } catch (error) {
-    console.error("Error extracting player data from alt row:", error);
-    return null;
-  }
+const extractTextContent = (html: string): string => {
+  return html.replace(/<[^>]*>/g, '').trim();
 };
 
 /**
- * Process player elements with a generic approach
+ * Parse golf score values, handling "E" (even), "+2", "-4", etc.
  */
-const processGenericPlayerElements = (elements: NodeListOf<Element>, leaderboard: GolferScore[]) => {
-  elements.forEach((element, index) => {
-    try {
-      const position = index + 1;
-      const playerName = element.getAttribute('data-player-name') || 
-                        element.textContent?.trim() || 
-                        `Player ${index + 1}`;
-      
-      // Look for any text that could represent a score
-      const allText = element.textContent || "";
-      
-      // Try to find score patterns like "-5", "+2", "E", etc.
-      const scoreMatch = allText.match(/([+-]\d+|E)/);
-      const scoreText = scoreMatch ? scoreMatch[0] : "E";
-      const score = parseScore(scoreText);
-      
-      // Default values for unavailable data
-      leaderboard.push({
-        position: position,
-        name: playerName,
-        score: score,
-        today: 0,
-        thru: "F",
-        status: "active"
-      });
-    } catch (error) {
-      console.error("Error processing generic player element:", error);
-    }
-  });
-};
-
-/**
- * Parse position text to number
- */
-const parsePosition = (posText: string): number => {
-  // Remove any non-numeric characters, except for "T" for ties
-  const cleaned = posText.replace(/[^\dT]/g, '').replace('T', '');
-  return parseInt(cleaned, 10);
-};
-
-/**
- * Parse score text to number
- */
-const parseScore = (scoreText: string): number => {
+const parseScoreValue = (scoreText: string): number => {
   if (!scoreText) return 0;
   
-  // Handle "E" for even par
-  if (scoreText.trim() === "E") return 0;
+  const cleanScore = scoreText.toString().trim().toUpperCase();
   
-  // Extract the number with + or - sign
-  const scoreMatch = scoreText.match(/([+-]?\d+)/);
-  if (scoreMatch) {
-    return parseInt(scoreMatch[0], 10);
+  if (cleanScore === 'E' || cleanScore === 'EV') {
+    return 0; // Even par
   }
   
-  return 0;
+  if (cleanScore.startsWith('+')) {
+    return parseInt(cleanScore.substring(1), 10) || 0;
+  }
+  
+  if (cleanScore.startsWith('-')) {
+    return -parseInt(cleanScore.substring(1), 10) || 0;
+  }
+  
+  // Try to parse as a simple number
+  return parseInt(cleanScore, 10) || 0;
 };
