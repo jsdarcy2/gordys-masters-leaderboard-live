@@ -1,7 +1,16 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
+import { Badge } from "@/components/ui/badge";
+import { getBestFourGolfers } from "@/utils/scoringUtils";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 interface ParticipantTableProps {
   displayStandings: PoolParticipant[];
@@ -11,8 +20,11 @@ interface ParticipantTableProps {
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
   return (
     <div className="overflow-x-auto mt-4">
-      <div className="text-sm text-gray-600 mb-2 italic">
-        Scores are calculated using the best 4 out of 5 golfer scores.
+      <div className="text-sm text-gray-600 mb-2 flex items-center gap-1">
+        <Info size={16} className="text-masters-green" />
+        <span>
+          Scores are calculated using the <span className="font-medium">best 4 out of 5</span> golfer scores.
+        </span>
       </div>
       <table className="w-full">
         <thead>
@@ -38,55 +50,95 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
               </td>
             </tr>
           ) : (
-            displayStandings.map((participant, index) => (
-              <tr
-                key={participant.name}
-                className={`${
-                  index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"
-                } ${
-                  searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    ? "bg-masters-green/10"
-                    : ""
-                }`}
-              >
-                <td className="px-2 py-3 font-medium">
-                  {participant.position}
-                  {participant.position <= 3 && (
-                    <span className="ml-1 text-masters-yellow">
-                      {participant.position === 1 ? "🏆" : participant.position === 2 ? "🥈" : "🥉"}
-                    </span>
-                  )}
-                </td>
-                <td className="px-2 py-3 font-medium">
-                  {participant.name}
-                  {!participant.paid && (
-                    <span className="ml-2 text-xs text-red-500">(unpaid)</span>
-                  )}
-                </td>
-                <td className="px-2 py-3 text-right font-medium">
-                  {formatGolfScore(participant.totalScore)}
-                </td>
+            displayStandings.map((participant, index) => {
+              // Get the best four golfers for highlighting
+              const bestFourGolfers = participant.pickScores ? 
+                getBestFourGolfers(participant.pickScores) : [];
                 
-                {/* Desktop view - Individual picks */}
-                {participant.picks && participant.picks.map((pick, idx) => (
-                  <td key={idx} className="px-2 py-3 text-right hidden md:table-cell">
-                    <div className="flex flex-col items-end">
-                      <span className="text-sm">{pick}</span>
-                      <span className={`text-xs ${participant.pickScores && participant.pickScores[pick] < 0 ? 'text-green-500' : participant.pickScores && participant.pickScores[pick] > 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                        {participant.pickScores && formatGolfScore(participant.pickScores[pick])}
-                      </span>
+              return (
+                <tr
+                  key={participant.name}
+                  className={`${
+                    index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"
+                  } ${
+                    searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
+                      ? "bg-masters-green/10"
+                      : ""
+                  }`}
+                >
+                  <td className="px-2 py-3 font-medium">
+                    <div className="flex items-center">
+                      {participant.position}
+                      {participant.position <= 3 && (
+                        <span className="ml-1 text-masters-yellow">
+                          {participant.position === 1 ? "🏆" : participant.position === 2 ? "🥈" : "🥉"}
+                        </span>
+                      )}
                     </div>
                   </td>
-                ))}
-                
-                {/* Mobile view - Just a button */}
-                <td className="px-2 py-3 text-right md:hidden">
-                  <button className="text-xs bg-masters-green/10 text-masters-green px-2 py-1 rounded hover:bg-masters-green/20">
-                    View Picks
-                  </button>
-                </td>
-              </tr>
-            ))
+                  <td className="px-2 py-3 font-medium">
+                    {participant.name}
+                    {!participant.paid && (
+                      <span className="ml-2 text-xs text-red-500">(unpaid)</span>
+                    )}
+                  </td>
+                  <td className="px-2 py-3 text-right font-medium">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <span className="border-b border-dotted border-gray-400">
+                            {formatGolfScore(participant.totalScore)}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="text-xs">Best 4 of 5 picks total</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </td>
+                  
+                  {/* Desktop view - Individual picks */}
+                  {participant.picks && participant.picks.map((pick, idx) => {
+                    const isBestFour = bestFourGolfers.includes(pick);
+                    
+                    return (
+                      <td key={idx} className="px-2 py-3 text-right hidden md:table-cell">
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1">
+                            <span className={`text-sm ${isBestFour ? "font-medium" : ""}`}>{pick}</span>
+                            {isBestFour && (
+                              <Badge variant="outline" className="h-4 text-[10px] bg-green-50">Best 4</Badge>
+                            )}
+                          </div>
+                          <span className={`text-xs ${
+                            participant.pickScores && participant.pickScores[pick] < 0 
+                              ? 'text-green-500' 
+                              : participant.pickScores && participant.pickScores[pick] > 0 
+                                ? 'text-red-500' 
+                                : 'text-gray-500'
+                          }`}>
+                            {participant.pickScores && formatGolfScore(participant.pickScores[pick])}
+                          </span>
+                        </div>
+                      </td>
+                    );
+                  })}
+                  
+                  {/* Mobile view - Just a button */}
+                  <td className="px-2 py-3 text-right md:hidden">
+                    <button 
+                      className="text-xs bg-masters-green/10 text-masters-green px-2 py-1 rounded hover:bg-masters-green/20"
+                      onClick={() => {
+                        // In a real app, this would show a modal with pick details
+                        alert(`${participant.name}'s picks: ${participant.picks?.join(', ')}`);
+                      }}
+                    >
+                      View Picks
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>

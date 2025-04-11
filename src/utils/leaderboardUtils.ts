@@ -1,12 +1,22 @@
+
 import { GolferScore } from "@/types";
 
-export const getScoreClass = (score: number) => {
+/**
+ * Get CSS class for score display based on value
+ */
+export const getScoreClass = (score: number | undefined) => {
+  if (score === undefined) return "text-black";
   if (score < 0) return "text-masters-green font-bold";
   if (score > 0) return "text-red-600";
   return "text-black";
 };
 
-export const formatScore = (score: number | string) => {
+/**
+ * Format a score for display (e.g. -3, E, +2)
+ */
+export const formatScore = (score: number | string | undefined) => {
+  if (score === undefined) return "E";
+  
   if (typeof score === 'string') {
     score = parseFloat(score);
     if (isNaN(score)) return "E";
@@ -16,17 +26,44 @@ export const formatScore = (score: number | string) => {
   return score > 0 ? `+${score}` : score.toString();
 };
 
+/**
+ * Format timestamp to readable time
+ */
 export const formatLastUpdated = (dateString: string) => {
   if (!dateString) return "";
-  const date = new Date(dateString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return "";
+  }
 };
 
-// Format a golf score to show proper golf notation (e.g. -3, +2, E)
-export const formatGolfScore = (score: number): string => {
+/**
+ * Format a golf score to show proper golf notation (e.g. -3, +2, E)
+ */
+export const formatGolfScore = (score: number | undefined): string => {
+  if (score === undefined) return 'E';
   if (score === 0) return 'E'; // Even par
   if (score > 0) return `+${score}`; // Over par
   return score.toString(); // Under par (already has the minus sign)
+};
+
+/**
+ * Format a date range for tournament display
+ */
+export const formatDateRange = (startDate: string, endDate: string): string => {
+  try {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
+  } catch (e) {
+    console.error("Error formatting date range:", e);
+    return `${startDate} - ${endDate}`;
+  }
 };
 
 // Configuration for the Masters pool prize distribution
@@ -100,6 +137,9 @@ export const MASTERS_PURSE = {
   ]
 };
 
+/**
+ * Calculate potential winnings for a pool position
+ */
 export const calculatePotentialWinnings = (position: number) => {
   const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
   
@@ -113,6 +153,9 @@ export const calculatePotentialWinnings = (position: number) => {
   }
 };
 
+/**
+ * Get the Masters prize money for a position
+ */
 export const getMastersPurseAmount = (position: number): string => {
   const payout = MASTERS_PURSE.payouts.find(prize => prize.position === position);
   
@@ -126,6 +169,9 @@ export const getMastersPurseAmount = (position: number): string => {
   }
 };
 
+/**
+ * Generate tooltip text for winner positions
+ */
 export const getWinnerTooltip = (position: number) => {
   const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
   const mastersPrize = MASTERS_PURSE.payouts.find(prize => prize.position === position);

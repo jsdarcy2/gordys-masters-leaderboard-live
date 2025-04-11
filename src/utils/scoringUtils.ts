@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant } from "@/types";
 
 /**
@@ -20,10 +19,23 @@ export const calculateTotalScore = (
  */
 export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, number> => {
   const golferScores: Record<string, number> = {};
+  
   leaderboard.forEach(golfer => {
-    golferScores[golfer.name] = golfer.score;
+    // Make sure we handle any edge cases where golfer score is undefined
+    golferScores[golfer.name] = typeof golfer.score === 'number' ? golfer.score : 0;
   });
+  
   return golferScores;
+};
+
+/**
+ * Get the 4 best-performing golfers from a participant's 5 picks
+ */
+export const getBestFourGolfers = (pickScores: Record<string, number>): string[] => {
+  return Object.entries(pickScores)
+    .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
+    .slice(0, 4)
+    .map(([name]) => name);
 };
 
 /**
@@ -66,9 +78,17 @@ export const calculatePoolStandings = (
   // Sort by total score (lowest/best score first, golf scoring)
   poolParticipants.sort((a, b) => a.totalScore - b.totalScore);
   
-  // Update positions based on the sorted order
+  // Handle ties by keeping the same position for equal scores
+  let currentPosition = 1;
+  let previousScore = null;
+  
   poolParticipants.forEach((participant, index) => {
-    participant.position = index + 1;
+    if (previousScore !== null && previousScore !== participant.totalScore) {
+      currentPosition = index + 1;
+    }
+    
+    participant.position = currentPosition;
+    previousScore = participant.totalScore;
   });
   
   return poolParticipants;
