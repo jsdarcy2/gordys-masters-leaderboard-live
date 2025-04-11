@@ -82,6 +82,7 @@ export const fetchLeaderboardData = async () => {
       
       // Transform ESPN data to our application format
       const leaderboardData = transformESPNData(espnData);
+      leaderboardData.year = tournamentYear;
       
       // Validate the data before caching
       if (!validateLeaderboardData(leaderboardData)) {
@@ -95,7 +96,7 @@ export const fetchLeaderboardData = async () => {
       localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
       localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
       localStorage.setItem('leaderboardSource', leaderboardData.source);
-      localStorage.setItem('leaderboardYear', TOURNAMENT_YEAR);
+      localStorage.setItem('leaderboardYear', leaderboardData.year);
       
       return leaderboardData;
     } else {
@@ -104,6 +105,7 @@ export const fetchLeaderboardData = async () => {
       
       // Transform ESPN data to our application format
       const leaderboardData = transformESPNData(espnData);
+      leaderboardData.year = TOURNAMENT_YEAR;
       
       // Validate the data before caching
       if (!validateLeaderboardData(leaderboardData)) {
@@ -151,12 +153,13 @@ export const fetchLeaderboardData = async () => {
       
       // Transform Sports Data API format to our application format
       const leaderboardData = transformSportsDataAPIData(sportsData);
+      leaderboardData.year = sportsData.year?.toString() || TOURNAMENT_YEAR;
       
       // Cache the fresh data with year information
       localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
       localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
       localStorage.setItem('leaderboardSource', leaderboardData.source);
-      localStorage.setItem('leaderboardYear', TOURNAMENT_YEAR);
+      localStorage.setItem('leaderboardYear', leaderboardData.year);
       
       return leaderboardData;
     } catch (fallbackError) {
@@ -181,7 +184,7 @@ export const fetchLeaderboardData = async () => {
             lastUpdated: cachedLastUpdated,
             currentRound: getCurrentRound(),
             source: "cached-data",
-            year: cachedYear || "unknown"
+            year: cachedYear || TOURNAMENT_YEAR
           };
         } catch (e) {
           console.error("Error parsing cached data:", e);
@@ -233,11 +236,15 @@ export function transformESPNData(espnData: any) {
     // Sort by position
     leaderboard.sort((a, b) => a.position - b.position);
     
+    // Get tournament year from ESPN data
+    const tournamentYear = events?.date ? new Date(events.date).getFullYear().toString() : TOURNAMENT_YEAR;
+    
     return {
       leaderboard,
       lastUpdated: new Date().toISOString(),
       currentRound: getCurrentRound(),
-      source: "espn-api"
+      source: "espn-api",
+      year: tournamentYear
     };
   } catch (error) {
     console.error("Error transforming ESPN data:", error);
@@ -285,7 +292,8 @@ export function transformSportsDataAPIData(sportsData: any) {
       leaderboard,
       lastUpdated: new Date().toISOString(),
       currentRound: sportsData.round || getCurrentRound(),
-      source: "sportsdata-api"
+      source: "sportsdata-api",
+      year: sportsData.year?.toString() || TOURNAMENT_YEAR
     };
   } catch (error) {
     console.error("Error transforming Sports Data API data:", error);

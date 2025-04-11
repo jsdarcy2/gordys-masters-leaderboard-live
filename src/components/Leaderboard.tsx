@@ -1,3 +1,4 @@
+
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
@@ -27,6 +28,7 @@ const Leaderboard = () => {
   const [dataInitialized, setDataInitialized] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<string | undefined>(undefined);
   const [dataSourceError, setDataSourceError] = useState<string | undefined>(undefined);
+  const [dataYear, setDataYear] = useState<string | undefined>(undefined);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -80,6 +82,7 @@ const Leaderboard = () => {
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
       setDataSource(data.source);
+      setDataYear(data.year);
       setDataSourceError(undefined); // Clear any previous errors on successful fetch
       setError(null);
       setDataInitialized(true);
@@ -184,6 +187,9 @@ const Leaderboard = () => {
         if (cachedSource) {
           setDataSource(cachedSource);
         }
+        if (cachedYear) {
+          setDataYear(cachedYear);
+        }
         
         if (cachedYear && cachedYear !== TOURNAMENT_YEAR) {
           setDataSourceError(`Note: Cached data is from ${cachedYear} instead of ${TOURNAMENT_YEAR}.`);
@@ -244,14 +250,14 @@ const Leaderboard = () => {
         togglePotentialWinnings={togglePotentialWinnings}
         dataSource={dataSource}
         errorMessage={dataSourceError}
-        tournamentYear={TOURNAMENT_YEAR}
+        tournamentYear={dataYear || TOURNAMENT_YEAR}
       />
       
       <div className="p-4 bg-white">
         {dataSource && (dataSource === 'historical-data' || dataSource === 'cached-data') && (
           <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data for {TOURNAMENT_YEAR} Masters</AlertTitle>
+            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
             <AlertDescription className="text-amber-700 text-sm">
               We're currently unable to fetch live tournament data. Scores shown may not reflect the current tournament standings.
             </AlertDescription>
@@ -294,7 +300,7 @@ const Leaderboard = () => {
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-gray-600">
             <Info size={24} className="mx-auto mb-2 text-masters-green"/>
-            <p>No leaderboard data available for {TOURNAMENT_YEAR} Masters. Please try refreshing.</p>
+            <p>No leaderboard data available for {dataYear || TOURNAMENT_YEAR} Masters. Please try refreshing.</p>
             <button 
               onClick={handleManualRefresh}
               className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"

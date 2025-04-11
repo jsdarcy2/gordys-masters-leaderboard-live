@@ -1,3 +1,4 @@
+
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -34,6 +35,8 @@ export type TournamentData = {
   lastUpdated: string;
   currentRound: TournamentRound;
   leaderboard: GolferScore[];
+  source?: string;
+  year?: string;
 }
 
 export type NavTab = {
