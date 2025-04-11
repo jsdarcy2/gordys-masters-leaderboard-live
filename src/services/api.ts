@@ -1,5 +1,6 @@
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings, generateParticipantName } from "@/utils/scoringUtils";
+import { validateLeaderboardData } from "@/utils/leaderboardUtils";
 
 /**
  * Check if the tournament is currently in progress
@@ -21,6 +22,7 @@ export const isTournamentInProgress = async (): Promise<boolean> => {
     // Check if today is between start and end dates
     const isActive = today >= tournamentStart && today <= tournamentEnd;
     
+    console.log("Tournament active status:", isActive);
     return isActive;
   } catch (error) {
     console.error('Error checking tournament status:', error);
@@ -33,6 +35,8 @@ export const isTournamentInProgress = async (): Promise<boolean> => {
  */
 export const fetchLeaderboardData = async () => {
   try {
+    console.log("Fetching leaderboard data...");
+    
     // In a production app, we would fetch from a real API
     // For demo purposes, simulate a network delay
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -49,12 +53,27 @@ export const fetchLeaderboardData = async () => {
       // Cache is valid for 5 minutes
       if (now - cacheTime < 5 * 60 * 1000) {
         console.log('Using cached leaderboard data');
-        return JSON.parse(cachedData);
+        const parsedData = JSON.parse(cachedData);
+        
+        // Validate the data structure
+        if (validateLeaderboardData(parsedData)) {
+          return parsedData;
+        }
+        
+        console.warn("Cached data failed validation, fetching fresh data");
       }
     }
     
     // Simulate fetching from API
     const data = getFallbackData();
+    
+    // Validate the data before caching
+    if (!validateLeaderboardData(data)) {
+      console.error("API returned invalid data structure");
+      throw new Error("Invalid data structure from API");
+    }
+    
+    console.log(`Fetched ${data.leaderboard.length} golfers for leaderboard`);
     
     // Cache the fresh data
     localStorage.setItem('leaderboardData', JSON.stringify(data));
@@ -67,8 +86,17 @@ export const fetchLeaderboardData = async () => {
     // Try to use cached data even if it's older than 5 minutes
     const cachedData = localStorage.getItem('leaderboardData');
     if (cachedData) {
-      console.log('Using older cached data as fallback');
-      return JSON.parse(cachedData);
+      try {
+        console.log('Using older cached data as fallback');
+        const parsedData = JSON.parse(cachedData);
+        
+        // Validate the data structure
+        if (validateLeaderboardData(parsedData)) {
+          return parsedData;
+        }
+      } catch (e) {
+        console.error("Error parsing cached data:", e);
+      }
     }
     
     // Ultimate fallback if everything fails
@@ -194,6 +222,8 @@ const getFallbackData = () => {
  */
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
+    console.log("Fetching pool standings...");
+    
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
@@ -208,16 +238,32 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     
     console.log(`Fetched selections for ${Object.keys(selectionsData).length} participants`);
     
+    if (Object.keys(selectionsData).length === 0) {
+      console.error("No player selections data received");
+      throw new Error("No player selections data");
+    }
+    
     // Calculate and return the pool standings with complete data
-    return calculatePoolStandings(selectionsData, golferScores);
+    const standings = calculatePoolStandings(selectionsData, golferScores);
+    
+    // Cache the calculated standings
+    localStorage.setItem('poolStandingsData', JSON.stringify(standings));
+    localStorage.setItem('poolStandingsTimestamp', new Date().getTime().toString());
+    
+    console.log(`Returning ${standings.length} processed participants for standings`);
+    return standings;
   } catch (error) {
     console.error('Error fetching pool standings:', error);
     
     // Try to use cached pool standings
     const cachedStandings = localStorage.getItem('poolStandingsData');
     if (cachedStandings) {
-      console.log('Using cached pool standings as fallback');
-      return JSON.parse(cachedStandings);
+      try {
+        console.log('Using cached pool standings as fallback');
+        return JSON.parse(cachedStandings);
+      } catch (e) {
+        console.error("Error parsing cached standings:", e);
+      }
     }
     
     return [];
@@ -229,6 +275,8 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
  */
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
+    console.log("Fetching player selections...");
+    
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
@@ -255,6 +303,8 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     // Generate additional teams to reach 134 total if needed
     const currentCount = Object.keys(teamsData).length;
     const neededCount = 134 - currentCount;
+    
+    console.log(`Have ${currentCount} base teams, need ${neededCount} more to reach 134 total`);
     
     if (neededCount > 0) {
       // Available golfers to choose from

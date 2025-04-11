@@ -1,10 +1,33 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import PlayerSelections from "@/components/PlayerSelections";
 import PaymentStatus from "@/components/PaymentStatus";
+import { fetchPlayerSelections } from "@/services/api";
 
 const SelectionsPage = () => {
+  const [participantCount, setParticipantCount] = useState<number>(134);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Load participant count
+  useEffect(() => {
+    const loadParticipantCount = async () => {
+      try {
+        setLoading(true);
+        const selectionsData = await fetchPlayerSelections();
+        const count = Object.keys(selectionsData).length;
+        console.log(`Loaded ${count} participants`);
+        setParticipantCount(count);
+      } catch (error) {
+        console.error("Error loading participant count:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParticipantCount();
+  }, []);
+
   // Log component mount for debugging
   useEffect(() => {
     console.log("Selections page mounted");
@@ -17,7 +40,7 @@ const SelectionsPage = () => {
           Player Selections
         </h2>
         <p className="text-gray-600">
-          See all 134 participant team selections for The Masters, ranked by their current position in the pool standings.
+          See all {loading ? "..." : participantCount} participant team selections for The Masters, ranked by their current position in the pool standings.
         </p>
       </div>
       

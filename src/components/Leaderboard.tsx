@@ -25,6 +25,7 @@ const Leaderboard = () => {
   const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
+  const [dataInitialized, setDataInitialized] = useState<boolean>(false);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -36,6 +37,7 @@ const Leaderboard = () => {
       try {
         setTournamentLoading(true);
         const tournamentInfo = await getCurrentTournament();
+        console.log("Tournament info loaded:", tournamentInfo);
         setCurrentTournament(tournamentInfo);
       } catch (error) {
         console.error("Error loading tournament info:", error);
@@ -49,13 +51,19 @@ const Leaderboard = () => {
 
   const loadLeaderboardData = async (showToast = false) => {
     try {
-      setLoading(!refreshing);
+      setLoading(!refreshing && !dataInitialized);
       if (showToast) {
         setRefreshing(true);
       }
       
+      console.log("Loading leaderboard data, initialized:", dataInitialized);
+      
       const data = await fetchLeaderboardData();
       console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
+      
+      if (!data || !data.leaderboard || !Array.isArray(data.leaderboard)) {
+        throw new Error("Invalid leaderboard data structure");
+      }
       
       previousLeaderboard.current = [...leaderboard];
       
@@ -63,6 +71,7 @@ const Leaderboard = () => {
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
       setError(null);
+      setDataInitialized(true);
       
       if (previousLeaderboard.current.length > 0) {
         const newChanges: Record<string, 'up' | 'down' | null> = {};
@@ -106,8 +115,8 @@ const Leaderboard = () => {
       localStorage.setItem('leaderboardLastUpdated', data.lastUpdated);
       localStorage.setItem('leaderboardData', JSON.stringify(data.leaderboard));
     } catch (err) {
+      console.error("Leaderboard data fetch error:", err);
       setError("Failed to load leaderboard data");
-      console.error(err);
       
       if (showToast) {
         toast({
@@ -137,16 +146,21 @@ const Leaderboard = () => {
     
     if (cachedLastUpdated && cachedData) {
       try {
+        console.log("Found cached leaderboard data, initializing...");
         const parsedData = JSON.parse(cachedData);
         setLeaderboard(parsedData);
         setLastUpdated(cachedLastUpdated);
         setLoading(false);
+        setDataInitialized(true);
         
+        // Still load fresh data in the background
         loadLeaderboardData();
       } catch (e) {
+        console.error("Error parsing cached data:", e);
         loadLeaderboardData();
       }
     } else {
+      console.log("No cached leaderboard data found");
       loadLeaderboardData();
     }
     
@@ -157,6 +171,7 @@ const Leaderboard = () => {
     
     // Set up polling every 15 seconds
     pollingRef.current = setInterval(() => {
+      console.log("Polling for leaderboard updates...");
       loadLeaderboardData();
     }, POLLING_INTERVAL);
     
@@ -230,6 +245,17 @@ const Leaderboard = () => {
         
         {loading ? (
           <LoadingState showPotentialWinnings={showPotentialWinnings} />
+        ) : leaderboard.length === 0 ? (
+          <div className="text-center py-8 text-gray-600">
+            <Info size={24} className="mx-auto mb-2 text-masters-green"/>
+            <p>No leaderboard data available. Please try refreshing.</p>
+            <button 
+              onClick={handleManualRefresh}
+              className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"
+            >
+              Refresh Now
+            </button>
+          </div>
         ) : (
           <LeaderboardTable 
             leaderboard={leaderboard}

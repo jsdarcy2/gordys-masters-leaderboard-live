@@ -1,193 +1,119 @@
-
-import { GolferScore } from "@/types";
-
 /**
- * Get CSS class for score display based on value
+ * Format the last updated timestamp into a readable string
  */
-export const getScoreClass = (score: number | undefined) => {
-  if (score === undefined) return "text-black";
-  if (score < 0) return "text-masters-green font-bold";
-  if (score > 0) return "text-red-600";
-  return "text-black";
+export const formatLastUpdated = (timestamp: string): string => {
+  if (!timestamp) return "Unknown";
+  
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    console.error("Error formatting timestamp:", e);
+    return "Unknown";
+  }
 };
 
 /**
- * Format a score for display (e.g. -3, E, +2)
+ * Map position to CSS class for score display
  */
-export const formatScore = (score: number | string | undefined) => {
-  if (score === undefined) return "E";
-  
-  if (typeof score === 'string') {
-    score = parseFloat(score);
-    if (isNaN(score)) return "E";
-  }
-  
+export const getScoreClass = (score: number | undefined): string => {
+  if (score === undefined) return "text-gray-500";
+  if (score < 0) return "text-green-600";
+  if (score > 0) return "text-red-500";
+  return "text-gray-700";
+};
+
+/**
+ * Format golf score with appropriate indicator
+ */
+export const formatScore = (score: number | undefined): string => {
+  if (score === undefined) return "-";
   if (score === 0) return "E";
-  return score > 0 ? `+${score}` : score.toString();
+  if (score < 0) return score.toString();
+  return `+${score}`;
 };
 
 /**
- * Format timestamp to readable time
+ * Format golf score for display, handling edge cases
  */
-export const formatLastUpdated = (dateString: string) => {
-  if (!dateString) return "";
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
-    console.error("Error formatting date:", e);
-    return "";
-  }
-};
-
-/**
- * Format a golf score to show proper golf notation (e.g. -3, +2, E)
- */
-export const formatGolfScore = (score: number | undefined): string => {
-  if (score === undefined) return 'E';
-  if (score === 0) return 'E'; // Even par
-  if (score > 0) return `+${score}`; // Over par
-  return score.toString(); // Under par (already has the minus sign)
-};
-
-/**
- * Format a date range for tournament display
- */
-export const formatDateRange = (startDate: string, endDate: string): string => {
-  try {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
-  } catch (e) {
-    console.error("Error formatting date range:", e);
-    return `${startDate} - ${endDate}`;
-  }
-};
-
-// Configuration for the Masters pool prize distribution
-export const POOL_CONFIG = {
-  entryFee: 25, // $25 per entry
-  estimatedEntrants: 120, // Estimated number of participants
-  prizeTiers: [
-    { position: 1, percentage: 0.7 }, // 70% to 1st place
-    { position: 2, percentage: 0.2 }, // 20% to 2nd place
-    { position: 3, percentage: 0.1 }  // 10% to 3rd place
-  ]
-};
-
-// Official Masters Tournament purse for 2025
-// Based on 2024 purse of $20,000,000 with a 5% increase
-export const MASTERS_PURSE = {
-  totalPurse: 21000000, // $21 million
-  payouts: [
-    { position: 1, amount: 3780000 }, // Winner (18% of purse)
-    { position: 2, amount: 2268000 }, // Runner-up
-    { position: 3, amount: 1428000 },
-    { position: 4, amount: 1008000 },
-    { position: 5, amount: 840000 },
-    { position: 6, amount: 756000 },
-    { position: 7, amount: 703500 },
-    { position: 8, amount: 651000 },
-    { position: 9, amount: 609000 },
-    { position: 10, amount: 567000 },
-    { position: 11, amount: 525000 },
-    { position: 12, amount: 483000 },
-    { position: 13, amount: 441000 },
-    { position: 14, amount: 399000 },
-    { position: 15, amount: 378000 },
-    { position: 16, amount: 357000 },
-    { position: 17, amount: 336000 },
-    { position: 18, amount: 315000 },
-    { position: 19, amount: 294000 },
-    { position: 20, amount: 273000 },
-    // Lower positions
-    { position: 21, amount: 252000 },
-    { position: 22, amount: 233100 },
-    { position: 23, amount: 216300 },
-    { position: 24, amount: 199500 },
-    { position: 25, amount: 182700 },
-    { position: 26, amount: 165900 },
-    { position: 27, amount: 159600 },
-    { position: 28, amount: 153300 },
-    { position: 29, amount: 147000 },
-    { position: 30, amount: 140700 },
-    // Amounts for positions 31-50 follow the same decreasing pattern
-    { position: 31, amount: 134400 },
-    { position: 32, amount: 128100 },
-    { position: 33, amount: 121800 },
-    { position: 34, amount: 116550 },
-    { position: 35, amount: 111300 },
-    { position: 36, amount: 106050 },
-    { position: 37, amount: 100800 },
-    { position: 38, amount: 96600 },
-    { position: 39, amount: 92400 },
-    { position: 40, amount: 88200 },
-    { position: 41, amount: 84000 },
-    { position: 42, amount: 79800 },
-    { position: 43, amount: 75600 },
-    { position: 44, amount: 71400 },
-    { position: 45, amount: 67200 },
-    { position: 46, amount: 63000 },
-    { position: 47, amount: 58800 },
-    { position: 48, amount: 55650 },
-    { position: 49, amount: 52500 },
-    { position: 50, amount: 50925 }
-  ]
-};
-
-/**
- * Calculate potential winnings for a pool position
- */
-export const calculatePotentialWinnings = (position: number) => {
-  const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
+export const formatGolfScore = (score: number | string | undefined): string => {
+  if (score === undefined || score === null) return "-";
+  if (score === 0) return "E";
   
-  const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
+  const numericScore = typeof score === "string" ? parseFloat(score) : score;
   
-  if (prizeTier) {
-    const winnings = totalPrizePool * prizeTier.percentage;
-    return winnings.toLocaleString(undefined, { maximumFractionDigits: 0 });
-  } else {
-    return "0";
-  }
+  if (isNaN(numericScore)) return "-";
+  if (numericScore === 0) return "E";
+  if (numericScore < 0) return numericScore.toString();
+  return `+${numericScore}`;
 };
 
 /**
- * Get the Masters prize money for a position
+ * Get Masters prize money amount based on position
+ * Uses realistic Masters purse distribution percentages
  */
 export const getMastersPurseAmount = (position: number): string => {
-  const payout = MASTERS_PURSE.payouts.find(prize => prize.position === position);
+  const totalPurse = 15000000; // $15 million total purse
   
-  if (payout) {
-    return payout.amount.toLocaleString();
-  } else if (position > 50) {
-    return "0"; // No prize money for positions beyond 50
-  } else {
-    // If position not found but is <= 50, show an estimate
-    return "TBD";
+  // Prize money distribution percentages based on position
+  const prizePercentages: Record<number, number> = {
+    1: 0.18, // 18% for winner
+    2: 0.108, // 10.8% for runner-up
+    3: 0.068, // 6.8% for 3rd
+    4: 0.048, // 4.8% for 4th
+    5: 0.04, // 4% for 5th
+    6: 0.036,
+    7: 0.0335,
+    8: 0.031,
+    9: 0.029,
+    10: 0.027,
+    11: 0.025,
+    12: 0.023,
+    13: 0.021,
+    14: 0.019,
+    15: 0.018,
+    16: 0.017,
+    17: 0.016,
+    18: 0.0155,
+    19: 0.015,
+    20: 0.0145
+  };
+  
+  // Calculate prize amount based on position
+  if (position in prizePercentages) {
+    const amount = totalPurse * prizePercentages[position];
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  } else if (position <= 30) {
+    // Scale down for positions 21-30
+    const amount = totalPurse * (0.014 - (position - 20) * 0.0005);
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  } else if (position <= 50) {
+    // Scale down for positions 31-50
+    const amount = totalPurse * (0.009 - (position - 30) * 0.0002);
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
+  
+  // Return a small amount for positions beyond 50
+  return "10,000";
 };
 
 /**
- * Generate tooltip text for winner positions
+ * Validate the leaderboard data
  */
-export const getWinnerTooltip = (position: number) => {
-  const prizeTier = POOL_CONFIG.prizeTiers.find(tier => tier.position === position);
-  const mastersPrize = MASTERS_PURSE.payouts.find(prize => prize.position === position);
+export const validateLeaderboardData = (data: any): boolean => {
+  if (!data) return false;
+  if (!Array.isArray(data.leaderboard)) return false;
+  if (data.leaderboard.length === 0) return false;
   
-  if (!prizeTier) return "";
-
-  const totalPrizePool = POOL_CONFIG.entryFee * POOL_CONFIG.estimatedEntrants;
-  const poolWinnings = totalPrizePool * prizeTier.percentage;
-  const percentage = prizeTier.percentage * 100;
-  
-  let tooltip = `${percentage}% of pool: $${poolWinnings.toLocaleString()}`;
-  
-  // Add Masters Tournament purse information if available
-  if (mastersPrize) {
-    tooltip += `\nMasters Prize: $${mastersPrize.amount.toLocaleString()}`;
-  }
-  
-  return tooltip;
+  // Check if first item has expected structure
+  const firstItem = data.leaderboard[0];
+  return (
+    typeof firstItem.position === 'number' &&
+    typeof firstItem.name === 'string' &&
+    (typeof firstItem.score === 'number' || firstItem.score === null)
+  );
 };
