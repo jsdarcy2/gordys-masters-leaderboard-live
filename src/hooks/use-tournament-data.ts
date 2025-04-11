@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { GolferScore, DataSource } from "@/types";
@@ -27,6 +26,7 @@ interface UseLeaderboardResult {
     message: string;
     timestamp: string;
   };
+  consecutiveFailures: number; // Added this property to the interface
 }
 
 /**
@@ -720,6 +720,7 @@ export function useTournamentData(): UseLeaderboardResult {
     dataYear,
     refreshData: fetchLeaderboardData,
     hasLiveData,
-    dataHealth
+    dataHealth,
+    consecutiveFailures: failedAttempts.current
   };
 }
