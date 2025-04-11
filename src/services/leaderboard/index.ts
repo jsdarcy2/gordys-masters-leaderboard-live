@@ -128,9 +128,9 @@ const getHistoricalMastersData = () => {
       { position: 13, name: "Cameron Young", score: -2, today: -1, thru: "F", status: "active" },
       { position: 16, name: "Collin Morikawa", score: -1, today: +1, thru: "F", status: "active" },
       { position: 16, name: "Jason Day", score: -1, today: -2, thru: "F", status: "active" },
-      { position: 18, name: "Shane Lowry", score: E, today: -1, thru: "F", status: "active" },
-      { position: 18, name: "Tommy Fleetwood", score: E, today: -1, thru: "F", status: "active" },
-      { position: 18, name: "Dustin Johnson", score: E, today: +1, thru: "F", status: "active" }
+      { position: 18, name: "Shane Lowry", score: 0, today: -1, thru: "F", status: "active" },
+      { position: 18, name: "Tommy Fleetwood", score: 0, today: -1, thru: "F", status: "active" },
+      { position: 18, name: "Dustin Johnson", score: 0, today: +1, thru: "F", status: "active" }
     ],
     lastUpdated: new Date().toISOString(),
     currentRound: getCurrentRound(),
