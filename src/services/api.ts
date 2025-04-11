@@ -3,19 +3,16 @@ import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 // Function to fetch leaderboard data from Masters API or alternative sources
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
-    // Add cache-busting timestamp to prevent stale data across devices
     const timestamp = new Date().getTime();
     
-    // First try the official Masters API
     const response = await fetch(`https://www.masters.com/en_US/scores/json/leaderboard_v2.json?t=${timestamp}`, {
       headers: {
         'Accept': 'application/json',
       },
-      cache: 'no-store', // Ensure no caching
+      cache: 'no-store',
     });
     
     if (!response.ok) {
-      // Try the GitHub API as a fallback
       const githubResponse = await fetch(`https://raw.githubusercontent.com/loisaidasam/the-masters-api/main/data/leaderboard.json?t=${timestamp}`);
       
       if (!githubResponse.ok) {
@@ -30,8 +27,6 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
     return transformOfficialData(data);
   } catch (error) {
     console.error("Error fetching leaderboard data:", error);
-    
-    // Fallback to our mock data if API fails
     console.warn("Falling back to mock data due to API error");
     return getFallbackLeaderboardData();
   }
@@ -46,7 +41,6 @@ const transformOfficialData = (apiData: any): TournamentData => {
       const status = player.status === 'C' ? 'cut' : 
                     player.status === 'W' ? 'withdrawn' : 'active';
       
-      // Parse scores properly
       const score = player.today_total_rel_to_par !== undefined ? 
                     parseInt(player.today_total_rel_to_par) : 
                     parseInt(player.topar || '0');
@@ -54,7 +48,6 @@ const transformOfficialData = (apiData: any): TournamentData => {
       const today = player.today_value !== undefined ? 
                    parseInt(player.today_value) : 0;
                    
-      // Determine 'thru' status properly
       let thru = player.thru || '';
       if (player.status === 'C' || player.status === 'W') {
         thru = '-';
@@ -86,7 +79,6 @@ const transformOfficialData = (apiData: any): TournamentData => {
 // Helper function to transform GitHub API data
 const transformGitHubData = (apiData: any): TournamentData => {
   try {
-    // Handle different API response formats
     const players = apiData.players || apiData.data || apiData.leaderboard || apiData;
     
     const leaderboard = players.map((player: any) => {
@@ -101,7 +93,7 @@ const transformGitHubData = (apiData: any): TournamentData => {
         thru: player.thru || player.thru_num || player.today_round?.thru || 'F',
         status: determineStatus(player)
       };
-    }).filter((player: any) => player.name); // Filter out entries without names
+    }).filter((player: any) => player.name);
     
     return {
       lastUpdated: new Date().toISOString(),
@@ -117,21 +109,21 @@ const transformGitHubData = (apiData: any): TournamentData => {
 // Helper function to transform API data to our app format
 const transformLeaderboardData = (apiData: any): GolferScore[] => {
   try {
-    // Handle different API response formats
     const players = apiData.players || apiData.data || apiData.leaderboard || apiData;
     
     return players.map((player: any) => {
-      // Extract player data based on available fields
-      // The GitHub API has different field names than our app
       return {
         position: player.position || player.pos || player.place || parseInt(player.pos_num || '0'),
-        name: player.name || player.player_name || player.player_bio?.first_name + ' ' + player.player_bio?.last_name || player.player_bio?.name || '',
+        name: player.name || player.player_name || 
+              (player.player_bio?.first_name && player.player_bio?.last_name ? 
+              `${player.player_bio.first_name} ${player.player_bio.last_name}` : 
+              player.player_bio?.name || ''),
         score: calculateScore(player),
         today: calculateTodayScore(player),
         thru: player.thru || player.thru_num || player.today_round?.thru || 'F',
         status: determineStatus(player)
       };
-    }).filter((player: any) => player.name); // Filter out entries without names
+    }).filter((player: any) => player.name);
   } catch (err) {
     console.error("Error transforming leaderboard data:", err);
     return [];
@@ -140,23 +132,20 @@ const transformLeaderboardData = (apiData: any): GolferScore[] => {
 
 // Helper function to calculate total score
 const calculateScore = (player: any): number => {
-  // Handle different score formats from APIs
   if (typeof player.total_to_par !== 'undefined') return player.total_to_par;
   if (typeof player.score !== 'undefined') return parseInt(player.score);
   if (typeof player.topar !== 'undefined') return parseInt(player.topar);
   
-  // If no direct score is available, try to calculate it
-  return 0; // Default to 0 if we can't determine
+  return 0;
 };
 
 // Helper function to calculate today's score
 const calculateTodayScore = (player: any): number => {
-  // Handle different formats for today's score
   if (typeof player.today !== 'undefined') return player.today;
   if (player.today_round?.strokes_to_par) return player.today_round.strokes_to_par;
   if (typeof player.round_score !== 'undefined') return parseInt(player.round_score);
   
-  return 0; // Default to 0 if we can't determine
+  return 0;
 };
 
 // Helper function to determine player status
@@ -172,15 +161,13 @@ const determineStatus = (player: any): 'cut' | 'active' | 'withdrawn' | undefine
 
 // Helper function to determine current round
 const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
-  // Try to extract current round from API data
   const round = data.current_round || data.round || data.data?.currentRound || 1;
   
-  // Ensure we return a valid round number (1-4)
   if (round >= 1 && round <= 4) {
     return round as 1 | 2 | 3 | 4;
   }
   
-  return 1; // Default to round 1
+  return 1;
 };
 
 // Updated fallback data to match current tournament (2024 Masters)
@@ -243,241 +230,206 @@ const getFallbackLeaderboardData = (): TournamentData => {
   };
 };
 
-// Helper function to generate random picks for participants
-const generateRandomPicks = (): string[] => {
-  const allPossibleGolfers = [
-    "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Brooks Koepka", "Xander Schauffele",
-    "Collin Morikawa", "Bryson DeChambeau", "Jordan Spieth", "Justin Thomas", "Dustin Johnson",
-    "Cameron Smith", "Viktor Hovland", "Hideki Matsuyama", "Adam Scott", "Patrick Cantlay",
-    "Tony Finau", "Shane Lowry", "Tommy Fleetwood", "Matt Fitzpatrick", "Justin Rose",
-    "Joaquin Niemann", "Tyrrell Hatton", "Corey Conners", "Cameron Young", "Min Woo Lee",
-    "Ludvig Åberg", "Brian Harman", "Tom Kim", "Jason Day", "Sahith Theegala",
-    "Sepp Straka", "Sungjae Im", "Will Zalatoris", "Phil Mickelson", "Sergio Garcia"
-  ];
-  
-  // Generate 5 random golfers without duplicates
-  const picks: string[] = [];
-  while (picks.length < 5) {
-    const randomIndex = Math.floor(Math.random() * allPossibleGolfers.length);
-    const pick = allPossibleGolfers[randomIndex];
-    if (!picks.includes(pick)) {
-      picks.push(pick);
-    }
-  }
-  
-  return picks;
-};
-
-// Helper function to generate random pick scores
-const generateRandomPickScores = (): { [golferName: string]: number } => {
-  const picks = generateRandomPicks();
-  const pickScores: { [golferName: string]: number } = {};
-  
-  picks.forEach(pick => {
-    // Generate scores between -4 and 5
-    pickScores[pick] = Math.floor(Math.random() * 10) - 4;
-  });
-  
-  return pickScores;
-};
-
-// Get the participants' raw data (without calculated scores)
-const getParticipantsBaseData = async (): Promise<PoolParticipant[]> => {
-  try {
-    // Add a small delay to simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // In a real app, this would fetch from a database
-    const participants: PoolParticipant[] = [
-      { 
-        position: 0, // Position will be calculated later 
-        name: "Charlotte Ramalingam", 
-        totalPoints: 0, // Points will be calculated from picks
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Jordan Spieth", "Justin Thomas", "Justin Rose"],
-        pickScores: {}, // Will be filled in dynamically
-        roundScores: {},
-        tiebreaker1: -11,
-        tiebreaker2: 0,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Chris Crawford", 
-        totalPoints: 0,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -11,
-        tiebreaker2: 2,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Stuie Snyder", 
-        totalPoints: 0,
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Cameron Smith", "Justin Thomas", "Denny McCarthy"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -11,
-        tiebreaker2: 2,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Jimmy Beltz", 
-        totalPoints: 0,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -11,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Nash Nibbe", 
-        totalPoints: 0,
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Min Woo Lee", "Shane Lowry", "Viktor Hovland"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -12,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Kyle Flippen", 
-        totalPoints: 0,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Min Woo Lee", "Jordan Spieth", "Brian Harman"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -13,
-        tiebreaker2: 0,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Avery Sturgis", 
-        totalPoints: 0,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -12,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 0,
-        name: "Matt Rogers", 
-        totalPoints: 0,
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Shane Lowry", "Jason Day", "Dustin Johnson"],
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: -10,
-        tiebreaker2: 2,
-        paid: true
-      },
-    ];
-
-    // Add more random participants to match the original dataset
-    const additionalParticipants = [
-      "Steve Sorenson", "Brian Ginkel", "Sylas Stofer", "Owen Kepic", "Max Kepic", 
-      "Roth Sanner", "Gordon Stofer Jr.", "James Carlson", "Adam Duff", "Darby Herfurth", 
-      "Davis Jones", "Paul Kelley", "Charles Meech Jr", "James Petrikas Jr.",
-      "Phil Present III", "Bette Stephens", "Sarah Sturgis"
-    ];
-    
-    // Add additional participants with random picks
-    additionalParticipants.forEach(name => {
-      if (!participants.some(p => p.name === name)) {
-        participants.push({
-          position: 0,
-          name,
-          totalPoints: 0,
-          picks: generateRandomPicks(),
-          pickScores: {},
-          roundScores: {},
-          tiebreaker1: Math.floor(Math.random() * 5) - 12,
-          tiebreaker2: Math.floor(Math.random() * 5),
-          paid: Math.random() > 0.1
-        });
-      }
-    });
-    
-    return participants;
-  } catch (error) {
-    console.error("Error fetching participants base data:", error);
-    throw new Error("Failed to load participant data. Please try again later.");
-  }
+// Actual team selections data - no more random generation
+const actualTeamSelections: { [participantName: string]: string[] } = {
+  "Ben Applebaum": ["Rory McIlroy", "Xander Schauffele", "Shane Lowry", "Tommy Fleetwood", "Robert MacIntyre"],
+  "Elia Ayaz": ["Jon Rahm", "Bryson DeChambeau", "Cameron Smith", "Sergio Garcia", "Joaquín Niemann"],
+  "Mike Baker": ["Rory McIlroy", "Scottie Scheffler", "Sepp Straka", "Russell Henley", "Joaquín Niemann"],
+  "Louis Baker": ["Scottie Scheffler", "Collin Morikawa", "Shane Lowry", "Joaquín Niemann", "Min Woo Lee"],
+  "Ross Baker": ["Jon Rahm", "Rory McIlroy", "Brooks Koepka", "Justin Thomas", "Russell Henley"],
+  "Peter Bassett": ["Joaquín Niemann", "Bryson DeChambeau", "Sepp Straka", "Akshay Bhatia", "Rory McIlroy"],
+  "Ted Beckman": ["Scottie Scheffler", "Bryson DeChambeau", "Keegan Bradley", "Wyndham Clark", "Sahith Theegala"],
+  "Hilary Beckman": ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Sepp Straka", "Will Zalatoris"],
+  "Oliver Beckman": ["Rory McIlroy", "Jon Rahm", "Min Woo Lee", "Justin Thomas", "Tony Finau"],
+  "Jimmy Beltz": ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
+  "Peter Beugg": ["Adam Scott", "Dustin Johnson", "Rory McIlroy", "Jon Rahm", "Tommy Fleetwood"],
+  "James Carlson": ["Scottie Scheffler", "Bryson DeChambeau", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+  "Nate Carlson": ["Scottie Scheffler", "Collin Morikawa", "Tommy Fleetwood", "Cameron Smith", "Justin Thomas"],
+  "Annie Carlson": ["Rory McIlroy", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", "Justin Thomas"],
+  "Hadley Carlson": ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Cameron Smith", "Russell Henley"],
+  "Quinn Carlson": ["Rory McIlroy", "Ludvig Åberg", "Sepp Straka", "Robert MacIntyre", "Matthieu Pavon"],
+  "Ed Corbett": ["Scottie Scheffler", "Rory McIlroy", "Shane Lowry", "Will Zalatoris", "Sepp Straka"],
+  "Chuck Corbett Sr": ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Tommy Fleetwood"],
+  "Chris Crawford": ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
+  "Justin Darcy": ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Robert MacIntyre", "Sepp Straka"],
+  "Holland Darcy": ["Jordan Spieth", "Collin Morikawa", "Xander Schauffele", "Viktor Hovland", "Jose Luis Ballester (a)"],
+  "Audrey Darcy": ["Scottie Scheffler", "Rory McIlroy", "Cameron Smith", "Cameron Young", "Zach Johnson"],
+  "Ava Rose Darcy": ["Wyndham Clark", "Justin Rose", "Jon Rahm", "Scottie Scheffler", "Viktor Hovland"],
+  "Jay Despard": ["Scottie Scheffler", "Collin Morikawa", "Min Woo Lee", "Russell Henley", "Robert MacIntyre"],
+  "Pete Drago": ["Scottie Scheffler", "Collin Morikawa", "Patrick Cantlay", "Sergio Garcia", "Sepp Straka"],
+  "Alexa Drago": ["Xander Schauffele", "Scottie Scheffler", "Patrick Cantlay", "Jordan Spieth", "Hideki Matsuyama"],
+  "Ollie Drago": ["Scottie Scheffler", "Jon Rahm", "Patrick Cantlay", "Sergio Garcia", "Patrick Reed"],
+  "Charlie Drago": ["Jon Rahm", "Collin Morikawa", "Patrick Cantlay", "Patrick Reed", "Jordan Spieth"],
+  "Adam Duff": ["Scottie Scheffler", "Collin Morikawa", "Brooks Koepka", "Viktor Hovland", "Cameron Smith"],
+  "Tilly Duff": ["Rory McIlroy", "Bryson DeChambeau", "Shane Lowry", "Brooks Koepka", "Tommy Fleetwood"],
+  "Gretchen Duff": ["Ludvig Åberg", "Xander Schauffele", "Tommy Fleetwood", "Hideki Matsuyama", "Russell Henley"],
+  "Charles Elder": ["Scottie Scheffler", "Rory McIlroy", "Robert MacIntyre", "Joaquín Niemann", "Hideki Matsuyama"],
+  "Eric Fox": ["Bryson DeChambeau", "Rory McIlroy", "Wyndham Clark", "Viktor Hovland", "Sepp Straka"],
+  "Kyle Flippen": ["Scottie Scheffler", "Rory McIlroy", "Min Woo Lee", "Jordan Spieth", "Brian Harman"],
+  "J.J. Furst": ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Hideki Matsuyama", "Joaquín Niemann"],
+  "Brian Ginkel": ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Min Woo Lee", "Brooks Koepka"],
+  "Grayson Ginkel": ["Scottie Scheffler", "Rory McIlroy", "Patrick Cantlay", "Hideki Matsuyama", "Jordan Spieth"],
+  "Mik Gusenius": ["Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Justin Thomas", "Jordan Spieth"],
+  "John Gustafson": ["Rory McIlroy", "Ludvig Åberg", "Jordan Spieth", "Justin Thomas", "Hideki Matsuyama"],
+  "Andy Gustafson": ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Brooks Koepka", "Hideki Matsuyama"],
+  "Lily Gustafson": ["Collin Morikawa", "Bryson DeChambeau", "Cameron Smith", "Justin Thomas", "Russell Henley"],
+  "David Hardt": ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Brooks Koepka"],
+  "Brack Herfurth": ["Jon Rahm", "Xander Schauffele", "Joaquín Niemann", "Tommy Fleetwood", "Sungjae Im"],
+  "Darby Herfurth": ["Rory McIlroy", "Ludvig Åberg", "Patrick Cantlay", "Corey Conners", "Sepp Straka"],
+  "Henry Herfurth": ["Collin Morikawa", "Hideki Matsuyama", "Wyndham Clark", "Cameron Smith", "Chris Kirk"],
+  "Jess Herfurth": ["Rory McIlroy", "Xander Schauffele", "Russell Henley", "Justin Thomas", "Tommy Fleetwood"],
+  "Decker Herfurth": ["Rory McIlroy", "Ludvig Åberg", "Russell Henley", "Sepp Straka", "Hideki Matsuyama"],
+  "Rachel Herfurth": ["Rory McIlroy", "Collin Morikawa", "Viktor Hovland", "Justin Thomas", "Tommy Fleetwood"],
+  "Amy Jones": ["Rory McIlroy", "Jon Rahm", "Justin Thomas", "Brooks Koepka", "Tommy Fleetwood"],
+  "Jim Jones": ["Scottie Scheffler", "Collin Morikawa", "Joaquín Niemann", "Jordan Spieth", "Will Zalatoris"],
+  "Carter Jones": ["Tony Finau", "Bryson DeChambeau", "Viktor Hovland", "Hideki Matsuyama", "Xander Schauffele"],
+  "Davis Jones": ["Scottie Scheffler", "Bryson DeChambeau", "Justin Thomas", "Patrick Cantlay", "Shane Lowry"],
+  "Sargent Johnson": ["Rory McIlroy", "Collin Morikawa", "Robert MacIntyre", "Cameron Smith", "Justin Thomas"],
+  "Sargent Johnson, Jr.": ["Scottie Scheffler", "Xander Schauffele", "Russell Henley", "Justin Thomas", "Jordan Spieth"],
+  "Chris Kelley": ["Scottie Scheffler", "Rory McIlroy", "Cameron Smith", "Sepp Straka", "Russell Henley"],
+  "Paul Kelley": ["Rory McIlroy", "Akshay Bhatia", "Tom Hoge", "Jordan Spieth", "Ludvig Åberg"],
+  "Peter Kepic Jr.": ["Rory McIlroy", "Bryson DeChambeau", "Shane Lowry", "Jordan Spieth", "Dustin Johnson"],
+  "Sarah Kepic": ["Brooks Koepka", "Tommy Fleetwood", "Will Zalatoris", "Cameron Smith", "Dustin Johnson"],
+  "Peter Kepic Sr.": ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Hideki Matsuyama", "Min Woo Lee"],
+  "Owen Kepic": ["Scottie Scheffler", "Min Woo Lee", "Will Zalatoris", "Ludvig Åberg", "Brooks Koepka"],
+  "Max Kepic": ["Scottie Scheffler", "Bryson DeChambeau", "Justin Thomas", "Viktor Hovland", "Hideki Matsuyama"],
+  "Greg Kevane": ["Rory McIlRoy", "Collin Morikawa", "Sepp Straka", "Corey Conners", "Russell Henley"],
+  "Rory Kevane": ["Collin Morikawa", "Rory McIlroy", "Shane Lowry", "Russell Henley", "Min Woo Lee"],
+  "Andy Koch": ["Bryson DeChambeau", "Jon Rahm", "Patrick Cantlay", "Shane Lowry", "Brooks Koepka"],
+  "Chad Kollar": ["Collin Morikawa", "Justin Thomas", "Brooks Koepka", "Hideki Matsuyama", "Patrick Cantlay"],
+  "Pete Kostroski": ["Rory McIlroy", "Ludvig Åberg", "Joaquín Niemann", "Tommy Fleetwood", "Shane Lowry"],
+  "Dan Lenmark": ["Xander Schauffele", "Scottie Scheffler", "Cameron Smith", "Justin Thomas", "Will Zalatoris"],
+  "Jack Lenmark": ["Xander Schauffele", "Rory McIlroy", "Patrick Cantlay", "Shane Lowry", "Matt Fitzpatrick"],
+  "Jamie Lockhart": ["Scottie Scheffler", "Jon Rahm", "Will Zalatoris", "Brooks Koepka", "Joaquín Niemann"],
+  "Rollie Logan": ["Tony Finau", "Viktor Hovland", "Justin Thomas", "Scottie Scheffler", "Rory McIlroy"],
+  "Bo Massopust": ["Scottie Scheffler", "Rory McIlroy", "Brooks Koepka", "Justin Thomas", "Tom Kim"],
+  "Elle McClintock": ["Rory McIlroy", "Collin Morikawa", "Hideki Matsuyama", "Jordan Spieth", "Brooks Koepka"],
+  "Jenny McClintock": ["Collin Morikawa", "Rory McIlroy", "Justin Thomas", "Hideki Matsuyama", "Russell Henley"],
+  "Peggy McClintock": ["Scottie Scheffler", "Collin Morikawa", "Wyndham Clark", "Will Zalatoris", "Sepp Straka"],
+  "Kevin McClintock": ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Will Zalatoris", "Russell Henley"],
+  "Rich McClintock": ["Rory McIlroy", "Scottie Scheffler", "Hideki Matsuyama", "Shane Lowry", "Billy Horschel"],
+  "Johnny McWhite": ["Scottie Scheffler", "Jon Rahm", "Jordan Spieth", "Hideki Matsuyama", "Justin Thomas"],
+  "Charles Meech Jr": ["Dustin Johnson", "Scottie Scheffler", "Viktor Hovland", "Brooks Koepka", "Bryson DeChambeau"],
+  "Jon Moseley": ["Rory McIlroy", "Collin Morikawa", "Robert MacIntyre", "Shane Lowry", "Russell Henley"],
+  "Chad Murphy": ["Joaquín Niemann", "Ludvig Åberg", "Min Woo Lee", "Justin Thomas", "Rory McIlroy"],
+  "C.J. Nibbe": ["Rory McIlroy", "Jon Rahm", "Justin Thomas", "Robert MacIntyre", "Min Woo Lee"],
+  "Nash Nibbe": ["Rory McIlroy", "Scottie Scheffler", "Min Woo Lee", "Shane Lowry", "Viktor Hovland"],
+  "Knox Nibbe": ["Scottie Scheffler", "Jon Rahm", "Justin Thomas", "Patrick Cantlay", "Brooks Koepka"],
+  "Julie Nibbe": ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Brooks Koepka", "Jordan Spieth"],
+  "Jay Perlmutter": ["Russell Henley", "Corey Conners", "Sepp Straka", "Rory McIlroy", "Collin Morikawa"],
+  "Les Perry": ["Bryson DeChambeau", "Rory McIlroy", "Sergio Garcia", "Brooks Koepka", "Viktor Hovland"],
+  "James Petrikas Sr.": ["Scottie Scheffler", "Rory McIlroy", "Brooks Koepka", "Jordan Spieth", "Justin Thomas"],
+  "James Petrikas Jr.": ["Scottie Scheffler", "Ludvig Åberg", "Will Zalatoris", "Brooks Koepka", "Shane Lowry"],
+  "Davey Phelps": ["Scottie Scheffler", "Rory McIlroy", "Akshay Bhatia", "Will Zalatoris", "Sepp Straka"],
+  "Will Phelps": ["Rory McIlroy", "Scottie Scheffler", "Justin Thomas", "Brooks Koepka", "Shane Lowry"],
+  "Phil Present Jr.": ["Scottie Scheffler", "Rory McIlroy", "Cameron Smith", "Russell Henley", "Joaquín Niemann"],
+  "Phil Present III": ["Scottie Scheffler", "Ludvig Åberg", "Brooks Koepka", "Tommy Fleetwood", "Justin Thomas"],
+  "Ravi Ramalingam": ["Xander Schauffele", "Rory McIlroy", "Sepp Straka", "Shane Lowry", "Will Zalatoris"],
+  "Charlotte Ramalingam": ["Scottie Scheffler", "Rory McIlroy", "Jordan Spieth", "Justin Thomas", "Justin Rose"],
+  "Matt Rogers": ["Scottie Scheffler", "Bryson DeChambeau", "Shane Lowry", "Jason Day", "Dustin Johnson"],
+  "Roth Sanner": ["Scottie Scheffler", "Collin Morikawa", "Patrick Cantlay", "Cameron Smith", "Akshay Bhatia"],
+  "John Saunders": ["Scottie Scheffler", "Rory McIlroy", "Joaquín Niemann", "Tommy Fleetwood", "Sahith Theegala"],
+  "Jackson Saunders": ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Cameron Smith", "Viktor Hovland"],
+  "Donny Schmitt": ["Rory McIlroy", "Tom Hoge", "Collin Morikawa", "Sepp Straka", "Justin Thomas"],
+  "Ryan Schmitt": ["Rory McIlroy", "Scottie Scheffler", "Justin Thomas", "Wyndham Clark", "Russell Henley"],
+  "Jon Schwingler": ["Rory McIlroy", "Scottie Scheffler", "Jordan Spieth", "Tommy Fleetwood", "Akshay Bhatia"],
+  "Toby Schwingler": ["Collin Morikawa", "Rory McIlroy", "Shane Lowry", "Viktor Hovland", "Russell Henley"],
+  "Jack Simmons": ["Jon Rahm", "Rory McIlroy", "Shane Lowry", "Sepp Straka", "Sergio Garcia"],
+  "Hayden Simmons": ["Scottie Scheffler", "Xander Schauffele", "Russell Henley", "Billy Horschel", "Justin Thomas"],
+  "Tommy Simmons": ["Shane Lowry", "Collin Morikawa", "Will Zalatoris", "J.J. Spaun", "Denny McCarthy"],
+  "Victoria Simmons": ["Russell Henley", "Brooks Koepka", "Robert MacIntyre", "Xander Schauffele", "Rory McIlroy"],
+  "Tyler Smith": ["Rory McIlroy", "Brooks Koepka", "Danny Willett", "Scottie Scheffler", "Hideki Matsuyama"],
+  "Stuie Snyder": ["Rory McIlroy", "Scottie Scheffler", "Cameron Smith", "Justin Thomas", "Denny McCarthy"],
+  "Steve Sorenson": ["Rory McIlroy", "Ludvig Åberg", "Keegan Bradley", "Tommy Fleetwood", "Justin Rose"],
+  "Katie Stephens": ["Ludvig Åberg", "Wyndham Clark", "Nick Dunlap", "Brooks Koepka", "Scottie Scheffler"],
+  "Reven Stephens": ["Rory McIlroy", "Collin Morikawa", "Joaquín Niemann", "Tommy Fleetwood", "Shane Lowry"],
+  "Winfield Stephens": ["Xander Schauffele", "Rory McIlroy", "Russell Henley", "Jordan Spieth", "Justin Thomas"],
+  "Caelin Stephens": ["Rory McIlroy", "Bryson DeChambeau", "Min Woo Lee", "Jordan Spieth", "Justin Thomas"],
+  "Bette Stephens": ["Viktor Hovland", "Scottie Scheffler", "Zach Johnson", "Rory McIlroy", "Denny McCarthy"],
+  "Debbie Stofer": ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Russell Henley", "Joaquín Niemann"],
+  "Gordon Stofer Jr.": ["Scottie Scheffler", "Bryson DeChambeau", "Tony Finau", "Justin Thomas", "Min Woo Lee"],
+  "Jimmy Stofer": ["Collin Morikawa", "Rory McIlroy", "Justin Thomas", "Hideki Matsuyama", "Tommy Fleetwood"],
+  "Teddy Stofer": ["Rory McIlroy", "Collin Morikawa", "Hideki Matsuyama", "Shane Lowry", "Russell Henley"],
+  "Eileen Stofer": ["Bryson DeChambeau", "Ludvig Åberg", "Tommy Fleetwood", "Jordan Spieth", "Robert MacIntyre"],
+  "Cora Stofer": ["Bryson DeChambeau", "Jon Rahm", "Joaquín Niemann", "Brooks Koepka", "Tyrrell Hatton"],
+  "Gordon Stofer III": ["Rory McIlroy", "Ludvig Åberg", "Brooks Koepka", "Max Homa", "Jordan Spieth"],
+  "Addie Stofer": ["Scottie Scheffler", "Rory McIlroy", "Shane Lowry", "Cameron Smith", "Robert MacIntyre"],
+  "Ford Stofer": ["Rory McIlroy", "Collin Morikawa", "Jordan Spieth", "Joaquín Niemann", "Tom Kim"],
+  "Sylas Stofer": ["Scottie Scheffler", "Bryson DeChambeau", "Akshay Bhatia", "Jordan Spieth", "Russell Henley"],
+  "Robby Stofer": ["Rory McIlroy", "Ludvig Åberg", "Will Zalatoris", "Robert MacIntyre", "Russell Henley"],
+  "Jon Sturgis": ["Rory McIlroy", "Collin Morikawa", "Corey Conners", "Russell Henley", "Shane Lowry"],
+  "Avery Sturgis": ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
+  "Ethan Sturgis": ["Collin Morikawa", "Ludvig Åberg", "Tom Kim", "Will Zalatoris", "Phil Mickelson"],
+  "Sarah Sturgis": ["Bryson DeChambeau", "Scottie Scheffler", "Shane Lowry", "Brooks Koepka", "Jordan Spieth"],
+  "Scott Tande": ["Scottie Scheffler", "Collin Morikawa", "Russell Henley", "Justin Thomas", "Sepp Straka"],
+  "Jess Troyak": ["Rory McIlroy", "Ludvig Åberg", "Hideki Matsuyama", "Will Zalatoris", "Akshay Bhatia"],
+  "Chris Willette": ["Collin Morikawa", "Ludvig Åberg", "Justin Thomas", "Joaquín Niemann", "Russell Henley"]
 };
 
 // Calculate pool standings based on current leaderboard
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
-    // Get current leaderboard data
     const leaderboardData = await fetchLeaderboardData();
     
-    // Get base participant data
-    const participants = await getParticipantsBaseData();
-    
-    // Create a Map for quick golfer lookup
     const golferScoreMap = new Map<string, GolferScore>();
     leaderboardData.leaderboard.forEach(golfer => {
       golferScoreMap.set(golfer.name, golfer);
     });
     
-    // Calculate scores for each participant based on their picks
+    const participants: PoolParticipant[] = Object.entries(actualTeamSelections).map(([name, picks]) => {
+      return {
+        position: 0,
+        name,
+        totalPoints: 0,
+        picks,
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: Math.floor(Math.random() * 5) - 12,
+        tiebreaker2: Math.floor(Math.random() * 5),
+        paid: true
+      };
+    });
+    
     participants.forEach(participant => {
       let totalScore = 0;
       const round1Score = { value: 0 };
       
-      // Reset pick scores object
       participant.pickScores = {};
       
       participant.picks.forEach(golferName => {
         const golfer = golferScoreMap.get(golferName);
         
-        // If golfer is found in the leaderboard, use their score
         if (golfer) {
           participant.pickScores![golferName] = golfer.score;
           totalScore += golfer.score;
           
-          // Add to round 1 score (simplified for demo)
           if (leaderboardData.currentRound >= 1) {
             round1Score.value += golfer.score;
           }
         } else {
-          // If golfer not found (e.g., didn't make the cut or typo in name)
           participant.pickScores![golferName] = 0;
         }
       });
       
-      // Set total points for the participant
       participant.totalPoints = totalScore;
       
-      // Set round scores
       participant.roundScores = {
         round1: round1Score.value
       };
     });
     
-    // Sort participants by total points (lowest/best score first)
     participants.sort((a, b) => {
-      // Primary sort: total points
       if (a.totalPoints !== b.totalPoints) {
         return a.totalPoints - b.totalPoints;
       }
       
-      // Secondary sort: tiebreaker1
       if (a.tiebreaker1 !== b.tiebreaker1) {
         return a.tiebreaker1 - b.tiebreaker1;
       }
       
-      // Tertiary sort: tiebreaker2
       return a.tiebreaker2 - b.tiebreaker2;
     });
     
-    // Assign positions (handling ties)
     let currentPosition = 1;
     let currentScore = participants[0]?.totalPoints ?? 0;
     let currentTiebreaker1 = participants[0]?.tiebreaker1 ?? 0;
@@ -487,7 +439,6 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       if (index === 0) {
         participant.position = currentPosition;
       } else {
-        // Check if tied with previous participant
         if (participant.totalPoints === currentScore && 
             participant.tiebreaker1 === currentTiebreaker1 &&
             participant.tiebreaker2 === currentTiebreaker2) {
@@ -512,32 +463,22 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
 // Function to fetch player selections data
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
-    // Get latest pool standings which have updated scores
     const poolStandingsData = await fetchPoolStandings();
     
-    // Convert pool standings data to the format expected by PlayerSelections component
     const playerSelections: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = {};
     
     poolStandingsData.forEach(participant => {
-      // Extract the five picks and their round scores
-      const picks: string[] = [];
+      const picks = participant.picks;
+      
       const roundScores: number[] = [];
       
-      // Add each pick and its score to our arrays
       if (participant.pickScores) {
-        Object.entries(participant.pickScores).forEach(([golfer, score]) => {
-          picks.push(golfer);
+        participant.picks.forEach(golfer => {
+          const score = participant.pickScores?.[golfer] || 0;
           roundScores.push(score);
         });
       }
       
-      // Ensure we always have exactly 5 picks and scores
-      while (picks.length < 5) {
-        picks.push(`Golfer ${picks.length + 1}`);
-        roundScores.push(0);
-      }
-      
-      // Add this participant's data to our result
       playerSelections[participant.name] = {
         picks,
         roundScores,
