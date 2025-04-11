@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
+import EmergencyFallback from "./leaderboard/EmergencyFallback";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
+const CRITICAL_OUTAGE_THRESHOLD = 5;
 
 const Leaderboard = () => {
-  // Use our enhanced tournament data hook
   const { 
     leaderboard, 
     loading, 
@@ -25,7 +25,8 @@ const Leaderboard = () => {
     dataYear,
     refreshData,
     hasLiveData,
-    dataHealth
+    dataHealth,
+    consecutiveFailures
   } = useTournamentData();
   
   const [refreshing, setRefreshing] = useState(false);
@@ -34,11 +35,11 @@ const Leaderboard = () => {
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const [dataSourceError, setDataSourceError] = useState<string | undefined>(undefined);
+  const [showEmergencyFallback, setShowEmergencyFallback] = useState<boolean>(false);
   const previousLeaderboard = useRef(leaderboard);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // Load tournament info
   useEffect(() => {
     const loadTournamentInfo = async () => {
       try {
@@ -62,7 +63,6 @@ const Leaderboard = () => {
     };
   }, []);
 
-  // Track changed positions
   useEffect(() => {
     if (previousLeaderboard.current.length > 0) {
       const newChanges: Record<string, 'up' | 'down' | null> = {};
@@ -99,7 +99,6 @@ const Leaderboard = () => {
     previousLeaderboard.current = leaderboard;
   }, [leaderboard, toast]);
 
-  // Set error message based on data source
   useEffect(() => {
     if (dataSource === 'cached-data') {
       let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(lastUpdated)}`;
@@ -118,7 +117,16 @@ const Leaderboard = () => {
     }
   }, [dataSource, dataYear, lastUpdated]);
 
-  // Handle manual refresh
+  useEffect(() => {
+    if (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) {
+      setShowEmergencyFallback(true);
+    } else if (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3) {
+      setShowEmergencyFallback(true);
+    } else if (dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
+      setShowEmergencyFallback(false);
+    }
+  }, [consecutiveFailures, dataHealth, dataSource]);
+
   const handleManualRefresh = async () => {
     console.log("Manual refresh requested");
     setRefreshing(true);
@@ -129,6 +137,10 @@ const Leaderboard = () => {
         title: "Leaderboard Updated",
         description: `Data refreshed at ${formatLastUpdated(new Date().toISOString())}${dataSource ? ` from ${dataSource}` : ''}`,
       });
+      
+      if (showEmergencyFallback && dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
+        setShowEmergencyFallback(false);
+      }
     } catch (error) {
       toast({
         title: "Update Failed",
@@ -140,13 +152,11 @@ const Leaderboard = () => {
     }
   };
 
-  // Toggle potential winnings display
   const togglePotentialWinnings = () => {
     setShowPotentialWinnings(!showPotentialWinnings);
     localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
   };
 
-  // Load potential winnings preference from localStorage
   useEffect(() => {
     const showWinnings = localStorage.getItem('showPotentialWinnings');
     if (showWinnings !== null) {
@@ -154,7 +164,6 @@ const Leaderboard = () => {
     }
   }, []);
 
-  // Set document title
   useEffect(() => {
     document.title = "Masters Leaderboard - Live Tournament Standings";
     
@@ -170,6 +179,31 @@ const Leaderboard = () => {
     const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
   };
+
+  if (showEmergencyFallback) {
+    return (
+      <div className="masters-card">
+        <LeaderboardHeader 
+          lastUpdated={lastUpdated}
+          loading={loading}
+          refreshing={refreshing}
+          handleManualRefresh={handleManualRefresh}
+          showPotentialWinnings={showPotentialWinnings}
+          togglePotentialWinnings={togglePotentialWinnings}
+          dataSource={dataSource}
+          errorMessage={dataSourceError}
+          tournamentYear={dataYear || TOURNAMENT_YEAR}
+          hasLiveData={false}
+          dataHealth={dataHealth}
+          criticalOutage={true}
+        />
+        
+        <div className="p-4 bg-white">
+          <EmergencyFallback onRetry={handleManualRefresh} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="masters-card">
@@ -270,7 +304,7 @@ const Leaderboard = () => {
           </div>
         )}
         
-        {error && (
+        {error && !showEmergencyFallback && (
           <div className="text-center text-red-500 py-4 flex items-center justify-center">
             <AlertTriangle size={16} className="mr-1" />
             {error}

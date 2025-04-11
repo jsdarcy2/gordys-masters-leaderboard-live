@@ -1,6 +1,6 @@
 
 import React from "react";
-import { RefreshCcw, Clock, Save, Signal, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
+import { RefreshCcw, Clock, Save, Signal, ShieldAlert, ShieldCheck, ShieldX, AlertTriangle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -23,6 +23,7 @@ interface LeaderboardHeaderProps {
     message: string;
     timestamp: string;
   };
+  criticalOutage?: boolean;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -36,7 +37,8 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   errorMessage,
   tournamentYear,
   hasLiveData = false,
-  dataHealth
+  dataHealth,
+  criticalOutage = false
 }) => {
   const renderHealthIndicator = () => {
     if (!dataHealth) return null;
@@ -97,6 +99,35 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
         return null;
     }
   };
+
+  if (criticalOutage) {
+    return (
+      <div className="p-3 md:p-4 flex items-center justify-between bg-red-700 text-white">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold mb-1 flex items-center">
+            System Status: Outage
+            <span className="ml-2 flex items-center text-sm bg-red-500/50 text-white px-2 py-0.5 rounded-full">
+              <AlertTriangle size={12} className="mr-1 animate-pulse" />
+              CRITICAL
+            </span>
+          </h3>
+          <p className="text-sm opacity-90">
+            We're experiencing a critical service outage. Live data is temporarily unavailable.
+          </p>
+        </div>
+        
+        <div>
+          <button 
+            onClick={handleManualRefresh}
+            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-sm flex items-center"
+          >
+            <RefreshCcw size={16} className="mr-1" />
+            Check Status
+          </button>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-masters-green text-white">
