@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Info, Check } from "lucide-react";
 
 interface ParticipantTableProps {
   displayStandings: PoolParticipant[];
@@ -109,7 +109,16 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                           <div className="flex items-center gap-1">
                             <span className={`text-sm ${isBestFour ? "font-medium" : ""}`}>{pick}</span>
                             {isBestFour && (
-                              <Badge variant="outline" className="h-4 text-[10px] bg-green-50">Best 4</Badge>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <Check size={14} className="text-green-600 opacity-60" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="bg-white text-xs">
+                                    <p>Best 4 pick</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
                             )}
                           </div>
                           <span className={`text-xs ${

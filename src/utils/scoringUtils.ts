@@ -36,12 +36,18 @@ export const getBestFourGolfers = (pickScores: Record<string, number>): string[]
   // Check if we have at least 4 picks
   if (Object.keys(pickScores).length < 4) {
     console.warn("Warning: Less than 4 picks available for best four calculation");
+    return Object.keys(pickScores);
   }
   
-  return Object.entries(pickScores)
+  // Sort by score (lowest/best first) and take the first 4
+  const bestFour = Object.entries(pickScores)
     .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
     .slice(0, 4)
     .map(([name]) => name);
+    
+  console.log("Best four golfers:", bestFour);
+  
+  return bestFour;
 };
 
 /**
