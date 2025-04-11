@@ -400,5 +400,159 @@ const actualTeamSelections: { [participantName: string]: string[] } = {
   "Robby Stofer": ["Rory McIlroy", "Ludvig Åberg", "Will Zalatoris", "Robert MacIntyre", "Russell Henley"],
   "Jon Sturgis": ["Rory McIlroy", "Collin Morikawa", "Corey Conners", "Russell Henley", "Shane Lowry"],
   "Avery Sturgis": ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
-  "Ethan Sturgis": ["Collin Morikawa", "Ludvig Åberg", "Tom Kim", "Will Zalatoris", "Phil Mickelson"],
-  "
+  "Ethan Sturgis": ["Collin Morikawa", "Ludvig Åberg", "Tom Kim", "Will Zalatoris", "Phil Mickelson"]
+};
+
+// Create a function to fetch player selections
+export const fetchPlayerSelections = async () => {
+  try {
+    // Here we would typically fetch from an API, but since we have the data locally,
+    // we'll create selections with mock round scores
+    const selections: {[participant: string]: {picks: string[], roundScores: number[], tiebreakers: [number, number]}} = {};
+    
+    // Map the actualTeamSelections into our desired format with mock round scores
+    Object.entries(actualTeamSelections).forEach(([participant, picks]) => {
+      // Calculate mock round scores based on players chosen
+      const roundScores = picks.map(golfer => {
+        // Get a score between -3 and +4 for each player
+        const fallbackPlayers = getFallbackLeaderboardData().leaderboard;
+        const playerInfo = fallbackPlayers.find(p => p.name === golfer);
+        
+        if (playerInfo) {
+          return playerInfo.today; // Use the player's actual today score
+        }
+        
+        // Random score if player not found in leaderboard
+        return Math.floor(Math.random() * 8) - 3;
+      });
+      
+      // Generate random tiebreakers (winner's score and winning score)
+      const tiebreakers: [number, number] = [
+        Math.floor(Math.random() * 12) - 8, // Winner score between -8 and 4
+        Math.floor(Math.random() * 20) + 270 // Total score between 270 and 290
+      ];
+      
+      selections[participant] = {
+        picks,
+        roundScores,
+        tiebreakers
+      };
+    });
+    
+    return selections;
+  } catch (err) {
+    console.error("Error fetching player selections:", err);
+    return {};
+  }
+};
+
+// Function to fetch pool standings data
+export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
+  try {
+    // Get the current leaderboard data to calculate positions
+    const leaderboardData = await fetchLeaderboardData();
+    const teamSelections = await fetchPlayerSelections();
+    
+    // Create an array to hold all participants and their scores
+    const standings: PoolParticipant[] = [];
+    
+    // Process each participant's selections
+    Object.entries(teamSelections).forEach(([participantName, data]) => {
+      const { picks, roundScores, tiebreakers } = data;
+      
+      // Calculate total points based on players' positions
+      let totalPoints = 0;
+      const pickScores: { [golferName: string]: number } = {};
+      
+      // Go through each pick and find their score
+      picks.forEach((golferName, index) => {
+        const golfer = leaderboardData.leaderboard.find(g => g.name === golferName);
+        
+        if (golfer) {
+          // If player made the cut or is active, use their position
+          if (!golfer.status || golfer.status === 'active') {
+            // Points are inverse of position (lower position = more points)
+            const points = 100 - golfer.position;
+            totalPoints += points;
+            pickScores[golferName] = points;
+          } else {
+            // If cut or withdrawn, zero points
+            pickScores[golferName] = 0;
+          }
+        } else {
+          // If golfer not found, assume zero points
+          pickScores[golferName] = 0;
+        }
+      });
+      
+      // Add participant to standings
+      standings.push({
+        name: participantName,
+        position: 0, // Will be calculated after sorting
+        totalPoints,
+        picks,
+        pickScores,
+        roundScores: {
+          round1: roundScores.reduce((sum, score) => sum + score, 0)
+        },
+        tiebreaker1: tiebreakers[0],
+        tiebreaker2: tiebreakers[1],
+        paid: Math.random() > 0.2 // Random payment status (80% paid)
+      });
+    });
+    
+    // Sort by totalPoints (descending) and assign positions
+    standings.sort((a, b) => {
+      // First sort by points
+      if (b.totalPoints !== a.totalPoints) {
+        return b.totalPoints - a.totalPoints;
+      }
+      
+      // If points are equal, check round 1 scores
+      if (a.roundScores?.round1 !== b.roundScores?.round1) {
+        return (a.roundScores?.round1 || 0) - (b.roundScores?.round1 || 0);
+      }
+      
+      // If still tied, check tiebreaker1
+      if (a.tiebreaker1 !== b.tiebreaker1) {
+        // Lower predicted score is better
+        return (a.tiebreaker1 || 0) - (b.tiebreaker1 || 0);
+      }
+      
+      // If still tied, check tiebreaker2
+      return (a.tiebreaker2 || 0) - (b.tiebreaker2 || 0);
+    });
+    
+    // Assign positions
+    let currentPosition = 1;
+    let samePositionCount = 0;
+    let previousPoints = -1;
+    let previousRound1 = -999;
+    
+    standings.forEach((participant, index) => {
+      if (index === 0) {
+        participant.position = currentPosition;
+        previousPoints = participant.totalPoints;
+        previousRound1 = participant.roundScores?.round1 || 0;
+      } else {
+        // If this participant has the same points and round1 score as previous, assign same position
+        if (participant.totalPoints === previousPoints && participant.roundScores?.round1 === previousRound1) {
+          participant.position = currentPosition;
+          samePositionCount++;
+        } else {
+          // Otherwise, assign a new position
+          currentPosition = index + 1;
+          participant.position = currentPosition;
+          samePositionCount = 0;
+          previousPoints = participant.totalPoints;
+          previousRound1 = participant.roundScores?.round1 || 0;
+        }
+      }
+    });
+    
+    return standings;
+  } catch (err) {
+    console.error("Error calculating pool standings:", err);
+    return [];
+  }
+};
