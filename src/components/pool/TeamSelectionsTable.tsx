@@ -211,7 +211,7 @@ const TeamSelectionsTable: React.FC = () => {
                   <span>Showing teams with {activeGolfer}</span>
                   <Button 
                     variant="outline" 
-                    size="xs" 
+                    size="sm" 
                     className="ml-2 h-6 text-xs"
                     onClick={() => setActiveGolfer(null)}
                   >
