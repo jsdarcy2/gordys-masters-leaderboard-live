@@ -1,8 +1,9 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Trophy } from "lucide-react";
+import { RefreshCw, Trophy, AlertCircle } from "lucide-react";
 import DataSourceInfo from "./DataSourceInfo";
+import { Badge } from "@/components/ui/badge";
 
 interface LeaderboardHeaderProps {
   lastUpdated: string;
@@ -25,12 +26,25 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   dataSource,
   errorMessage
 }) => {
+  // Determine if we're using fallback data
+  const isFallbackData = dataSource === 'historical-data' || dataSource === 'cached-data';
+
   return (
     <div className="masters-header bg-gradient-to-r from-masters-green to-masters-green/90 backdrop-blur-sm rounded-t-lg">
       <div className="flex flex-col md:flex-row justify-between items-center gap-2 p-4">
-        <h2 className="text-xl md:text-2xl font-serif text-white mb-2 md:mb-0">
-          Masters Tournament Leaderboard
-        </h2>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
+          <h2 className="text-xl md:text-2xl font-serif text-white">
+            Masters Tournament Leaderboard
+          </h2>
+          
+          {isFallbackData && (
+            <Badge variant="outline" className="bg-amber-500/20 text-white border-amber-400 text-xs">
+              <AlertCircle size={12} className="mr-1 text-amber-300" /> 
+              Using {dataSource === 'historical-data' ? 'historical' : 'cached'} data
+            </Badge>
+          )}
+        </div>
+        
         <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
           <div className="flex items-center gap-2">
             <Button 

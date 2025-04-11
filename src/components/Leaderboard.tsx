@@ -1,19 +1,16 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
 import { AlertTriangle, Info, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-// Import our components
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// More frequent polling interval for live data (30 seconds)
 const POLLING_INTERVAL = 30000; 
 
 const Leaderboard = () => {
@@ -34,7 +31,6 @@ const Leaderboard = () => {
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load tournament information
   useEffect(() => {
     const loadTournamentInfo = async () => {
       try {
@@ -54,7 +50,6 @@ const Leaderboard = () => {
     
     loadTournamentInfo();
     
-    // Refresh tournament data periodically
     const tournamentRefreshInterval = setInterval(loadTournamentInfo, 30 * 60 * 1000); // 30 minutes
     
     return () => {
@@ -87,6 +82,10 @@ const Leaderboard = () => {
       setDataSourceError(undefined); // Clear any previous errors on successful fetch
       setError(null);
       setDataInitialized(true);
+      
+      if (data.source === 'historical-data' || data.source === 'cached-data') {
+        setDataSourceError(`Note: Using ${data.source === 'historical-data' ? 'historical' : 'cached'} data as live data could not be fetched.`);
+      }
       
       if (previousLeaderboard.current.length > 0) {
         const newChanges: Record<string, 'up' | 'down' | null> = {};
@@ -177,7 +176,6 @@ const Leaderboard = () => {
         setLoading(false);
         setDataInitialized(true);
         
-        // Still load fresh data in the background
         loadLeaderboardData();
       } catch (e) {
         console.error("Error parsing cached data:", e);
@@ -188,12 +186,10 @@ const Leaderboard = () => {
       loadLeaderboardData();
     }
     
-    // Clear any existing interval
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
     }
     
-    // Set up polling every 30 seconds for live data
     pollingRef.current = setInterval(() => {
       console.log("Polling for leaderboard updates...");
       loadLeaderboardData();
@@ -213,7 +209,6 @@ const Leaderboard = () => {
     }
   }, []);
 
-  // Format tournament dates
   const formatTournamentDates = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -236,6 +231,16 @@ const Leaderboard = () => {
       />
       
       <div className="p-4 bg-white">
+        {dataSource && (dataSource === 'historical-data' || dataSource === 'cached-data') && (
+          <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data</AlertTitle>
+            <AlertDescription className="text-amber-700 text-sm">
+              We're currently unable to fetch live tournament data. Scores shown may not reflect the current tournament standings.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {currentTournament && !tournamentLoading && (
           <div className="mb-4 bg-masters-green/5 border border-masters-green/20 rounded-md p-3">
             <div className="flex items-center gap-2 text-masters-dark">

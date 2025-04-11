@@ -1,7 +1,8 @@
 
 import React from "react";
-import { Info, AlertTriangle } from "lucide-react";
+import { Info, AlertTriangle, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 interface DataSourceInfoProps {
   dataSource?: string;
@@ -34,8 +35,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     if (!dataSource) return "Unknown";
     
     switch (dataSource.toLowerCase()) {
-      case "pga-tour":
-        return "PGA Tour";
+      case "espn-api":
+        return "ESPN Golf";
+      case "sportsdata-api":
+        return "Sports Data API";
       case "historical-data":
         return "Historical Data";
       case "cached-data":
@@ -44,6 +47,23 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return dataSource;
     }
   };
+  
+  const getDataSourceLink = () => {
+    if (!dataSource) return null;
+    
+    switch (dataSource.toLowerCase()) {
+      case "espn-api":
+        return "https://www.espn.com/golf/leaderboard";
+      case "sportsdata-api":
+        return "https://www.masters.com/en_US/scores/index.html";
+      case "historical-data":
+        return "https://www.masters.com/en_US/scores/index.html";
+      default:
+        return null;
+    }
+  };
+  
+  const sourceLink = getDataSourceLink();
   
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
@@ -66,6 +86,17 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
           <span className="text-white/60">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
           </span> • <span className="text-white/60">Updated:</span> {formatLastUpdated(lastUpdated)}
+          
+          {sourceLink && (
+            <a 
+              href={sourceLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="ml-2 text-white/80 hover:text-white inline-flex items-center"
+            >
+              <ExternalLink size={12} className="ml-0.5" />
+            </a>
+          )}
         </span>
       </div>
     </div>
