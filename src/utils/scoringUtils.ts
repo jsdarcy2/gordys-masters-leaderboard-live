@@ -31,6 +31,7 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
 
 /**
  * Get the 4 best-performing golfers from a participant's 5 picks
+ * This function now ensures we only ever return exactly 4 golfers (or fewer if less than 4 are available)
  */
 export const getBestFourGolfers = (pickScores: Record<string, number>): string[] => {
   // Check if we have at least 4 picks
@@ -39,7 +40,19 @@ export const getBestFourGolfers = (pickScores: Record<string, number>): string[]
     return Object.keys(pickScores);
   }
   
-  // Sort by score (lowest/best first) and take the first 4
+  // If we have exactly 5 picks (normal case), take the best 4 scores
+  if (Object.keys(pickScores).length === 5) {
+    const bestFour = Object.entries(pickScores)
+      .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
+      .slice(0, 4)
+      .map(([name]) => name);
+      
+    console.log("Best four golfers:", bestFour);
+    
+    return bestFour;
+  }
+  
+  // If we have more than 5 picks (unusual case), still only take the best 4
   const bestFour = Object.entries(pickScores)
     .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
     .slice(0, 4)

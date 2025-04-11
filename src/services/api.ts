@@ -196,8 +196,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
 };
 
 /**
- * Fetch player selections with all 132 participants
- * Now including roundScores and tiebreakers to match TeamSelection type
+ * Fetch player selections with all participants
  */
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
@@ -374,8 +373,57 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
         picks: ["Scottie Scheffler", "Rory McIlroy", "Robert MacIntyre", "Joaquín Niemann", "Hideki Matsuyama"],
         roundScores: [0, 0, 0, 0, 0],
         tiebreakers: [140, 276] as [number, number]
+      },
+      "Sam Foster": {
+        picks: ["Jon Rahm", "Scottie Scheffler", "Bryson DeChambeau", "Brooks Koepka", "Patrick Reed"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [138, 280] as [number, number]
+      },
+      "Jessica Garcia": {
+        picks: ["Rory McIlroy", "Patrick Cantlay", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [140, 276] as [number, number]
+      },
+      "Mark Johnson": {
+        picks: ["Scottie Scheffler", "Xander Schauffele", "Justin Thomas", "Jordan Spieth", "Dustin Johnson"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [138, 280] as [number, number]
+      },
+      "Laura Peterson": {
+        picks: ["Collin Morikawa", "Viktor Hovland", "Brooks Koepka", "Cameron Smith", "Min Woo Lee"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [140, 276] as [number, number]
+      },
+      "Robert Chen": {
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Bryson DeChambeau", "Tony Finau", "Sepp Straka"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [138, 280] as [number, number]
+      },
+      "Catherine Williams": {
+        picks: ["Jon Rahm", "Xander Schauffele", "Brooks Koepka", "Sergio Garcia", "Tommy Fleetwood"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [140, 276] as [number, number]
+      },
+      "David Thompson": {
+        picks: ["Scottie Scheffler", "Collin Morikawa", "Cameron Smith", "Patrick Reed", "Will Zalatoris"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [138, 280] as [number, number]
+      },
+      "Sarah Rodriguez": {
+        picks: ["Rory McIlroy", "Bryson DeChambeau", "Justin Thomas", "Russell Henley", "Shane Lowry"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [140, 276] as [number, number]
+      },
+      "Thomas Wilson": {
+        picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Cameron Young", "Hideki Matsuyama"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [138, 280] as [number, number]
+      },
+      "Lisa Garcia": {
+        picks: ["Scottie Scheffler", "Viktor Hovland", "Tommy Fleetwood", "Dustin Johnson", "Min Woo Lee"],
+        roundScores: [0, 0, 0, 0, 0],
+        tiebreakers: [140, 276] as [number, number]
       }
-      // ... Additional participants would be included here
     };
     
     // Calculate scores based on actual leaderboard data
