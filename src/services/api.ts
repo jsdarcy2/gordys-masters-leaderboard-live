@@ -1,3 +1,4 @@
+
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings, generateParticipantName } from "@/utils/scoringUtils";
 import { validateLeaderboardData } from "@/utils/leaderboardUtils";
@@ -686,4 +687,7 @@ const getBaseSampleTeams = () => {
     "William Davis": {
       picks: ["Bryson DeChambeau", "Collin Morikawa", "Brooks Koepka", "Cameron Smith", "Joaquín Niemann"],
       roundScores: [0, 0, 0, 0, 0],
-      tiebreakers: [138, 280] as [number,
+      tiebreakers: [138, 280] as [number, number]
+    }
+  };
+};
