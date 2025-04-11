@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
 // Function to fetch leaderboard data from Masters API or alternative sources
@@ -282,13 +281,238 @@ const generateRandomPickScores = (): { [golferName: string]: number } => {
   return pickScores;
 };
 
-// Add the missing fetchPlayerSelections function that returns player selections
-export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
+// Get the participants' raw data (without calculated scores)
+const getParticipantsBaseData = async (): Promise<PoolParticipant[]> => {
   try {
     // Add a small delay to simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Get pool standings data to use consistent data
+    // In a real app, this would fetch from a database
+    const participants: PoolParticipant[] = [
+      { 
+        position: 0, // Position will be calculated later 
+        name: "Charlotte Ramalingam", 
+        totalPoints: 0, // Points will be calculated from picks
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Jordan Spieth", "Justin Thomas", "Justin Rose"],
+        pickScores: {}, // Will be filled in dynamically
+        roundScores: {},
+        tiebreaker1: -11,
+        tiebreaker2: 0,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Chris Crawford", 
+        totalPoints: 0,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -11,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Stuie Snyder", 
+        totalPoints: 0,
+        picks: ["Rory McIlroy", "Scottie Scheffler", "Cameron Smith", "Justin Thomas", "Denny McCarthy"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -11,
+        tiebreaker2: 2,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Jimmy Beltz", 
+        totalPoints: 0,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -11,
+        tiebreaker2: 1,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Nash Nibbe", 
+        totalPoints: 0,
+        picks: ["Rory McIlroy", "Scottie Scheffler", "Min Woo Lee", "Shane Lowry", "Viktor Hovland"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -12,
+        tiebreaker2: 1,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Kyle Flippen", 
+        totalPoints: 0,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Min Woo Lee", "Jordan Spieth", "Brian Harman"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -13,
+        tiebreaker2: 0,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Avery Sturgis", 
+        totalPoints: 0,
+        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -12,
+        tiebreaker2: 1,
+        paid: true
+      },
+      { 
+        position: 0,
+        name: "Matt Rogers", 
+        totalPoints: 0,
+        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Shane Lowry", "Jason Day", "Dustin Johnson"],
+        pickScores: {},
+        roundScores: {},
+        tiebreaker1: -10,
+        tiebreaker2: 2,
+        paid: true
+      },
+    ];
+
+    // Add more random participants to match the original dataset
+    const additionalParticipants = [
+      "Steve Sorenson", "Brian Ginkel", "Sylas Stofer", "Owen Kepic", "Max Kepic", 
+      "Roth Sanner", "Gordon Stofer Jr.", "James Carlson", "Adam Duff", "Darby Herfurth", 
+      "Davis Jones", "Paul Kelley", "Charles Meech Jr", "James Petrikas Jr.",
+      "Phil Present III", "Bette Stephens", "Sarah Sturgis"
+    ];
+    
+    // Add additional participants with random picks
+    additionalParticipants.forEach(name => {
+      if (!participants.some(p => p.name === name)) {
+        participants.push({
+          position: 0,
+          name,
+          totalPoints: 0,
+          picks: generateRandomPicks(),
+          pickScores: {},
+          roundScores: {},
+          tiebreaker1: Math.floor(Math.random() * 5) - 12,
+          tiebreaker2: Math.floor(Math.random() * 5),
+          paid: Math.random() > 0.1
+        });
+      }
+    });
+    
+    return participants;
+  } catch (error) {
+    console.error("Error fetching participants base data:", error);
+    throw new Error("Failed to load participant data. Please try again later.");
+  }
+};
+
+// Calculate pool standings based on current leaderboard
+export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
+  try {
+    // Get current leaderboard data
+    const leaderboardData = await fetchLeaderboardData();
+    
+    // Get base participant data
+    const participants = await getParticipantsBaseData();
+    
+    // Create a Map for quick golfer lookup
+    const golferScoreMap = new Map<string, GolferScore>();
+    leaderboardData.leaderboard.forEach(golfer => {
+      golferScoreMap.set(golfer.name, golfer);
+    });
+    
+    // Calculate scores for each participant based on their picks
+    participants.forEach(participant => {
+      let totalScore = 0;
+      const round1Score = { value: 0 };
+      
+      // Reset pick scores object
+      participant.pickScores = {};
+      
+      participant.picks.forEach(golferName => {
+        const golfer = golferScoreMap.get(golferName);
+        
+        // If golfer is found in the leaderboard, use their score
+        if (golfer) {
+          participant.pickScores![golferName] = golfer.score;
+          totalScore += golfer.score;
+          
+          // Add to round 1 score (simplified for demo)
+          if (leaderboardData.currentRound >= 1) {
+            round1Score.value += golfer.score;
+          }
+        } else {
+          // If golfer not found (e.g., didn't make the cut or typo in name)
+          participant.pickScores![golferName] = 0;
+        }
+      });
+      
+      // Set total points for the participant
+      participant.totalPoints = totalScore;
+      
+      // Set round scores
+      participant.roundScores = {
+        round1: round1Score.value
+      };
+    });
+    
+    // Sort participants by total points (lowest/best score first)
+    participants.sort((a, b) => {
+      // Primary sort: total points
+      if (a.totalPoints !== b.totalPoints) {
+        return a.totalPoints - b.totalPoints;
+      }
+      
+      // Secondary sort: tiebreaker1
+      if (a.tiebreaker1 !== b.tiebreaker1) {
+        return a.tiebreaker1 - b.tiebreaker1;
+      }
+      
+      // Tertiary sort: tiebreaker2
+      return a.tiebreaker2 - b.tiebreaker2;
+    });
+    
+    // Assign positions (handling ties)
+    let currentPosition = 1;
+    let currentScore = participants[0]?.totalPoints ?? 0;
+    let currentTiebreaker1 = participants[0]?.tiebreaker1 ?? 0;
+    let currentTiebreaker2 = participants[0]?.tiebreaker2 ?? 0;
+    
+    participants.forEach((participant, index) => {
+      if (index === 0) {
+        participant.position = currentPosition;
+      } else {
+        // Check if tied with previous participant
+        if (participant.totalPoints === currentScore && 
+            participant.tiebreaker1 === currentTiebreaker1 &&
+            participant.tiebreaker2 === currentTiebreaker2) {
+          participant.position = currentPosition;
+        } else {
+          currentPosition = index + 1;
+          participant.position = currentPosition;
+          currentScore = participant.totalPoints;
+          currentTiebreaker1 = participant.tiebreaker1 ?? 0;
+          currentTiebreaker2 = participant.tiebreaker2 ?? 0;
+        }
+      }
+    });
+    
+    return participants;
+  } catch (error) {
+    console.error("Error calculating pool standings:", error);
+    throw new Error("Failed to calculate pool standings. Please try again later.");
+  }
+};
+
+// Function to fetch player selections data
+export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
+  try {
+    // Get latest pool standings which have updated scores
     const poolStandingsData = await fetchPoolStandings();
     
     // Convert pool standings data to the format expected by PlayerSelections component
@@ -300,10 +524,12 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       const roundScores: number[] = [];
       
       // Add each pick and its score to our arrays
-      Object.entries(participant.pickScores || {}).forEach(([golfer, score]) => {
-        picks.push(golfer);
-        roundScores.push(score);
-      });
+      if (participant.pickScores) {
+        Object.entries(participant.pickScores).forEach(([golfer, score]) => {
+          picks.push(golfer);
+          roundScores.push(score);
+        });
+      }
       
       // Ensure we always have exactly 5 picks and scores
       while (picks.length < 5) {
@@ -315,7 +541,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       playerSelections[participant.name] = {
         picks,
         roundScores,
-        tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+        tiebreakers: [participant.tiebreaker1 ?? 0, participant.tiebreaker2 ?? 0]
       };
     });
     
@@ -323,458 +549,5 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
   } catch (error) {
     console.error("Error fetching player selections:", error);
     throw new Error("Failed to load player selections data. Please try again later.");
-  }
-};
-
-// Update the fetchPoolStandings to match the data in the image
-export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
-  try {
-    // Add cache-busting to prevent stale data
-    const timestamp = new Date().getTime();
-    
-    // In a real application, we would add the timestamp to the API URL
-    // For mock data, we'll add a small delay to ensure consistent rendering
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Updated participant data based on the provided screenshot
-    const participants: PoolParticipant[] = [
-      { 
-        position: 1, 
-        name: "Charlotte Ramalingam", 
-        totalPoints: -14,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Jordan Spieth", "Justin Thomas", "Justin Rose"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Jordan Spieth": 1, 
-          "Justin Thomas": 1,
-          "Justin Rose": -7
-        },
-        roundScores: {
-          round1: -11
-        },
-        tiebreaker1: -11,
-        tiebreaker2: 0,
-        paid: true
-      },
-      { 
-        position: 2, 
-        name: "Chris Crawford", 
-        totalPoints: -12,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Justin Thomas": 1, 
-          "Cameron Smith": -1,
-          "Tyrrell Hatton": -3
-        },
-        roundScores: {
-          round1: -9
-        },
-        tiebreaker1: -11,
-        tiebreaker2: 2,
-        paid: true
-      },
-      { 
-        position: 3, 
-        name: "Stuie Snyder", 
-        totalPoints: -10,
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Cameron Smith", "Justin Thomas", "Denny McCarthy"],
-        pickScores: { 
-          "Rory McIlroy": -2, 
-          "Scottie Scheffler": -4, 
-          "Cameron Smith": -1, 
-          "Justin Thomas": 1,
-          "Denny McCarthy": -1
-        },
-        roundScores: {
-          round1: -7
-        },
-        tiebreaker1: -11,
-        tiebreaker2: 2,
-        paid: true
-      },
-      { 
-        position: 4, 
-        name: "Jimmy Beltz", 
-        totalPoints: -10,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Hideki Matsuyama": 1, 
-          "Cameron Smith": -1,
-          "Min Woo Lee": -1
-        },
-        roundScores: {
-          round1: -7
-        },
-        tiebreaker1: -11,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 5, 
-        name: "Nash Nibbe", 
-        totalPoints: -10,
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Min Woo Lee", "Shane Lowry", "Viktor Hovland"],
-        pickScores: { 
-          "Rory McIlroy": -2, 
-          "Scottie Scheffler": -4, 
-          "Min Woo Lee": -1, 
-          "Shane Lowry": -1,
-          "Viktor Hovland": 5
-        },
-        roundScores: {
-          round1: -8
-        },
-        tiebreaker1: -12,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 6, 
-        name: "Kyle Flippen", 
-        totalPoints: -10,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Min Woo Lee", "Jordan Spieth", "Brian Harman"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Min Woo Lee": -1, 
-          "Jordan Spieth": 1,
-          "Brian Harman": 6
-        },
-        roundScores: {
-          round1: -7
-        },
-        tiebreaker1: -13,
-        tiebreaker2: 0,
-        paid: true
-      },
-      { 
-        position: 7, 
-        name: "Avery Sturgis", 
-        totalPoints: -10,
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Rory McIlroy": -2, 
-          "Hideki Matsuyama": 1, 
-          "Sergio Garcia": 1,
-          "Jason Day": -2
-        },
-        roundScores: {
-          round1: -7
-        },
-        tiebreaker1: -12,
-        tiebreaker2: 1,
-        paid: true
-      },
-      { 
-        position: 8, 
-        name: "Matt Rogers", 
-        totalPoints: -10,
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Shane Lowry", "Jason Day", "Dustin Johnson"],
-        pickScores: { 
-          "Scottie Scheffler": -4, 
-          "Bryson DeChambeau": -3, 
-          "Shane Lowry": -1, 
-          "Jason Day": -2,
-          "Dustin Johnson": 2
-        },
-        roundScores: {
-          round1: -8
-        },
-        tiebreaker1: -10,
-        tiebreaker2: 2,
-        paid: true
-      },
-    ];
-    
-    // Add tied for 9th place (-9) - 15 participants
-    const tiedForNinth = [
-      "Steve Sorenson", "Brian Ginkel", "Sylas Stofer", "Owen Kepic", "Max Kepic", 
-      "Roth Sanner", "Gordon Stofer Jr.", "James Carlson", "Adam Duff", "Kyle Flippen", 
-      "Darby Herfurth", "Davis Jones", "Paul Kelley", "Charles Meech Jr", "Nash Nibbe"
-    ];
-    
-    tiedForNinth.forEach((name, index) => {
-      // Skip names that are already in our top list
-      if (participants.some(p => p.name === name)) return;
-      
-      participants.push({
-        position: 9,
-        name,
-        totalPoints: -9,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -6 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: true
-      });
-    });
-    
-    // Add tied for 12th place (-6) - 16 participants
-    const tiedForTwelfth = [
-      "Jimmy Beltz", "James Carlson", "Adam Duff", "Kyle Flippen", "Darby Herfurth", 
-      "Davis Jones", "Paul Kelley", "Charles Meech Jr", "Nash Nibbe", "James Petrikas Jr.",
-      "Phil Present III", "Stuie Snyder", "Bette Stephens", "Avery Sturgis", "Sarah Sturgis"
-    ];
-    
-    tiedForTwelfth.forEach(name => {
-      if (participants.some(p => p.name === name)) return;
-      participants.push({
-        position: 12,
-        name,
-        totalPoints: -6,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -6 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: true
-      });
-    });
-    
-    // Add tied for 27th place (-5) - 10 participants
-    const tiedForTwentySeventh = [
-      "Louis Baker", "Peter Bassett", "Audrey Darcy", "Chad Murphy", "Phil Present Jr.",
-      "Jackson Saunders", "Jon Schwingler", "Eileen Stofer", "Addie Stofer", "Jess Troyak"
-    ];
-    
-    tiedForTwentySeventh.forEach(name => {
-      participants.push({
-        position: 27,
-        name,
-        totalPoints: -5,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -5 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: true
-      });
-    });
-    
-    // Add tied for 37th place (-4) - 11 participants
-    const tiedForThirtySeventh = [
-      "Elia Ayaz", "Ted Beckman", "Nate Carlson", "Hadley Carlson", "Peter Kepic Sr.",
-      "Pete Kostroski", "Rollie Logan", "Les Perry", "Davey Phelps", "Cora Stofer", "Jon Sturgis"
-    ];
-    
-    tiedForThirtySeventh.forEach(name => {
-      participants.push({
-        position: 37,
-        name,
-        totalPoints: -4,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -4 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.1
-      });
-    });
-    
-    // Add tied for 48th place (-3) - 12 participants
-    const tiedForFortyEighth = [
-      "Chuck Corbett Sr", "Ollie Drago", "Charles Elder", "Lily Gustafson", "Jim Jones",
-      "Dan Lenmark", "Rich McClintock", "Will Phelps", "John Saunders", "Katie Stephens",
-      "Caelin Stephens", "Chris Willette"
-    ];
-    
-    tiedForFortyEighth.forEach(name => {
-      participants.push({
-        position: 48,
-        name,
-        totalPoints: -3,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -3 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 60th place (-2) - 13 participants
-    const tiedForSixtieth = [
-      "Ed Corbett", "Jay Despard", "Pete Drago", "Tilly Duff", "J.J. Furst", "Grayson Ginkel",
-      "John Gustafson", "Andy Gustafson", "David Hardt", "Carter Jones", "Peter Kepic Jr.",
-      "Bo Massopust", "James Petrikas Sr."
-    ];
-    
-    tiedForSixtieth.forEach(name => {
-      participants.push({
-        position: 60,
-        name,
-        totalPoints: -2,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -2 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 73rd place (-1) - 10 participants
-    const tiedForSeventyThird = [
-      "Alexa Drago", "Gretchen Duff", "Eric Fox", "Sargent Johnson, Jr.", "Rory Kevane",
-      "Johnny McWhite", "Toby Schwingler", "Tyler Smith", "Gordon Stofer III", "Ethan Sturgis"
-    ];
-    
-    tiedForSeventyThird.forEach(name => {
-      participants.push({
-        position: 73,
-        name,
-        totalPoints: -1,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: -1 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 83rd place (E) - 7 participants
-    const tiedForEightyThird = [
-      "Rachel Herfurth", "Sargent Johnson", "Jack Lenmark", "Jamie Lockhart", 
-      "Ryan Schmitt", "Reven Stephens", "Debbie Stofer"
-    ];
-    
-    tiedForEightyThird.forEach(name => {
-      participants.push({
-        position: 83,
-        name,
-        totalPoints: 0,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 0 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 90th place (+1) - 11 participants
-    const tiedForNinetieth = [
-      "Holland Darcy", "Brack Herfurth", "Chris Kelley", "Andy Koch", "Peggy McClintock", 
-      "Knox Nibbe", "Donny Schmitt", "Tommy Simmons", "Teddy Stofer", "Ford Stofer", "Robby Stofer"
-    ];
-    
-    tiedForNinetieth.forEach(name => {
-      participants.push({
-        position: 90,
-        name,
-        totalPoints: 1,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 1 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 101st place (+2) - 9 participants
-    const tiedForHundredFirst = [
-      "Ben Applebaum", "Mike Baker", "Charlie Drago", "Greg Kevane", "Elle McClintock", 
-      "Jenny McClintock", "Julie Nibbe", "Jay Perlmutter", "Jimmy Stofer"
-    ];
-    
-    tiedForHundredFirst.forEach(name => {
-      participants.push({
-        position: 101,
-        name,
-        totalPoints: 2,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 2 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 110th place (+3) - 15 participants
-    const tiedForHundredTenth = [
-      "Hilary Beckman", "Oliver Beckman", "Justin Darcy", "Mik Gusenius", "Henry Herfurth", 
-      "Jess Herfurth", "Decker Herfurth", "Kevin McClintock", "Jon Moseley", "C.J. Nibbe", 
-      "Ravi Ramalingam", "Jack Simmons", "Hayden Simmons", "Winfield Stephens", "Scott Tande"
-    ];
-    
-    tiedForHundredTenth.forEach(name => {
-      participants.push({
-        position: 110,
-        name,
-        totalPoints: 3,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 3 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 125th place (+4) - 4 participants
-    const tiedForHundredTwentyFifth = [
-      "Annie Carlson", "Amy Jones", "Sarah Kepic", "Chad Kollar"
-    ];
-    
-    tiedForHundredTwentyFifth.forEach(name => {
-      participants.push({
-        position: 125,
-        name,
-        totalPoints: 4,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 4 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add 129th place (+5) - 1 participant
-    participants.push({
-      position: 129,
-      name: "Quinn Carlson",
-      totalPoints: 5,
-      picks: generateRandomPicks(),
-      pickScores: generateRandomPickScores(),
-      roundScores: { round1: 5 },
-      tiebreaker1: -12,
-      tiebreaker2: 2,
-      paid: true
-    });
-    
-    // Add tied for 130th place (+6) - 3 participants
-    const tiedForHundredThirtieth = [
-      "Ross Baker", "Peter Beugg", "Victoria Simmons"
-    ];
-    
-    tiedForHundredThirtieth.forEach(name => {
-      participants.push({
-        position: 130,
-        name,
-        totalPoints: 6,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 6 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    return participants;
-  } catch (error) {
-    console.error("Error fetching pool standings:", error);
-    throw new Error("Failed to load pool standings data. Please try again later.");
   }
 };
