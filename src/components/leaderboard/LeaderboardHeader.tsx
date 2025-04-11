@@ -32,32 +32,28 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
           Masters Tournament Leaderboard
         </h2>
         <div className="flex items-center gap-2">
-          {!loading && !refreshing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
-              onClick={handleManualRefresh}
-              disabled={refreshing}
-            >
-              <RefreshCw size={14} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="sr-only md:not-sr-only">Refresh</span>
-            </Button>
-          )}
-          {!loading && !refreshing && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
-              onClick={togglePotentialWinnings}
-            >
-              <DollarSign size={14} className="mr-1" />
-              <span className="sr-only md:not-sr-only">
-                {showPotentialWinnings ? "Hide Prize Money" : "Show Prize Money"}
-              </span>
-            </Button>
-          )}
-          {!loading && lastUpdated && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw size={14} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+            <span className="sr-only md:not-sr-only">Refresh</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
+            onClick={togglePotentialWinnings}
+          >
+            <DollarSign size={14} className="mr-1" />
+            <span className="sr-only md:not-sr-only">
+              {showPotentialWinnings ? "Hide Prize Money" : "Show Prize Money"}
+            </span>
+          </Button>
+          {lastUpdated && (
             <DataSourceInfo 
               lastUpdated={lastUpdated} 
               dataSource={dataSource} 

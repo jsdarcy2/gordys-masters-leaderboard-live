@@ -61,7 +61,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
           <Info size={14} className="mr-1" />
         )}
         <span>
-          Data: {getDataSourceLabel()} • Updated: {formatLastUpdated(lastUpdated)}
+          Data: <span className={dataSource?.toLowerCase() === "masters.com" ? "text-white font-medium" : ""}>
+            {getDataSourceLabel()}
+          </span> • Updated: {formatLastUpdated(lastUpdated)}
         </span>
       </div>
     </div>
