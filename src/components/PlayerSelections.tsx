@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -171,7 +172,7 @@ const PlayerSelections = () => {
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-6 w-40" />
                   <div className="flex flex-wrap gap-2">
-                    {[...Array(4)].map((_, j) => (
+                    {[...Array(5)].map((_, j) => (
                       <Skeleton key={j} className="h-8 w-24" />
                     ))}
                   </div>
@@ -189,7 +190,7 @@ const PlayerSelections = () => {
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">Rd 1</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB1</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB2</th>
-                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections (4)</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections (5)</th>
                     </tr>
                   </thead>
                   <tbody>
