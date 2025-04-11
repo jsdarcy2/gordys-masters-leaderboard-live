@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trophy, Loader2, Check, Flag } from "lucide-react";
+import { Trophy, Loader2, Check, Flag, Barcode } from "lucide-react";
 
 const PlayerPicksSchema = z.object({
   participantName: z.string().min(2, "Name must be at least 2 characters"),
@@ -39,6 +39,7 @@ const availableGolfers = [
 
 const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showVenmoCode, setShowVenmoCode] = useState(false);
   
   const form = useForm<PlayerPicksFormValues>({
     resolver: zodResolver(PlayerPicksSchema),
@@ -60,6 +61,11 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
       setIsSubmitting(false);
       onSubmit();
     }, 1500);
+  };
+
+  const handlePaymentMethodChange = (value: string) => {
+    form.setValue("paymentMethod", value as "venmo" | "paypal" | "cash" | "check");
+    setShowVenmoCode(value === "venmo");
   };
   
   return (
@@ -191,7 +197,7 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
                   </FormLabel>
                   <FormControl>
                     <RadioGroup
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => handlePaymentMethodChange(value)}
                       defaultValue={field.value}
                       className="flex flex-col space-y-1"
                     >
@@ -233,6 +239,26 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
                 </FormItem>
               )}
             />
+            
+            {showVenmoCode && (
+              <div className="bg-white p-4 rounded-lg border border-masters-green/20 flex flex-col items-center">
+                <div className="text-sm font-medium text-masters-green mb-2 flex items-center gap-2">
+                  <Barcode className="text-masters-green" size={18} />
+                  Scan to pay via Venmo
+                </div>
+                <div className="bg-white p-3 rounded-md border-2 border-masters-green/20 mb-2">
+                  <img 
+                    src="/lovable-uploads/912144bb-30e1-461b-afb7-c475e0ebc3a5.png" 
+                    alt="Venmo QR Code" 
+                    className="w-48 h-48 object-contain" 
+                  />
+                </div>
+                <p className="text-xs text-gray-500 text-center">
+                  Scan this code with your phone's Venmo app to send $25 to @GordyMasters. 
+                  Add your name in the payment note.
+                </p>
+              </div>
+            )}
             
             <FormField
               control={form.control}
