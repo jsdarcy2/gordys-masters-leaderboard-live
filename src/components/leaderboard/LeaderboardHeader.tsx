@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, RefreshCw, DollarSign, Info } from "lucide-react";
-import { formatLastUpdated } from "@/utils/leaderboardUtils";
+import { RefreshCw, DollarSign } from "lucide-react";
+import DataSourceInfo from "./DataSourceInfo";
 
 interface LeaderboardHeaderProps {
   lastUpdated: string;
@@ -12,6 +12,7 @@ interface LeaderboardHeaderProps {
   showPotentialWinnings: boolean;
   togglePotentialWinnings: () => void;
   dataSource?: string;
+  errorMessage?: string;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -21,7 +22,8 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   handleManualRefresh,
   showPotentialWinnings,
   togglePotentialWinnings,
-  dataSource
+  dataSource,
+  errorMessage
 }) => {
   return (
     <div className="masters-header">
@@ -56,16 +58,11 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             </Button>
           )}
           {!loading && lastUpdated && (
-            <div className="flex items-center text-sm text-masters-yellow">
-              <Clock size={14} className="mr-1" />
-              <span>Updated: {formatLastUpdated(lastUpdated)}</span>
-              {dataSource && (
-                <div className="ml-2 flex items-center">
-                  <Info size={14} className="mr-1" />
-                  <span>Source: {dataSource === "espn" ? "ESPN" : "Masters.com"}</span>
-                </div>
-              )}
-            </div>
+            <DataSourceInfo 
+              lastUpdated={lastUpdated} 
+              dataSource={dataSource} 
+              errorMessage={errorMessage}
+            />
           )}
         </div>
       </div>

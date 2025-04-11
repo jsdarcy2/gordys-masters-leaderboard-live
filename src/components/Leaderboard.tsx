@@ -28,6 +28,7 @@ const Leaderboard = () => {
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const [dataInitialized, setDataInitialized] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<string | undefined>(undefined);
+  const [dataSourceError, setDataSourceError] = useState<string | undefined>(undefined);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -83,6 +84,7 @@ const Leaderboard = () => {
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
       setDataSource(data.source);
+      setDataSourceError(undefined); // Clear any previous errors on successful fetch
       setError(null);
       setDataInitialized(true);
       
@@ -121,7 +123,7 @@ const Leaderboard = () => {
       if (showToast) {
         toast({
           title: "Leaderboard Updated",
-          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source === 'espn' ? 'ESPN' : 'Masters.com'}` : ''}`,
+          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source === 'espn' ? 'ESPN' : 'Masters.org'}` : ''}`,
         });
       }
       
@@ -130,9 +132,10 @@ const Leaderboard = () => {
       if (data.source) {
         localStorage.setItem('leaderboardSource', data.source);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Leaderboard data fetch error:", err);
       setError("Failed to load leaderboard data from all sources");
+      setDataSourceError(`Error: ${err.message || "Unknown error"}`);
       
       if (showToast) {
         toast({
@@ -228,6 +231,7 @@ const Leaderboard = () => {
         showPotentialWinnings={showPotentialWinnings}
         togglePotentialWinnings={togglePotentialWinnings}
         dataSource={dataSource}
+        errorMessage={dataSourceError}
       />
       
       <div className="p-4 bg-white">
