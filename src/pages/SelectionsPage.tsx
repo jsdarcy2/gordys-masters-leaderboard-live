@@ -34,7 +34,7 @@ const SelectionsPage = () => {
           toast({
             title: "Using demo data",
             description: `Currently showing demo data with ${count} participants due to connection issues.`,
-            variant: "warning",
+            variant: "default", // Changed from "warning" to "default"
           });
         }
       } catch (error) {
@@ -43,7 +43,7 @@ const SelectionsPage = () => {
         toast({
           title: "Data loading issue",
           description: "Using demo data while we're unable to connect to the tournament API.",
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default"
         });
       } finally {
         setLoading(false);
@@ -87,7 +87,7 @@ const SelectionsPage = () => {
         toast({
           title: "Data loading issue",
           description: "Still unable to connect to the tournament API. Using demo data.",
-          variant: "warning",
+          variant: "default", // Changed from "warning" to "default"
         });
       } finally {
         setLoading(false);
