@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
 // Your RapidAPI Key - you'll need to set this in your environment
@@ -10,7 +9,7 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
     // Add cache-busting timestamp to prevent stale data
     const timestamp = new Date().getTime();
     
-    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "YOUR_API_KEY") {
+    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "") {
       console.warn("RapidAPI key not set. Falling back to fallback data.");
       return getFallbackLeaderboardData();
     }
@@ -42,7 +41,7 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
 // Function to fetch current tournament schedule
 export const fetchTournamentSchedule = async () => {
   try {
-    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "YOUR_API_KEY") {
+    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "") {
       console.warn("RapidAPI key not set. Cannot fetch tournament schedule.");
       return null;
     }
@@ -402,150 +401,4 @@ const actualTeamSelections: { [participantName: string]: string[] } = {
   "Jon Sturgis": ["Rory McIlroy", "Collin Morikawa", "Corey Conners", "Russell Henley", "Shane Lowry"],
   "Avery Sturgis": ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Sergio Garcia", "Jason Day"],
   "Ethan Sturgis": ["Collin Morikawa", "Ludvig Åberg", "Tom Kim", "Will Zalatoris", "Phil Mickelson"],
-  "Sarah Sturgis": ["Bryson DeChambeau", "Scottie Scheffler", "Shane Lowry", "Brooks Koepka", "Jordan Spieth"],
-  "Scott Tande": ["Scottie Scheffler", "Collin Morikawa", "Russell Henley", "Justin Thomas", "Sepp Straka"],
-  "Jess Troyak": ["Rory McIlroy", "Ludvig Åberg", "Hideki Matsuyama", "Will Zalatoris", "Akshay Bhatia"],
-  "Chris Willette": ["Collin Morikawa", "Ludvig Åberg", "Justin Thomas", "Joaquín Niemann", "Russell Henley"]
-};
-
-// Calculate pool standings based on current leaderboard
-export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
-  try {
-    const leaderboardData = await fetchLeaderboardData();
-    
-    const golferScoreMap = new Map<string, GolferScore>();
-    leaderboardData.leaderboard.forEach(golfer => {
-      golferScoreMap.set(golfer.name, golfer);
-    });
-    
-    const participants: PoolParticipant[] = Object.entries(actualTeamSelections).map(([name, picks]) => {
-      return {
-        position: 0,
-        name,
-        totalPoints: 0,
-        picks,
-        pickScores: {},
-        roundScores: {},
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: true
-      };
-    });
-    
-    participants.forEach(participant => {
-      let totalScore = 0;
-      const round1Score = { value: 0 };
-      
-      participant.pickScores = {};
-      
-      participant.picks.forEach(golferName => {
-        // Try to find an exact match first
-        let golfer = golferScoreMap.get(golferName);
-        
-        // If not found, try a more flexible match (to handle name variations)
-        if (!golfer) {
-          for (const [key, value] of golferScoreMap.entries()) {
-            if (key.toLowerCase().includes(golferName.toLowerCase()) || 
-                golferName.toLowerCase().includes(key.toLowerCase())) {
-              golfer = value;
-              break;
-            }
-          }
-        }
-        
-        if (golfer) {
-          participant.pickScores![golferName] = golfer.score;
-          totalScore += golfer.score;
-          
-          if (leaderboardData.currentRound >= 1) {
-            round1Score.value += golfer.score;
-          }
-        } else {
-          // Player not found in leaderboard, use 0 as a fallback
-          participant.pickScores![golferName] = 0;
-        }
-      });
-      
-      participant.totalPoints = totalScore;
-      
-      participant.roundScores = {
-        round1: round1Score.value
-      };
-    });
-    
-    // Sort participants by total score (lower is better)
-    participants.sort((a, b) => {
-      if (a.totalPoints !== b.totalPoints) {
-        return a.totalPoints - b.totalPoints;
-      }
-      
-      if (a.tiebreaker1 !== b.tiebreaker1) {
-        return a.tiebreaker1 - b.tiebreaker1;
-      }
-      
-      return a.tiebreaker2 - b.tiebreaker2;
-    });
-    
-    // Assign positions
-    let currentPosition = 1;
-    let currentScore = participants[0]?.totalPoints ?? 0;
-    let currentTiebreaker1 = participants[0]?.tiebreaker1 ?? 0;
-    let currentTiebreaker2 = participants[0]?.tiebreaker2 ?? 0;
-    
-    participants.forEach((participant, index) => {
-      if (index === 0) {
-        participant.position = currentPosition;
-      } else {
-        if (participant.totalPoints === currentScore && 
-            participant.tiebreaker1 === currentTiebreaker1 &&
-            participant.tiebreaker2 === currentTiebreaker2) {
-          participant.position = currentPosition;
-        } else {
-          currentPosition = index + 1;
-          participant.position = currentPosition;
-          currentScore = participant.totalPoints;
-          currentTiebreaker1 = participant.tiebreaker1 ?? 0;
-          currentTiebreaker2 = participant.tiebreaker2 ?? 0;
-        }
-      }
-    });
-    
-    return participants;
-  } catch (error) {
-    console.error("Error calculating pool standings:", error);
-    throw new Error("Failed to calculate pool standings. Please try again later.");
-  }
-};
-
-// Function to fetch player selections data
-export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
-  try {
-    const poolStandingsData = await fetchPoolStandings();
-    
-    const playerSelections: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = {};
-    
-    poolStandingsData.forEach(participant => {
-      const picks = participant.picks;
-      
-      const roundScores: number[] = [];
-      
-      if (participant.pickScores) {
-        participant.picks.forEach(golfer => {
-          const score = participant.pickScores?.[golfer] || 0;
-          roundScores.push(score);
-        });
-      }
-      
-      playerSelections[participant.name] = {
-        picks,
-        roundScores,
-        tiebreakers: [participant.tiebreaker1 ?? 0, participant.tiebreaker2 ?? 0]
-      };
-    });
-    
-    return playerSelections;
-  } catch (error) {
-    console.error("Error fetching player selections:", error);
-    throw new Error("Failed to load player selections data. Please try again later.");
-  }
-};
+  "
