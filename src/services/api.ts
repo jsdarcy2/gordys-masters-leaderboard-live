@@ -7,7 +7,7 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
     // Add cache-busting timestamp to prevent stale data
     const timestamp = new Date().getTime();
     
-    // Use ESPN's main golf leaderboard page instead
+    // Use ESPN's main golf leaderboard API endpoint
     const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?t=${timestamp}`, {
       headers: {
         'Accept': 'application/json',
@@ -60,13 +60,35 @@ const transformESPNData = (apiData: any): TournamentData => {
       const status = competitor.status?.displayValue === 'CUT' ? 'cut' : 
                      competitor.status?.displayValue === 'WD' ? 'withdrawn' : 'active';
       
-      // Parse scores
-      const scoreToPar = parseInt(competitor.score || '0');
+      // Parse scores - Fixing the score data extraction
+      let scoreToPar = 0;
+      if (competitor.score !== undefined) {
+        // First try to parse as number
+        const parsed = parseInt(competitor.score);
+        if (!isNaN(parsed)) {
+          scoreToPar = parsed;
+        }
+        // If the score is "E" (Even par)
+        else if (competitor.score === "E") {
+          scoreToPar = 0;
+        }
+      }
+      
       let todayScore = 0;
       
       // Try to get the current round score
-      if (competitor.linescores && competitor.linescores.length >= currentRound) {
-        todayScore = parseInt(competitor.linescores[currentRound - 1]?.value || '0');
+      if (competitor.linescores && competitor.linescores.length > 0) {
+        const currentRoundIdx = Math.min(currentRound - 1, competitor.linescores.length - 1);
+        const roundScore = competitor.linescores[currentRoundIdx]?.value;
+        
+        if (roundScore === "E") {
+          todayScore = 0;
+        } else {
+          const parsed = parseInt(roundScore);
+          if (!isNaN(parsed)) {
+            todayScore = parsed;
+          }
+        }
       }
       
       // Get thru information
@@ -77,23 +99,28 @@ const transformESPNData = (apiData: any): TournamentData => {
         thru = '-';
       }
       
+      // Using more fallbacks for position
+      const position = parseInt(competitor.status?.position?.id || competitor.status?.position || competitor.rank || '0');
+      
       return {
-        position: parseInt(competitor.status?.position?.id || competitor.rank || '0'),
+        position: position,
         name: playerData.displayName || playerData.name || '',
-        score: isNaN(scoreToPar) ? 0 : scoreToPar,
-        today: isNaN(todayScore) ? 0 : todayScore,
+        score: scoreToPar,
+        today: todayScore,
         thru: thru,
         status: status as 'cut' | 'active' | 'withdrawn'
       };
     });
     
-    // Sort by position if not already sorted
-    const sortedLeaderboard = leaderboard.sort((a, b) => a.position - b.position);
+    // Filter out entries without names and sort by position
+    const validLeaderboard = leaderboard
+      .filter(entry => entry.name.trim() !== '')
+      .sort((a, b) => a.position - b.position);
     
     return {
       lastUpdated: new Date().toISOString(),
       currentRound: currentRound,
-      leaderboard: sortedLeaderboard
+      leaderboard: validLeaderboard
     };
   } catch (err) {
     console.error("Error transforming ESPN leaderboard data:", err);
