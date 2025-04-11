@@ -4,8 +4,11 @@ import Layout from "@/components/Layout";
 import Leaderboard from "@/components/Leaderboard";
 import { Separator } from "@/components/ui/separator";
 import { BarChart3 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const LeaderboardPage = () => {
+  const isMobile = useIsMobile();
+  
   // Log component mount for debugging
   useEffect(() => {
     console.log("Leaderboard page mounted");
@@ -21,15 +24,15 @@ const LeaderboardPage = () => {
 
   return (
     <Layout>
-      <div className="mb-6">
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-masters-green flex items-center">
-          <BarChart3 size={24} className="mr-2 text-masters-yellow" />
+      <div className="mb-4 md:mb-6">
+        <h2 className={`${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'} font-serif font-bold text-masters-green flex items-center`}>
+          <BarChart3 size={isMobile ? 20 : 24} className="mr-2 text-masters-yellow" />
           Live Leaderboard
         </h2>
-        <p className="text-gray-600 mt-2">
+        <p className="text-sm md:text-base text-gray-600 mt-1 md:mt-2">
           Real-time scoring updates from Augusta National Golf Club.
         </p>
-        <Separator className="my-4 bg-masters-green/10" />
+        <Separator className="my-3 md:my-4 bg-masters-green/10" />
       </div>
       
       <Leaderboard />
