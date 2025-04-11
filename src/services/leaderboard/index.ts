@@ -3,6 +3,9 @@ import { DataSource, GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound } from "../tournament";
 import { scrapeMastersWebsite } from "./scraper";
 
+// Export the scraper function so it can be re-exported by the api module
+export { scrapeMastersWebsite };
+
 // Get the current year for API requests
 const getCurrentYear = (): string => {
   // Use environment variable if available, otherwise use the current year
