@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Info, AlertTriangle, ExternalLink } from "lucide-react";
+import { Info, AlertTriangle, ExternalLink, Calendar } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
@@ -8,12 +8,14 @@ interface DataSourceInfoProps {
   dataSource?: string;
   lastUpdated: string;
   errorMessage?: string;
+  tournamentYear?: string;
 }
 
 const DataSourceInfo: React.FC<DataSourceInfoProps> = ({ 
   dataSource, 
   lastUpdated,
-  errorMessage
+  errorMessage,
+  tournamentYear
 }) => {
   const formatLastUpdated = (timestamp: string): string => {
     if (!timestamp) return "Unknown";
@@ -51,13 +53,15 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   const getDataSourceLink = () => {
     if (!dataSource) return null;
     
+    const year = tournamentYear || new Date().getFullYear();
+    
     switch (dataSource.toLowerCase()) {
       case "espn-api":
-        return "https://www.espn.com/golf/leaderboard";
+        return `https://www.espn.com/golf/${year}/masters/leaderboard`;
       case "sportsdata-api":
-        return "https://www.masters.com/en_US/scores/index.html";
+        return `https://www.masters.com/en_US/scores/index.html`;
       case "historical-data":
-        return "https://www.masters.com/en_US/scores/index.html";
+        return `https://www.masters.com/en_US/scores/index.html`;
       default:
         return null;
     }
@@ -85,7 +89,15 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         <span>
           <span className="text-white/60">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
-          </span> • <span className="text-white/60">Updated:</span> {formatLastUpdated(lastUpdated)}
+          </span> 
+          {tournamentYear && (
+            <span className="ml-1">
+              <Calendar size={12} className="inline mr-0.5" />
+              {tournamentYear}
+            </span>
+          )}
+          <span> • </span>
+          <span className="text-white/60">Updated:</span> {formatLastUpdated(lastUpdated)}
           
           {sourceLink && (
             <a 

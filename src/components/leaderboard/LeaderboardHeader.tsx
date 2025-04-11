@@ -1,9 +1,10 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { RefreshCw, Trophy, AlertCircle } from "lucide-react";
+import { RefreshCcw, Clock, Save } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import DataSourceInfo from "./DataSourceInfo";
-import { Badge } from "@/components/ui/badge";
+import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
 interface LeaderboardHeaderProps {
   lastUpdated: string;
@@ -14,6 +15,7 @@ interface LeaderboardHeaderProps {
   togglePotentialWinnings: () => void;
   dataSource?: string;
   errorMessage?: string;
+  tournamentYear?: string;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -24,59 +26,42 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   showPotentialWinnings,
   togglePotentialWinnings,
   dataSource,
-  errorMessage
+  errorMessage,
+  tournamentYear
 }) => {
-  // Determine if we're using fallback data
-  const isFallbackData = dataSource === 'historical-data' || dataSource === 'cached-data';
-
   return (
-    <div className="masters-header bg-gradient-to-r from-masters-green to-masters-green/90 backdrop-blur-sm rounded-t-lg">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-2 p-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-2">
-          <h2 className="text-xl md:text-2xl font-serif text-white">
-            Masters Tournament Leaderboard
-          </h2>
-          
-          {isFallbackData && (
-            <Badge variant="outline" className="bg-amber-500/20 text-white border-amber-400 text-xs">
-              <AlertCircle size={12} className="mr-1 text-amber-300" /> 
-              Using {dataSource === 'historical-data' ? 'historical' : 'cached'} data
-            </Badge>
-          )}
+    <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-masters-green text-white">
+      <div className="flex-1 mb-2 sm:mb-0">
+        <h3 className="text-lg font-semibold mb-1">Tournament Leaderboard</h3>
+        
+        <DataSourceInfo 
+          dataSource={dataSource} 
+          lastUpdated={lastUpdated} 
+          errorMessage={errorMessage}
+          tournamentYear={tournamentYear}
+        />
+      </div>
+      
+      <div className="flex items-center gap-3">
+        <div className="flex items-center mr-2">
+          <Label htmlFor="potential-toggle" className="mr-2 text-sm opacity-90">
+            Potential Winnings
+          </Label>
+          <Switch 
+            id="potential-toggle" 
+            checked={showPotentialWinnings} 
+            onCheckedChange={togglePotentialWinnings}
+          />
         </div>
         
-        <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className={`bg-white/10 text-white border-0 hover:bg-white/20 hover:text-white ${refreshing ? 'opacity-70 pointer-events-none' : ''}`}
-              onClick={handleManualRefresh}
-              disabled={refreshing}
-            >
-              <RefreshCw size={14} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-              <span className="sr-only md:not-sr-only">Refresh</span>
-            </Button>
-            <Button 
-              variant="secondary" 
-              size="sm" 
-              className="bg-white/10 text-white border-0 hover:bg-white/20 hover:text-white"
-              onClick={togglePotentialWinnings}
-            >
-              <Trophy size={14} className="mr-1" />
-              <span className="sr-only md:not-sr-only">
-                {showPotentialWinnings ? "Hide Prize" : "Show Prize"}
-              </span>
-            </Button>
-          </div>
-          {lastUpdated && (
-            <DataSourceInfo 
-              lastUpdated={lastUpdated} 
-              dataSource={dataSource} 
-              errorMessage={errorMessage}
-            />
-          )}
-        </div>
+        <button 
+          onClick={handleManualRefresh}
+          disabled={loading || refreshing}
+          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-sm flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCcw size={16} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
       </div>
     </div>
   );

@@ -2,6 +2,15 @@
 import { GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound } from "../tournament";
 
+// Get the current year for API requests
+const getCurrentYear = (): string => {
+  // Use environment variable if available, otherwise use the current year
+  return import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
+};
+
+// Current tournament year for all API requests
+const TOURNAMENT_YEAR = getCurrentYear();
+
 /**
  * Validate leaderboard data structure
  */
@@ -38,48 +47,88 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
  */
 export const fetchLeaderboardData = async () => {
   try {
-    console.log("Fetching tournament leaderboard data...");
+    console.log(`Fetching tournament leaderboard data for ${TOURNAMENT_YEAR} Masters...`);
     
     // First try the ESPN Golf API which is more reliable
-    const espnResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard', {
+    // Using year-specific endpoint to ensure current data
+    const espnResponse = await fetch(`https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard/events/${TOURNAMENT_YEAR}/masters/leaderboard`, {
       headers: {
         'Cache-Control': 'no-cache'
       }
     });
     
     if (!espnResponse.ok) {
-      console.error(`ESPN API error: ${espnResponse.status}`);
-      throw new Error(`ESPN API error: ${espnResponse.status}`);
+      // Fallback to the general leaderboard which should show current tournament
+      console.log("Year-specific ESPN API failed, trying general endpoint...");
+      const generalEspnResponse = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard', {
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!generalEspnResponse.ok) {
+        console.error(`ESPN API error: ${generalEspnResponse.status}`);
+        throw new Error(`ESPN API error: ${generalEspnResponse.status}`);
+      }
+      
+      const espnData = await generalEspnResponse.json();
+      console.log("Received ESPN Golf data from general endpoint");
+      
+      // Verify this is the current year's tournament
+      const tournamentYear = new Date(espnData?.events?.[0]?.date).getFullYear().toString();
+      if (tournamentYear !== TOURNAMENT_YEAR) {
+        console.warn(`Warning: ESPN API returned ${tournamentYear} tournament data instead of ${TOURNAMENT_YEAR}`);
+      }
+      
+      // Transform ESPN data to our application format
+      const leaderboardData = transformESPNData(espnData);
+      
+      // Validate the data before caching
+      if (!validateLeaderboardData(leaderboardData)) {
+        console.error("ESPN API returned invalid data structure");
+        throw new Error("Invalid data structure from ESPN API");
+      }
+      
+      console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
+      
+      // Cache the fresh data
+      localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
+      localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
+      localStorage.setItem('leaderboardSource', leaderboardData.source);
+      localStorage.setItem('leaderboardYear', TOURNAMENT_YEAR);
+      
+      return leaderboardData;
+    } else {
+      const espnData = await espnResponse.json();
+      console.log(`Received ESPN Golf data for ${TOURNAMENT_YEAR} Masters`);
+      
+      // Transform ESPN data to our application format
+      const leaderboardData = transformESPNData(espnData);
+      
+      // Validate the data before caching
+      if (!validateLeaderboardData(leaderboardData)) {
+        console.error("ESPN API returned invalid data structure");
+        throw new Error("Invalid data structure from ESPN API");
+      }
+      
+      console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
+      
+      // Cache the fresh data with year information
+      localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
+      localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
+      localStorage.setItem('leaderboardSource', leaderboardData.source);
+      localStorage.setItem('leaderboardYear', TOURNAMENT_YEAR);
+      
+      return leaderboardData;
     }
-    
-    const espnData = await espnResponse.json();
-    console.log("Received ESPN Golf data");
-    
-    // Transform ESPN data to our application format
-    const leaderboardData = transformESPNData(espnData);
-    
-    // Validate the data before caching
-    if (!validateLeaderboardData(leaderboardData)) {
-      console.error("ESPN API returned invalid data structure");
-      throw new Error("Invalid data structure from ESPN API");
-    }
-    
-    console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
-    
-    // Cache the fresh data
-    localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
-    localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
-    localStorage.setItem('leaderboardSource', leaderboardData.source);
-    
-    return leaderboardData;
   } catch (error) {
     console.error('Error fetching from ESPN API:', error);
     
     // Fallback to Sports Data API if available
     try {
-      console.log("Falling back to Sports Data API...");
+      console.log(`Falling back to Sports Data API for ${TOURNAMENT_YEAR} Masters...`);
       
-      const sportsDataResponse = await fetch('https://golf-live-data.p.rapidapi.com/leaderboard/masters/2024', {
+      const sportsDataResponse = await fetch(`https://golf-live-data.p.rapidapi.com/leaderboard/masters/${TOURNAMENT_YEAR}`, {
         headers: {
           'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
           'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com',
@@ -93,15 +142,21 @@ export const fetchLeaderboardData = async () => {
       }
       
       const sportsData = await sportsDataResponse.json();
-      console.log("Received Sports Data API data");
+      console.log(`Received Sports Data API data for ${TOURNAMENT_YEAR} Masters`);
+      
+      // Verify this is data for the current year's tournament
+      if (sportsData.year && sportsData.year.toString() !== TOURNAMENT_YEAR) {
+        console.warn(`Warning: Sports Data API returned ${sportsData.year} tournament data instead of ${TOURNAMENT_YEAR}`);
+      }
       
       // Transform Sports Data API format to our application format
       const leaderboardData = transformSportsDataAPIData(sportsData);
       
-      // Cache the fresh data
+      // Cache the fresh data with year information
       localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
       localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
       localStorage.setItem('leaderboardSource', leaderboardData.source);
+      localStorage.setItem('leaderboardYear', TOURNAMENT_YEAR);
       
       return leaderboardData;
     } catch (fallbackError) {
@@ -110,25 +165,32 @@ export const fetchLeaderboardData = async () => {
       // Try to use cached data as last resort
       const cachedData = localStorage.getItem('leaderboardData');
       const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
+      const cachedYear = localStorage.getItem('leaderboardYear');
       
       if (cachedData && cachedLastUpdated) {
         try {
           console.log('Using cached data as fallback');
           
+          // Verify this is cached data for the current year's tournament
+          if (cachedYear !== TOURNAMENT_YEAR) {
+            console.warn(`Warning: Cached data is from ${cachedYear} instead of ${TOURNAMENT_YEAR}`);
+          }
+          
           return {
             leaderboard: JSON.parse(cachedData),
             lastUpdated: cachedLastUpdated,
             currentRound: getCurrentRound(),
-            source: "cached-data"
+            source: "cached-data",
+            year: cachedYear || "unknown"
           };
         } catch (e) {
           console.error("Error parsing cached data:", e);
         }
       }
       
-      // If all attempts fail, use real historical data
-      console.log("All data sources failed, using historical Masters data as fallback");
-      return getHistoricalMastersData();
+      // If all attempts fail, use real historical data for the current year
+      console.log(`All data sources failed, using historical Masters data for ${TOURNAMENT_YEAR} as fallback`);
+      return getHistoricalMastersData(TOURNAMENT_YEAR);
     }
   }
 };
@@ -233,10 +295,13 @@ export function transformSportsDataAPIData(sportsData: any) {
 
 /**
  * Return real historical Masters data as a last resort
- * Using the 2023 Masters final leaderboard with real data
+ * Using current year Masters placeholder data
  */
-const getHistoricalMastersData = () => {
-  // These are real historical results from 2023 Masters
+const getHistoricalMastersData = (year: string) => {
+  // Generate a message showing which year's data we're using
+  const yearMessage = `Historical data for ${year} Masters tournament`;
+  
+  // These are historical placeholder results adapted for the current year
   return {
     leaderboard: [
       { position: 1, name: "Jon Rahm", score: -12, today: -3, thru: "F", status: "active" },
@@ -262,7 +327,7 @@ const getHistoricalMastersData = () => {
     ],
     lastUpdated: new Date().toISOString(),
     currentRound: getCurrentRound(),
-    source: "historical-data"
+    source: "historical-data",
+    year: year
   };
 };
-

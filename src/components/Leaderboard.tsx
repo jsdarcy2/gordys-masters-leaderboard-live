@@ -11,6 +11,7 @@ import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 const POLLING_INTERVAL = 30000; 
 
 const Leaderboard = () => {
@@ -64,7 +65,7 @@ const Leaderboard = () => {
         setRefreshing(true);
       }
       
-      console.log("Loading leaderboard data, initialized:", dataInitialized);
+      console.log(`Loading leaderboard data for ${TOURNAMENT_YEAR} Masters, initialized:`, dataInitialized);
       
       const data = await fetchLeaderboardData();
       console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
@@ -84,7 +85,13 @@ const Leaderboard = () => {
       setDataInitialized(true);
       
       if (data.source === 'historical-data' || data.source === 'cached-data') {
-        setDataSourceError(`Note: Using ${data.source === 'historical-data' ? 'historical' : 'cached'} data as live data could not be fetched.`);
+        let errorMessage = `Note: Using ${data.source === 'historical-data' ? 'historical' : 'cached'} data as live data could not be fetched.`;
+        
+        if (data.year && data.year !== TOURNAMENT_YEAR) {
+          errorMessage += ` Data is from ${data.year} instead of ${TOURNAMENT_YEAR}.`;
+        }
+        
+        setDataSourceError(errorMessage);
       }
       
       if (previousLeaderboard.current.length > 0) {
@@ -131,6 +138,9 @@ const Leaderboard = () => {
       if (data.source) {
         localStorage.setItem('leaderboardSource', data.source);
       }
+      if (data.year) {
+        localStorage.setItem('leaderboardYear', data.year);
+      }
     } catch (err: any) {
       console.error("Leaderboard data fetch error:", err);
       setError("Failed to load leaderboard data. Please try again later.");
@@ -163,6 +173,7 @@ const Leaderboard = () => {
     const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
     const cachedData = localStorage.getItem('leaderboardData');
     const cachedSource = localStorage.getItem('leaderboardSource');
+    const cachedYear = localStorage.getItem('leaderboardYear');
     
     if (cachedLastUpdated && cachedData) {
       try {
@@ -173,6 +184,11 @@ const Leaderboard = () => {
         if (cachedSource) {
           setDataSource(cachedSource);
         }
+        
+        if (cachedYear && cachedYear !== TOURNAMENT_YEAR) {
+          setDataSourceError(`Note: Cached data is from ${cachedYear} instead of ${TOURNAMENT_YEAR}.`);
+        }
+        
         setLoading(false);
         setDataInitialized(true);
         
@@ -228,13 +244,14 @@ const Leaderboard = () => {
         togglePotentialWinnings={togglePotentialWinnings}
         dataSource={dataSource}
         errorMessage={dataSourceError}
+        tournamentYear={TOURNAMENT_YEAR}
       />
       
       <div className="p-4 bg-white">
         {dataSource && (dataSource === 'historical-data' || dataSource === 'cached-data') && (
           <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data</AlertTitle>
+            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data for {TOURNAMENT_YEAR} Masters</AlertTitle>
             <AlertDescription className="text-amber-700 text-sm">
               We're currently unable to fetch live tournament data. Scores shown may not reflect the current tournament standings.
             </AlertDescription>
@@ -277,7 +294,7 @@ const Leaderboard = () => {
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-gray-600">
             <Info size={24} className="mx-auto mb-2 text-masters-green"/>
-            <p>No leaderboard data available. Please try refreshing.</p>
+            <p>No leaderboard data available for {TOURNAMENT_YEAR} Masters. Please try refreshing.</p>
             <button 
               onClick={handleManualRefresh}
               className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"
