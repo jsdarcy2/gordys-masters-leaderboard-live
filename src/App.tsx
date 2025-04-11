@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
 import Index from "./pages/Index";
+import EntryPage from "./pages/EntryPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import SelectionsPage from "./pages/SelectionsPage";
 import RulesPage from "./pages/RulesPage";
@@ -36,6 +37,7 @@ const App = () => (
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/entry" element={<EntryPage />} />
           <Route path="/leaderboard" element={<LeaderboardPage />} />
           <Route path="/selections" element={<SelectionsPage />} />
           <Route path="/archive" element={<ArchivePage />} />

@@ -1,3 +1,4 @@
+
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -58,4 +59,12 @@ export type GreenRobeCoChampions = {
     image?: string;
     hometown?: string;
   }[];
+}
+
+export interface CardProps {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  href: string;
+  highlight?: boolean;
 }
