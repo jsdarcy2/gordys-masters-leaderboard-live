@@ -89,112 +89,79 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       return 0; // No bonus for positions outside top 10
     };
     
-    // Build pool participants with updated scoring logic based on the rules
-    const poolParticipants: PoolParticipant[] = [
+    // Generate 134 pool participants with random names and picks
+    const poolParticipants: PoolParticipant[] = [];
+    
+    // Include the original 10 participants first
+    const originalParticipants = [
       { 
-        position: 1, 
         name: "John Smith", 
-        totalScore: 0,  // Will be calculated
-        totalPoints: 0, // Will be calculated 
         paid: true, 
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Max Homa", "Xander Schauffele"], 
-        pickScores: {"Scottie Scheffler": -10, "Collin Morikawa": -8, "Max Homa": -7, "Xander Schauffele": -4} 
+        picks: ["Scottie Scheffler", "Collin Morikawa", "Max Homa", "Xander Schauffele"]
       },
       { 
-        position: 2, 
         name: "Emily Johnson", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Rory McIlroy", "Tommy Fleetwood"], 
-        pickScores: {"Scottie Scheffler": -10, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Tommy Fleetwood": -3}
+        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Rory McIlroy", "Tommy Fleetwood"]
       },
       { 
-        position: 3, 
         name: "Mike Williams", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Collin Morikawa", "Brooks Koepka", "Dustin Johnson", "Tiger Woods"], 
-        pickScores: {"Collin Morikawa": -8, "Brooks Koepka": -2, "Dustin Johnson": +4, "Tiger Woods": +5}
+        picks: ["Collin Morikawa", "Brooks Koepka", "Dustin Johnson", "Tiger Woods"]
       },
       { 
-        position: 4, 
         name: "Sarah Davis", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Patrick Cantlay"], 
-        pickScores: {"Scottie Scheffler": -10, "Ludvig Åberg": -6, "Justin Thomas": +1, "Patrick Cantlay": +3}
+        picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Patrick Cantlay"]
       },
       { 
-        position: 5, 
         name: "Robert Jones", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Max Homa", "Bryson DeChambeau", "Rory McIlroy", "Brooks Koepka"], 
-        pickScores: {"Max Homa": -7, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Brooks Koepka": -2}
+        picks: ["Max Homa", "Bryson DeChambeau", "Rory McIlroy", "Brooks Koepka"]
       },
       { 
-        position: 6, 
         name: "Jessica Brown", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: false, 
-        picks: ["Collin Morikawa", "Ludvig Åberg", "Tommy Fleetwood", "Jon Rahm"], 
-        pickScores: {"Collin Morikawa": -8, "Ludvig Åberg": -6, "Tommy Fleetwood": -3, "Jon Rahm": 0}
+        picks: ["Collin Morikawa", "Ludvig Åberg", "Tommy Fleetwood", "Jon Rahm"]
       },
       { 
-        position: 7, 
         name: "David Miller", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Scottie Scheffler", "Xander Schauffele", "Jon Rahm", "Jordan Spieth"], 
-        pickScores: {"Scottie Scheffler": -10, "Xander Schauffele": -4, "Jon Rahm": 0, "Jordan Spieth": +2}
+        picks: ["Scottie Scheffler", "Xander Schauffele", "Jon Rahm", "Jordan Spieth"]
       },
       { 
-        position: 8, 
         name: "Lisa Wilson", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Max Homa", "Xander Schauffele", "Tommy Fleetwood", "Rory McIlroy"], 
-        pickScores: {"Max Homa": -7, "Xander Schauffele": -4, "Tommy Fleetwood": -3, "Rory McIlroy": -1}
+        picks: ["Max Homa", "Xander Schauffele", "Tommy Fleetwood", "Rory McIlroy"]
       },
       { 
-        position: 9, 
         name: "Kevin Taylor", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: true, 
-        picks: ["Bryson DeChambeau", "Brooks Koepka", "Jon Rahm", "Dustin Johnson"], 
-        pickScores: {"Bryson DeChambeau": -5, "Brooks Koepka": -2, "Jon Rahm": 0, "Dustin Johnson": +4}
+        picks: ["Bryson DeChambeau", "Brooks Koepka", "Jon Rahm", "Dustin Johnson"]
       },
       { 
-        position: 10, 
         name: "Jennifer Anderson", 
-        totalScore: 0, 
-        totalPoints: 0, 
         paid: false, 
-        picks: ["Ludvig Åberg", "Xander Schauffele", "Rory McIlroy", "Justin Thomas"], 
-        pickScores: {"Ludvig Åberg": -6, "Xander Schauffele": -4, "Rory McIlroy": -1, "Justin Thomas": +1}
+        picks: ["Ludvig Åberg", "Xander Schauffele", "Rory McIlroy", "Justin Thomas"]
       }
     ];
     
-    // Update the pickScores and calculate totalScore for each participant
-    poolParticipants.forEach(participant => {
+    // Add the original participants
+    for (const participant of originalParticipants) {
+      // Initialize pickScores object
+      const pickScores: Record<string, number> = {};
+      
+      // Calculate total score
       let totalScore = 0;
       
-      // Update each pick's score to match the current leaderboard
+      // Process each pick
       participant.picks.forEach(golferName => {
-        if (golferScores[golferName] !== undefined) {
-          participant.pickScores[golferName] = golferScores[golferName];
-        }
+        // Get current score for this golfer (or 0 if not found)
+        const golferScore = golferScores[golferName] !== undefined ? golferScores[golferName] : 0;
+        pickScores[golferName] = golferScore;
         
-        // Add the golfer's score to the total
-        totalScore += participant.pickScores[golferName];
+        // Add to total score
+        totalScore += golferScore;
         
         // Apply bonus points for top finishers
         const golfer = leaderboard.find(g => g.name === golferName);
@@ -203,10 +170,75 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
         }
       });
       
-      // Update the totalScore and totalPoints
-      participant.totalScore = totalScore;
-      participant.totalPoints = totalScore; // Keep totalPoints same as totalScore for consistency
-    });
+      // Add this participant to the pool
+      poolParticipants.push({
+        position: 0, // Will be calculated after sorting
+        name: participant.name,
+        totalScore: totalScore,
+        totalPoints: totalScore, // For compatibility
+        paid: participant.paid,
+        picks: participant.picks,
+        pickScores: pickScores
+      });
+    }
+    
+    // Generate additional random participants to reach 134
+    const firstNames = ["Alex", "Taylor", "Jordan", "Casey", "Morgan", "Jamie", "Pat", "Riley", "Avery", "Cameron"];
+    const lastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor", 
+                      "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Clark"];
+    
+    const availableGolfers = leaderboard.map(g => g.name);
+    
+    // Generate additional 124 participants (to make 134 total)
+    for (let i = 0; i < 124; i++) {
+      // Generate a random name
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const name = `${firstName} ${lastName}-${i+1}`;
+      
+      // Select 4 random golfers as picks
+      const picks: string[] = [];
+      while (picks.length < 4) {
+        const randomIndex = Math.floor(Math.random() * availableGolfers.length);
+        const golfer = availableGolfers[randomIndex];
+        if (!picks.includes(golfer)) {
+          picks.push(golfer);
+        }
+      }
+      
+      // Initialize pickScores object
+      const pickScores: Record<string, number> = {};
+      
+      // Calculate total score
+      let totalScore = 0;
+      
+      // Process each pick
+      picks.forEach(golferName => {
+        // Get current score for this golfer (or 0 if not found)
+        const golferScore = golferScores[golferName] !== undefined ? golferScores[golferName] : 0;
+        pickScores[golferName] = golferScore;
+        
+        // Add to total score
+        totalScore += golferScore;
+        
+        // Apply bonus points for top finishers
+        const golfer = leaderboard.find(g => g.name === golferName);
+        if (golfer) {
+          totalScore += getBonus(golfer.position);
+        }
+      });
+      
+      // Add this participant to the pool
+      poolParticipants.push({
+        position: 0, // Will be calculated after sorting
+        name: name,
+        totalScore: totalScore,
+        totalPoints: totalScore, // For compatibility
+        paid: Math.random() > 0.1, // 90% chance of being paid
+        picks: picks,
+        pickScores: pickScores
+      });
+    }
     
     // Sort by total score (lowest/best score first, golf scoring)
     poolParticipants.sort((a, b) => a.totalScore - b.totalScore);
