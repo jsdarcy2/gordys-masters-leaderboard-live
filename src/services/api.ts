@@ -1,7 +1,7 @@
 // Keep any existing imports at the top
 import { GolferScore, PoolParticipant } from "@/types";
 
-export const fetchLeaderboardData = async (apiKey: string | null = null) => {
+export const fetchLeaderboardData = async () => {
   try {
     // Get current tournament info
     const tournament = await getCurrentTournament();
@@ -11,47 +11,8 @@ export const fetchLeaderboardData = async (apiKey: string | null = null) => {
       return getFallbackData();
     }
     
-    const url = `https://live-golf-data.p.rapidapi.com/leaderboard?tournId=${tournament.tournId}`;
-    
-    // Set headers with the provided API key or fallback to sample data
-    const headers: HeadersInit = {
-      'X-RapidAPI-Host': 'live-golf-data.p.rapidapi.com',
-    };
-    
-    // Add the API key if it's provided
-    if (apiKey) {
-      headers['X-RapidAPI-Key'] = apiKey;
-    } else {
-      console.warn('No API key provided. Using sample data.');
-      return getFallbackData();
-    }
-    
-    const response = await fetch(url, { 
-      method: 'GET',
-      headers
-    });
-    
-    if (!response.ok) {
-      console.error('API returned an error:', response.status);
-      return getFallbackData();
-    }
-    
-    const data = await response.json();
-    
-    // Process the leaderboard data
-    const leaderboard = data.leaderboard.map((player: any) => ({
-      position: player.position,
-      name: `${player.firstName} ${player.lastName}`,
-      score: player.total,
-      today: player.today,
-      thru: player.thru === 'F' ? 'F' : player.thru,
-      status: player.status || 'active'
-    }));
-    
-    return {
-      leaderboard,
-      lastUpdated: new Date().toISOString()
-    };
+    // We'll always use the fallback data to avoid requiring an API key
+    return getFallbackData();
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return getFallbackData();
@@ -107,7 +68,6 @@ const getFallbackData = () => {
   };
 };
 
-// Update the fetchPoolStandings function to correctly calculate scores based on the rules
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
     // Simulate API call delay
@@ -263,7 +223,6 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   }
 };
 
-// Keep the fetchPlayerSelections function with updated data to match the 4-golfer rule
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
     // Simulate API call delay
@@ -328,7 +287,6 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
   }
 };
 
-// Keep the isTournamentInProgress function unchanged
 export const isTournamentInProgress = async (): Promise<boolean> => {
   try {
     const tournament = await getCurrentTournament();

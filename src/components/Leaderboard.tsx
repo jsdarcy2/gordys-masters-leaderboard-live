@@ -23,14 +23,12 @@ const Leaderboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
   const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
-  const [needsApiKey, setNeedsApiKey] = useState<boolean>(false);
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const apiKeyRef = useRef<string | null>(localStorage.getItem('rapidApiKey'));
 
   // Load tournament information
   useEffect(() => {
@@ -49,27 +47,15 @@ const Leaderboard = () => {
     loadTournamentInfo();
   }, []);
 
-  const loadLeaderboardData = async (showToast = false, newApiKey: string | null = null) => {
+  const loadLeaderboardData = async (showToast = false) => {
     try {
       setLoading(!refreshing);
       if (showToast) {
         setRefreshing(true);
       }
       
-      // Use the new API key if provided, otherwise use the stored one
-      const apiKey = newApiKey || apiKeyRef.current;
-      
-      const data = await fetchLeaderboardData(apiKey);
+      const data = await fetchLeaderboardData();
       console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
-      
-      // Check if we might be using fallback data
-      if (data.leaderboard.length > 0 && 
-          data.leaderboard[0].name === "Scottie Scheffler" && 
-          data.leaderboard[0].score === -10) {
-        setNeedsApiKey(true);
-      } else {
-        setNeedsApiKey(false);
-      }
       
       previousLeaderboard.current = [...leaderboard];
       
@@ -138,11 +124,6 @@ const Leaderboard = () => {
 
   const handleManualRefresh = () => {
     loadLeaderboardData(true);
-  };
-
-  const handleApiKeySet = (apiKey: string) => {
-    apiKeyRef.current = apiKey;
-    loadLeaderboardData(true, apiKey);
   };
 
   const togglePotentialWinnings = () => {
@@ -238,9 +219,7 @@ const Leaderboard = () => {
           </div>
         )}
         
-        {needsApiKey && (
-          <ApiKeyForm onApiKeySet={handleApiKeySet} />
-        )}
+        <ApiKeyForm />
         
         {error && (
           <div className="text-center text-red-500 py-4 flex items-center justify-center">
