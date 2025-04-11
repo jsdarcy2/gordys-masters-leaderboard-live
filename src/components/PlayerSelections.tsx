@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,7 +84,6 @@ const PlayerSelections = () => {
     return score > 0 ? `+${score}` : score.toString();
   };
 
-  // Create a map of participant names to their standings position
   const participantRankMap = useMemo(() => {
     const rankMap = new Map<string, number>();
     poolStandings.forEach((participant) => {
@@ -97,7 +95,6 @@ const PlayerSelections = () => {
   const filteredParticipants = useMemo(() => {
     let filtered = Object.entries(selections);
     
-    // Filter by search term
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       filtered = filtered.filter(([name, data]) => {
@@ -108,31 +105,26 @@ const PlayerSelections = () => {
       });
     }
     
-    // Filter by specific golfer if in golfer sort mode
     if (sortBy === "golfer" && sortedGolfer) {
       filtered = filtered.filter(([, data]) => 
         data.picks.includes(sortedGolfer)
       );
     }
     
-    // Sort by pool standings position (if available) or alphabetically as fallback
     filtered = filtered.sort((a, b) => {
       const rankA = participantRankMap.get(a[0]) || Infinity;
       const rankB = participantRankMap.get(b[0]) || Infinity;
       
-      // First sort by rank
       if (rankA !== rankB) {
         return rankA - rankB;
       }
       
-      // If ranks are the same or not available, sort alphabetically
       return a[0].localeCompare(b[0]);
     });
     
     return filtered;
   }, [selections, searchTerm, sortBy, sortedGolfer, participantRankMap]);
 
-  // Display either all selections or just the preview based on showAll state
   const displaySelections = showAll ? filteredParticipants : filteredParticipants.slice(0, PREVIEW_COUNT);
 
   const calculateTotalRoundScore = (roundScores: number[]) => {
@@ -156,7 +148,6 @@ const PlayerSelections = () => {
             <div className="text-center text-red-500 py-4">{error}</div>
           )}
           
-          {/* Search bar */}
           <div className="mb-6 relative">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
@@ -180,7 +171,7 @@ const PlayerSelections = () => {
                 <div key={i} className="space-y-2">
                   <Skeleton className="h-6 w-40" />
                   <div className="flex flex-wrap gap-2">
-                    {[...Array(5)].map((_, j) => (
+                    {[...Array(4)].map((_, j) => (
                       <Skeleton key={j} className="h-8 w-24" />
                     ))}
                   </div>
@@ -198,7 +189,7 @@ const PlayerSelections = () => {
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">Rd 1</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB1</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB2</th>
-                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections (4)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -243,7 +234,6 @@ const PlayerSelections = () => {
                 </table>
               </div>
               
-              {/* Mobile view */}
               <div className="md:hidden space-y-6">
                 {displaySelections.map(([participant, data], index) => {
                   const totalRound1 = calculateTotalRoundScore(data.roundScores);
@@ -291,7 +281,6 @@ const PlayerSelections = () => {
             </div>
           )}
           
-          {/* Show More/Less button */}
           {filteredParticipants.length > PREVIEW_COUNT && (
             <div className="mt-6 text-center">
               <Button 

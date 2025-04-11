@@ -20,15 +20,14 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
             <th className="masters-table-header text-right hidden md:table-cell">Pick 1</th>
             <th className="masters-table-header text-right hidden md:table-cell">Pick 2</th>
             <th className="masters-table-header text-right hidden md:table-cell">Pick 3</th>
-            <th className="masters-table-header text-right hidden md:table-cell">Pick 4</th>
-            <th className="masters-table-header text-right hidden md:table-cell rounded-tr-md">Pick 5</th>
+            <th className="masters-table-header text-right hidden md:table-cell rounded-tr-md">Pick 4</th>
             <th className="masters-table-header text-right md:hidden rounded-tr-md">Details</th>
           </tr>
         </thead>
         <tbody>
           {displayStandings.length === 0 ? (
             <tr>
-              <td colSpan={9} className="text-center py-8 text-gray-500">
+              <td colSpan={8} className="text-center py-8 text-gray-500">
                 {searchQuery
                   ? "No participants match your search"
                   : "No participants data available"}
@@ -65,11 +64,11 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                 </td>
                 
                 {/* Desktop view - Individual picks */}
-                {participant.picks && participant.picks.map((pick, idx) => (
+                {participant.picks && participant.picks.slice(0, 4).map((pick, idx) => (
                   <td key={idx} className="px-2 py-3 text-right hidden md:table-cell">
                     <div className="flex flex-col items-end">
                       <span className="text-sm">{pick}</span>
-                      <span className={`text-xs ${participant.pickScores && participant.pickScores[pick] < 0 ? 'text-red-500' : participant.pickScores && participant.pickScores[pick] > 0 ? 'text-green-500' : 'text-gray-500'}`}>
+                      <span className={`text-xs ${participant.pickScores && participant.pickScores[pick] < 0 ? 'text-green-500' : participant.pickScores && participant.pickScores[pick] > 0 ? 'text-red-500' : 'text-gray-500'}`}>
                         {participant.pickScores && formatGolfScore(participant.pickScores[pick])}
                       </span>
                     </div>

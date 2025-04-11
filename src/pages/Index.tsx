@@ -3,14 +3,9 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
-import PersonalizedDashboard from "@/components/PersonalizedDashboard";
 import { Flag, Trophy, Clock } from "lucide-react";
 
 const Index = () => {
-  // Mock data for PersonalizedDashboard
-  const mockPoolStandings = [];
-  const isLoading = false;
-
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -30,13 +25,8 @@ const Index = () => {
               href="/archive" />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PoolStandings />
-        </div>
-        <div>
-          <PersonalizedDashboard poolStandings={mockPoolStandings} loading={isLoading} />
-        </div>
+      <div className="w-full">
+        <PoolStandings />
       </div>
     </Layout>
   );
