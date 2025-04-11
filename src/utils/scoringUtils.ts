@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant } from "@/types";
 
 /**
@@ -61,6 +60,39 @@ export const getBestFourGolfers = (pickScores: Record<string, number>): string[]
   console.log("Best four golfers:", bestFour);
   
   return bestFour;
+};
+
+/**
+ * Generate a realistic participant name instead of generic "Team X"
+ */
+export const generateParticipantName = (index: number): string => {
+  const firstNames = [
+    "John", "Jane", "Michael", "Emma", "David", "Sarah", "Robert", "Emily", 
+    "William", "Olivia", "James", "Sophia", "Thomas", "Isabella", "Daniel", 
+    "Mia", "Matthew", "Charlotte", "Andrew", "Amelia", "Christopher", "Harper", 
+    "Joseph", "Abigail", "Anthony", "Elizabeth", "Mark", "Sofia", "Paul", 
+    "Victoria", "Steven", "Ella", "Kevin", "Grace", "Brian", "Chloe", "George", 
+    "Lily", "Edward", "Hannah", "Jason", "Zoe", "Jeffrey", "Natalie", "Ryan", 
+    "Lucy", "Jacob", "Audrey", "Gary", "Leah", "Nicholas", "Samantha", "Eric", 
+    "Brooklyn", "Stephen", "Anna", "Benjamin", "Caroline", "Patrick", "Madison"
+  ];
+  
+  const lastNames = [
+    "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson",
+    "Moore", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin",
+    "Thompson", "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall",
+    "Allen", "Young", "King", "Wright", "Scott", "Green", "Adams", "Baker", "Nelson",
+    "Carter", "Mitchell", "Perez", "Roberts", "Turner", "Phillips", "Campbell", 
+    "Parker", "Evans", "Edwards", "Collins", "Stewart", "Morris", "Rogers", "Reed",
+    "Cook", "Morgan", "Bell", "Murphy", "Bailey", "Rivera", "Cooper", "Cox", "Howard",
+    "Ward", "Torres", "Peterson", "Gray", "Ramirez", "James", "Watson", "Brooks"
+  ];
+  
+  // Create a deterministic random name based on the index to keep it consistent
+  const firstNameIndex = index % firstNames.length;
+  const lastNameIndex = Math.floor(index / firstNames.length) % lastNames.length;
+  
+  return `${firstNames[firstNameIndex]} ${lastNames[lastNameIndex]}`;
 };
 
 /**

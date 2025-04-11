@@ -1,5 +1,5 @@
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
-import { buildGolferScoreMap, calculatePoolStandings } from "@/utils/scoringUtils";
+import { buildGolferScoreMap, calculatePoolStandings, generateParticipantName } from "@/utils/scoringUtils";
 
 /**
  * Check if the tournament is currently in progress
@@ -272,8 +272,9 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       ];
       
       for (let i = 0; i < neededCount; i++) {
-        const teamNumber = currentCount + i + 1;
-        const teamName = `Team ${teamNumber}`;
+        const teamIndex = currentCount + i + 1;
+        // Generate a realistic name instead of "Team X"
+        const teamName = generateParticipantName(teamIndex);
         
         // Select 5 random golfers for this team
         const picks: string[] = [];

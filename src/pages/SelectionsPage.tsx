@@ -17,7 +17,7 @@ const SelectionsPage = () => {
           Player Selections
         </h2>
         <p className="text-gray-600">
-          See player selections ranked by their current position in the pool standings.
+          See all 134 participant team selections for The Masters, ranked by their current position in the pool standings.
         </p>
       </div>
       
