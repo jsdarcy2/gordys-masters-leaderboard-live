@@ -1,3 +1,4 @@
+
 import { GolferScore, PoolParticipant } from "@/types";
 
 /**
@@ -32,6 +33,11 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
  * Get the 4 best-performing golfers from a participant's 5 picks
  */
 export const getBestFourGolfers = (pickScores: Record<string, number>): string[] => {
+  // Check if we have at least 4 picks
+  if (Object.keys(pickScores).length < 4) {
+    console.warn("Warning: Less than 4 picks available for best four calculation");
+  }
+  
   return Object.entries(pickScores)
     .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
     .slice(0, 4)
@@ -61,6 +67,9 @@ export const calculatePoolStandings = (
     
     // Calculate total from best 4 scores
     const totalScore = calculateTotalScore(pickScores);
+    const bestFourGolfers = getBestFourGolfers(pickScores);
+    
+    console.log(`${name}'s best 4 golfers:`, bestFourGolfers);
     
     // Add this participant to the pool
     poolParticipants.push({

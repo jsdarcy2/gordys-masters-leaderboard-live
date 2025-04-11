@@ -54,6 +54,8 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.pickScores ? 
                 getBestFourGolfers(participant.pickScores) : [];
+              
+              console.log(`Rendering ${participant.name}, best four:`, bestFourGolfers);
                 
               return (
                 <tr
