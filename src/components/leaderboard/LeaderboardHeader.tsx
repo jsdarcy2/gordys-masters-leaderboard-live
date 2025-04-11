@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, RefreshCw, DollarSign } from "lucide-react";
+import { Clock, RefreshCw, DollarSign, Info } from "lucide-react";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
 interface LeaderboardHeaderProps {
@@ -11,6 +11,7 @@ interface LeaderboardHeaderProps {
   handleManualRefresh: () => void;
   showPotentialWinnings: boolean;
   togglePotentialWinnings: () => void;
+  dataSource?: string;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -19,7 +20,8 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   refreshing,
   handleManualRefresh,
   showPotentialWinnings,
-  togglePotentialWinnings
+  togglePotentialWinnings,
+  dataSource
 }) => {
   return (
     <div className="masters-header">
@@ -57,6 +59,12 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             <div className="flex items-center text-sm text-masters-yellow">
               <Clock size={14} className="mr-1" />
               <span>Updated: {formatLastUpdated(lastUpdated)}</span>
+              {dataSource && (
+                <div className="ml-2 flex items-center">
+                  <Info size={14} className="mr-1" />
+                  <span>Source: {dataSource === "espn" ? "ESPN" : "Masters.com"}</span>
+                </div>
+              )}
             </div>
           )}
         </div>

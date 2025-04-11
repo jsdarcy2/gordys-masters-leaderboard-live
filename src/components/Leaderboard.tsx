@@ -13,8 +13,8 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
-// More frequent polling interval for live data (60 seconds)
-const POLLING_INTERVAL = 60000; 
+// More frequent polling interval for live data (30 seconds)
+const POLLING_INTERVAL = 30000; 
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -27,6 +27,7 @@ const Leaderboard = () => {
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const [dataInitialized, setDataInitialized] = useState<boolean>(false);
+  const [dataSource, setDataSource] = useState<string | undefined>(undefined);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -40,6 +41,9 @@ const Leaderboard = () => {
         const tournamentInfo = await getCurrentTournament();
         console.log("Tournament info loaded:", tournamentInfo);
         setCurrentTournament(tournamentInfo);
+        if (tournamentInfo.source) {
+          setDataSource(tournamentInfo.source);
+        }
       } catch (error) {
         console.error("Error loading tournament info:", error);
       } finally {
@@ -78,6 +82,7 @@ const Leaderboard = () => {
       const sortedLeaderboard = data.leaderboard.sort((a, b) => a.position - b.position);
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
+      setDataSource(data.source);
       setError(null);
       setDataInitialized(true);
       
@@ -116,20 +121,23 @@ const Leaderboard = () => {
       if (showToast) {
         toast({
           title: "Leaderboard Updated",
-          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}`,
+          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source === 'espn' ? 'ESPN' : 'Masters.com'}` : ''}`,
         });
       }
       
       localStorage.setItem('leaderboardLastUpdated', data.lastUpdated);
       localStorage.setItem('leaderboardData', JSON.stringify(data.leaderboard));
+      if (data.source) {
+        localStorage.setItem('leaderboardSource', data.source);
+      }
     } catch (err) {
       console.error("Leaderboard data fetch error:", err);
-      setError("Failed to load leaderboard data");
+      setError("Failed to load leaderboard data from all sources");
       
       if (showToast) {
         toast({
           title: "Update Failed",
-          description: "Could not refresh leaderboard data. Please try again.",
+          description: "Could not refresh leaderboard data from any source. Please try again later.",
           variant: "destructive",
         });
       }
@@ -151,6 +159,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
     const cachedData = localStorage.getItem('leaderboardData');
+    const cachedSource = localStorage.getItem('leaderboardSource');
     
     if (cachedLastUpdated && cachedData) {
       try {
@@ -158,6 +167,9 @@ const Leaderboard = () => {
         const parsedData = JSON.parse(cachedData);
         setLeaderboard(parsedData);
         setLastUpdated(cachedLastUpdated);
+        if (cachedSource) {
+          setDataSource(cachedSource);
+        }
         setLoading(false);
         setDataInitialized(true);
         
@@ -177,7 +189,7 @@ const Leaderboard = () => {
       clearInterval(pollingRef.current);
     }
     
-    // Set up polling every minute for live data
+    // Set up polling every 30 seconds for live data
     pollingRef.current = setInterval(() => {
       console.log("Polling for leaderboard updates...");
       loadLeaderboardData();
@@ -215,6 +227,7 @@ const Leaderboard = () => {
         handleManualRefresh={handleManualRefresh}
         showPotentialWinnings={showPotentialWinnings}
         togglePotentialWinnings={togglePotentialWinnings}
+        dataSource={dataSource}
       />
       
       <div className="p-4 bg-white">

@@ -34,8 +34,8 @@ const SelectionsPage = () => {
 
     loadParticipantCount();
     
-    // Set up refresh interval during the tournament
-    const refreshInterval = setInterval(loadParticipantCount, 5 * 60 * 1000); // Refresh every 5 minutes
+    // Set up refresh interval during the tournament - every 2 minutes
+    const refreshInterval = setInterval(loadParticipantCount, 2 * 60 * 1000);
     
     return () => {
       clearInterval(refreshInterval);
