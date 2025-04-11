@@ -2,13 +2,14 @@
 import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star } from "lucide-react";
+import { Menu, X, Star, Tv } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "@/components/ui/image";
 
 const NAV_TABS: NavTab[] = [
   { id: "standings", label: "Pool Standings", href: "/" },
   { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
+  { id: "watch-live", label: "Watch Live", href: "/watch-live" },
   { id: "selections", label: "Player Selections", href: "/selections" },
   { id: "archive", label: "Green Robe Winners", href: "/archive" },
   { id: "masters-champions", label: "Masters Champions", href: "/masters-champions" },

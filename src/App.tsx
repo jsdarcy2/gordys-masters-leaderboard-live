@@ -13,6 +13,7 @@ import SelectionsPage from "./pages/SelectionsPage";
 import RulesPage from "./pages/RulesPage";
 import ArchivePage from "./pages/ArchivePage";
 import MastersChampionsPage from "./pages/MastersChampionsPage";
+import WatchLivePage from "./pages/WatchLivePage";
 import NotFound from "./pages/NotFound";
 
 // Scroll to top on route change
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/selections" element={<SelectionsPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/masters-champions" element={<MastersChampionsPage />} />
+          <Route path="/watch-live" element={<WatchLivePage />} />
           <Route path="/rules" element={<RulesPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
