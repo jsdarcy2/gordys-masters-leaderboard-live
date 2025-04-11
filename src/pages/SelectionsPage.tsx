@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import PlayerSelections from "@/components/PlayerSelections";
 import PaymentStatus from "@/components/PaymentStatus";
+import TeamSelectionsTable from "@/components/pool/TeamSelectionsTable";
 import { fetchPlayerSelections } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SelectionsPage = () => {
   const [participantCount, setParticipantCount] = useState<number>(0);
@@ -72,14 +74,27 @@ const SelectionsPage = () => {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PlayerSelections />
-        </div>
-        <div>
-          <PaymentStatus />
-        </div>
-      </div>
+      <Tabs defaultValue="pool" className="mb-6">
+        <TabsList className="bg-masters-light">
+          <TabsTrigger value="pool" className="data-[state=active]:bg-masters-green data-[state=active]:text-white">Pool Standings</TabsTrigger>
+          <TabsTrigger value="teams" className="data-[state=active]:bg-masters-green data-[state=active]:text-white">All Team Selections</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="pool" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <PlayerSelections />
+            </div>
+            <div>
+              <PaymentStatus />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="teams" className="mt-6">
+          <TeamSelectionsTable />
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 };
