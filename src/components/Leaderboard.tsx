@@ -3,7 +3,7 @@ import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -23,6 +23,7 @@ const Leaderboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
   const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
+  const [needsApiKey, setNeedsApiKey] = useState<boolean>(false);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -37,6 +38,15 @@ const Leaderboard = () => {
       
       const data = await fetchLeaderboardData();
       console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
+      
+      // Check if we might be using fallback data
+      if (data.leaderboard.length > 0 && 
+          data.leaderboard[0].name === "Scottie Scheffler" && 
+          data.leaderboard[0].score === -10) {
+        setNeedsApiKey(true);
+      } else {
+        setNeedsApiKey(false);
+      }
       
       previousLeaderboard.current = [...leaderboard];
       
@@ -167,6 +177,13 @@ const Leaderboard = () => {
       />
       
       <div className="p-4 bg-white">
+        {needsApiKey && (
+          <div className="text-center text-amber-600 py-4 flex items-center justify-center mb-4 bg-amber-50 border border-amber-200 rounded-md">
+            <Info size={16} className="mr-1" />
+            Note: Using sample data. Set your SportsData.io API key for live data.
+          </div>
+        )}
+        
         {error && (
           <div className="text-center text-red-500 py-4 flex items-center justify-center">
             <AlertTriangle size={16} className="mr-1" />
