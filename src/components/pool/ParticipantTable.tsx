@@ -58,7 +58,7 @@ const ParticipantTable = ({ displayStandings, searchQuery }: ParticipantTablePro
           <TableRow className="border-b-2 border-masters-green">
             <TableHead className="masters-table-header rounded-tl-md w-[80px]">Pos</TableHead>
             <TableHead className="masters-table-header">Name</TableHead>
-            <TableHead className="masters-table-header text-right w-[100px]">Score</TableHead>
+            <TableHead className="masters-table-header text-right w-[100px]">Points</TableHead>
             <TableHead className="masters-table-header hidden md:table-cell">Picks</TableHead>
             <TableHead className="masters-table-header hidden md:table-cell text-right rounded-tr-md">Today</TableHead>
           </TableRow>
