@@ -1,38 +1,43 @@
-import { GolferScore } from "@/types";
-import { useEffect, useState, useRef } from "react";
-import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
-import { AlertTriangle, Info, Calendar, RefreshCcw } from "lucide-react";
+
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getCurrentTournament } from "@/services/api";
+import { useTournamentData } from "@/hooks/use-tournament-data";
+import { formatLastUpdated } from "@/utils/leaderboardUtils";
+import { AlertTriangle, Info, Calendar, RefreshCcw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
-import { formatLastUpdated } from "@/utils/leaderboardUtils";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
-const POLLING_INTERVAL = 30000; 
 
 const Leaderboard = () => {
-  const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
-  const [lastUpdated, setLastUpdated] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use our new custom hook for tournament data
+  const { 
+    leaderboard, 
+    loading, 
+    error, 
+    lastUpdated, 
+    dataSource, 
+    dataYear,
+    refreshData,
+    hasLiveData
+  } = useTournamentData();
+  
   const [refreshing, setRefreshing] = useState(false);
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
   const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
-  const [dataInitialized, setDataInitialized] = useState<boolean>(false);
-  const [dataSource, setDataSource] = useState<string | undefined>(undefined);
   const [dataSourceError, setDataSourceError] = useState<string | undefined>(undefined);
-  const [dataYear, setDataYear] = useState<string | undefined>(undefined);
-  const previousLeaderboard = useRef<GolferScore[]>([]);
+  const previousLeaderboard = useRef(leaderboard);
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load tournament info
   useEffect(() => {
     const loadTournamentInfo = async () => {
       try {
@@ -40,9 +45,6 @@ const Leaderboard = () => {
         const tournamentInfo = await getCurrentTournament();
         console.log("Tournament info loaded:", tournamentInfo);
         setCurrentTournament(tournamentInfo);
-        if (tournamentInfo && typeof tournamentInfo === 'object' && 'source' in tournamentInfo) {
-          setDataSource(tournamentInfo.source as string);
-        }
       } catch (error) {
         console.error("Error loading tournament info:", error);
       } finally {
@@ -59,182 +61,103 @@ const Leaderboard = () => {
     };
   }, []);
 
-  const loadLeaderboardData = async (showToast = false) => {
-    try {
-      setLoading(!refreshing && !dataInitialized);
-      if (showToast) {
-        setRefreshing(true);
-      }
+  // Track changed positions
+  useEffect(() => {
+    if (previousLeaderboard.current.length > 0) {
+      const newChanges: Record<string, 'up' | 'down' | null> = {};
       
-      console.log(`Loading leaderboard data for ${TOURNAMENT_YEAR} Masters, initialized:`, dataInitialized);
-      
-      const data = await fetchLeaderboardData();
-      console.log("Fetched leaderboard data:", data && typeof data === 'object' && 'leaderboard' in data && Array.isArray(data.leaderboard) ? data.leaderboard.length : 0, "golfers");
-      
-      if (!data || typeof data !== 'object' || !('leaderboard' in data) || !Array.isArray(data.leaderboard)) {
-        throw new Error("Invalid leaderboard data structure");
-      }
-      
-      previousLeaderboard.current = [...leaderboard];
-      
-      const sortedLeaderboard = data.leaderboard.sort((a, b) => a.position - b.position);
-      setLeaderboard(sortedLeaderboard);
-      setLastUpdated(data.lastUpdated);
-      if ('source' in data) {
-        setDataSource(data.source as string);
-      }
-      if ('year' in data) {
-        setDataYear(data.year as string);
-      }
-      setDataSourceError(undefined); // Clear any previous errors on successful fetch
-      setError(null);
-      setDataInitialized(true);
-      
-      // Show more specific messages based on data source
-      if ('source' in data && data.source === 'cached-data') {
-        let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(data.lastUpdated)}`;
+      leaderboard.forEach(golfer => {
+        const previousGolfer = previousLeaderboard.current.find(g => g.name === golfer.name);
         
-        if ('year' in data && data.year && data.year !== TOURNAMENT_YEAR) {
-          errorMessage += ` Data is from ${data.year} instead of ${TOURNAMENT_YEAR}.`;
-        }
-        
-        setDataSourceError(errorMessage);
-      } else if ('source' in data && data.source === 'no-data') {
-        setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
-      }
-      
-      if (previousLeaderboard.current.length > 0) {
-        const newChanges: Record<string, 'up' | 'down' | null> = {};
-        
-        sortedLeaderboard.forEach(golfer => {
-          const previousGolfer = previousLeaderboard.current.find(g => g.name === golfer.name);
-          
-          if (previousGolfer && previousGolfer.position !== golfer.position) {
-            if (previousGolfer.position > golfer.position) {
-              newChanges[golfer.name] = 'up';
-              
-              if (golfer.position <= 10 || (previousGolfer.position - golfer.position) >= 3) {
-                toast({
-                  title: `${golfer.name} Moving Up!`,
-                  description: `Moved from position ${previousGolfer.position} to ${golfer.position}`,
-                  variant: "default",
-                });
-              }
-            } else {
-              newChanges[golfer.name] = 'down';
+        if (previousGolfer && previousGolfer.position !== golfer.position) {
+          if (previousGolfer.position > golfer.position) {
+            newChanges[golfer.name] = 'up';
+            
+            if (golfer.position <= 10 || (previousGolfer.position - golfer.position) >= 3) {
+              toast({
+                title: `${golfer.name} Moving Up!`,
+                description: `Moved from position ${previousGolfer.position} to ${golfer.position}`,
+                variant: "default",
+              });
             }
           } else {
-            newChanges[golfer.name] = null;
+            newChanges[golfer.name] = 'down';
           }
-        });
-        
-        setChangedPositions(newChanges);
-        
-        setTimeout(() => {
-          setChangedPositions({});
-        }, 5000);
+        } else {
+          newChanges[golfer.name] = null;
+        }
+      });
+      
+      setChangedPositions(newChanges);
+      
+      setTimeout(() => {
+        setChangedPositions({});
+      }, 5000);
+    }
+    
+    previousLeaderboard.current = leaderboard;
+  }, [leaderboard, toast]);
+
+  // Set error message based on data source
+  useEffect(() => {
+    if (dataSource === 'cached-data') {
+      let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(lastUpdated)}`;
+      
+      if (dataYear && dataYear !== TOURNAMENT_YEAR) {
+        errorMessage += ` Data is from ${dataYear} instead of ${TOURNAMENT_YEAR}.`;
       }
       
-      if (showToast) {
-        toast({
-          title: "Leaderboard Updated",
-          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source}` : ''}`,
-        });
-      }
-      
-      localStorage.setItem('leaderboardLastUpdated', data.lastUpdated);
-      localStorage.setItem('leaderboardData', JSON.stringify(data.leaderboard));
-      if (data.source) {
-        localStorage.setItem('leaderboardSource', data.source);
-      }
-      if (data.year) {
-        localStorage.setItem('leaderboardYear', data.year);
-      }
-    } catch (err: any) {
-      console.error("Leaderboard data fetch error:", err);
-      setError("Failed to load leaderboard data. Please try again later.");
-      setDataSourceError(`Error: ${err.message || "Unknown error"}`);
-      
-      if (showToast) {
-        toast({
-          title: "Update Failed",
-          description: "Could not refresh leaderboard data. Please try again later.",
-          variant: "destructive",
-        });
-      }
+      setDataSourceError(errorMessage);
+    } else if (dataSource === 'no-data') {
+      setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
+    } else {
+      setDataSourceError(undefined);
+    }
+  }, [dataSource, dataYear, lastUpdated]);
+
+  // Handle manual refresh
+  const handleManualRefresh = async () => {
+    console.log("Manual refresh requested");
+    setRefreshing(true);
+    
+    try {
+      await refreshData(true);
+      toast({
+        title: "Leaderboard Updated",
+        description: `Data refreshed at ${formatLastUpdated(lastUpdated)}${dataSource ? ` from ${dataSource}` : ''}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "Could not refresh leaderboard data. Please try again later.",
+        variant: "destructive",
+      });
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
   };
 
-  const handleManualRefresh = () => {
-    console.log("Manual refresh requested");
-    loadLeaderboardData(true);
-  };
-
+  // Toggle potential winnings display
   const togglePotentialWinnings = () => {
     setShowPotentialWinnings(!showPotentialWinnings);
     localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
   };
 
-  useEffect(() => {
-    const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
-    const cachedData = localStorage.getItem('leaderboardData');
-    const cachedSource = localStorage.getItem('leaderboardSource');
-    const cachedYear = localStorage.getItem('leaderboardYear');
-    
-    if (cachedLastUpdated && cachedData) {
-      try {
-        console.log("Found cached leaderboard data, initializing...");
-        const parsedData = JSON.parse(cachedData);
-        setLeaderboard(parsedData);
-        setLastUpdated(cachedLastUpdated);
-        if (cachedSource) {
-          setDataSource(cachedSource);
-        }
-        if (cachedYear) {
-          setDataYear(cachedYear);
-        }
-        
-        if (cachedYear && cachedYear !== TOURNAMENT_YEAR) {
-          setDataSourceError(`Note: Cached data is from ${cachedYear} instead of ${TOURNAMENT_YEAR}.`);
-        }
-        
-        setLoading(false);
-        setDataInitialized(true);
-        
-        loadLeaderboardData();
-      } catch (e) {
-        console.error("Error parsing cached data:", e);
-        loadLeaderboardData();
-      }
-    } else {
-      console.log("No cached leaderboard data found");
-      loadLeaderboardData();
-    }
-    
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-    }
-    
-    pollingRef.current = setInterval(() => {
-      console.log("Polling for leaderboard updates...");
-      loadLeaderboardData();
-    }, POLLING_INTERVAL);
-    
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-      }
-    };
-  }, []);
-
+  // Load potential winnings preference from localStorage
   useEffect(() => {
     const showWinnings = localStorage.getItem('showPotentialWinnings');
     if (showWinnings !== null) {
       setShowPotentialWinnings(showWinnings === 'true');
     }
+  }, []);
+
+  // Set document title
+  useEffect(() => {
+    document.title = "Masters Leaderboard - Live Tournament Standings";
+    
+    return () => {
+      document.title = "Gordy's Masters Pool";
+    };
   }, []);
 
   const formatTournamentDates = (startDate: string, endDate: string) => {
@@ -257,6 +180,7 @@ const Leaderboard = () => {
         dataSource={dataSource}
         errorMessage={dataSourceError}
         tournamentYear={dataYear || TOURNAMENT_YEAR}
+        hasLiveData={hasLiveData}
       />
       
       <div className="p-4 bg-white">

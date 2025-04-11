@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Info, AlertTriangle, ExternalLink, Calendar } from "lucide-react";
+import { Info, AlertTriangle, ExternalLink, Calendar, Signal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
@@ -9,13 +9,15 @@ interface DataSourceInfoProps {
   lastUpdated: string;
   errorMessage?: string;
   tournamentYear?: string;
+  hasLiveData?: boolean;
 }
 
 const DataSourceInfo: React.FC<DataSourceInfoProps> = ({ 
   dataSource, 
   lastUpdated,
   errorMessage,
-  tournamentYear
+  tournamentYear,
+  hasLiveData = false
 }) => {
   const formatLastUpdated = (timestamp: string): string => {
     if (!timestamp) return "Unknown";
@@ -45,6 +47,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Historical Data";
       case "cached-data":
         return "Cached Data";
+      case "pgatour-api":
+        return "PGA Tour";
+      case "masters-scraper":
+        return "Masters.com";
       default:
         return dataSource;
     }
@@ -58,7 +64,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     switch (dataSource.toLowerCase()) {
       case "espn-api":
         return `https://www.espn.com/golf/${year}/masters/leaderboard`;
+      case "pgatour-api":
+        return `https://www.pgatour.com/leaderboard`;
       case "sportsdata-api":
+      case "masters-scraper":
         return `https://www.masters.com/en_US/scores/index.html`;
       case "historical-data":
         return `https://www.masters.com/en_US/scores/index.html`;
@@ -89,6 +98,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         <span>
           <span className="text-white/60">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
+            {hasLiveData && (
+              <Signal size={12} className="inline-block ml-1 text-green-400 animate-pulse" />
+            )}
           </span> 
           {tournamentYear && (
             <span className="ml-1">

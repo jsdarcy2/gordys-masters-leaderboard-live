@@ -1,6 +1,6 @@
 
 import React from "react";
-import { RefreshCcw, Clock, Save } from "lucide-react";
+import { RefreshCcw, Clock, Save, Signal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import DataSourceInfo from "./DataSourceInfo";
@@ -16,6 +16,7 @@ interface LeaderboardHeaderProps {
   dataSource?: string;
   errorMessage?: string;
   tournamentYear?: string;
+  hasLiveData?: boolean;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -27,18 +28,28 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   togglePotentialWinnings,
   dataSource,
   errorMessage,
-  tournamentYear
+  tournamentYear,
+  hasLiveData = false
 }) => {
   return (
     <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-masters-green text-white">
       <div className="flex-1 mb-2 sm:mb-0">
-        <h3 className="text-lg font-semibold mb-1">Tournament Leaderboard</h3>
+        <h3 className="text-lg font-semibold mb-1 flex items-center">
+          Tournament Leaderboard
+          {hasLiveData && (
+            <span className="ml-2 flex items-center text-sm bg-green-600/30 text-white px-2 py-0.5 rounded-full">
+              <Signal size={12} className="mr-1 animate-pulse" />
+              LIVE
+            </span>
+          )}
+        </h3>
         
         <DataSourceInfo 
           dataSource={dataSource} 
           lastUpdated={lastUpdated} 
           errorMessage={errorMessage}
           tournamentYear={tournamentYear}
+          hasLiveData={hasLiveData}
         />
       </div>
       
