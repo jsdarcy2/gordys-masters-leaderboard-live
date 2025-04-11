@@ -207,7 +207,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // Get the player selections
     const selectionsData = await fetchPlayerSelections();
     
-    // Calculate and return the pool standings
+    // Calculate and return the pool standings with complete data
     return calculatePoolStandings(selectionsData, golferScores);
   } catch (error) {
     console.error('Error fetching pool standings:', error);

@@ -72,7 +72,9 @@ export const calculatePoolStandings = (
 ): PoolParticipant[] => {
   const poolParticipants: PoolParticipant[] = [];
   
-  // Process each participant's picks
+  // Process each participant's picks - ensure we process ALL participants
+  console.log(`Processing ${Object.keys(selectionsData).length} participants from selections data`);
+  
   Object.entries(selectionsData).forEach(([name, data]) => {
     // Initialize pickScores object
     const pickScores: Record<string, number> = {};
@@ -88,8 +90,6 @@ export const calculatePoolStandings = (
     const totalScore = calculateTotalScore(pickScores);
     const bestFourGolfers = getBestFourGolfers(pickScores);
     
-    console.log(`${name}'s best 4 golfers:`, bestFourGolfers);
-    
     // Add this participant to the pool
     poolParticipants.push({
       position: 0, // Will be calculated after sorting
@@ -102,6 +102,8 @@ export const calculatePoolStandings = (
       bestFourTotal: totalScore
     });
   });
+  
+  console.log(`Final pool participants count after processing: ${poolParticipants.length}`);
   
   // Sort by total score (lowest/best score first, golf scoring)
   poolParticipants.sort((a, b) => a.totalScore - b.totalScore);

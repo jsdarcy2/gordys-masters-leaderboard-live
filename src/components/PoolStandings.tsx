@@ -11,7 +11,7 @@ import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
-const PREVIEW_COUNT = 15;
+const PREVIEW_COUNT = 200; // Increased from 15 to 200 to show all participants
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
