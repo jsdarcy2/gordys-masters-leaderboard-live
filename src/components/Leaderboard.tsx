@@ -2,7 +2,7 @@
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
-import { AlertTriangle, Info, Calendar } from "lucide-react";
+import { AlertTriangle, Info, Calendar, RefreshCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LoadingState from "./leaderboard/LoadingState";
@@ -11,6 +11,7 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 const POLLING_INTERVAL = 30000; 
@@ -70,7 +71,7 @@ const Leaderboard = () => {
       console.log(`Loading leaderboard data for ${TOURNAMENT_YEAR} Masters, initialized:`, dataInitialized);
       
       const data = await fetchLeaderboardData();
-      console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
+      console.log("Fetched leaderboard data:", data.leaderboard?.length || 0, "golfers");
       
       if (!data || !data.leaderboard || !Array.isArray(data.leaderboard)) {
         throw new Error("Invalid leaderboard data structure");
@@ -87,14 +88,17 @@ const Leaderboard = () => {
       setError(null);
       setDataInitialized(true);
       
-      if (data.source === 'historical-data' || data.source === 'cached-data') {
-        let errorMessage = `Note: Using ${data.source === 'historical-data' ? 'historical' : 'cached'} data as live data could not be fetched.`;
+      // Show more specific messages based on data source
+      if (data.source === 'cached-data') {
+        let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(data.lastUpdated)}`;
         
         if (data.year && data.year !== TOURNAMENT_YEAR) {
           errorMessage += ` Data is from ${data.year} instead of ${TOURNAMENT_YEAR}.`;
         }
         
         setDataSourceError(errorMessage);
+      } else if (data.source === 'no-data') {
+        setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
       }
       
       if (previousLeaderboard.current.length > 0) {
@@ -254,12 +258,40 @@ const Leaderboard = () => {
       />
       
       <div className="p-4 bg-white">
-        {dataSource && (dataSource === 'historical-data' || dataSource === 'cached-data') && (
+        {dataSource === 'no-data' && (
+          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTitle className="text-red-800">Unable to fetch tournament data</AlertTitle>
+            <AlertDescription className="text-red-700 text-sm">
+              We couldn't retrieve live tournament data at this time. Please check your connection and try again.
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 bg-white"
+              >
+                <RefreshCcw size={14} className="mr-1" />
+                Try Again
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {dataSource === 'cached-data' && (
           <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Using {dataSource === 'historical-data' ? 'Historical' : 'Cached'} Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
+            <AlertTitle className="text-amber-800">Using Cached Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
             <AlertDescription className="text-amber-700 text-sm">
               We're currently unable to fetch live tournament data. Scores shown may not reflect the current tournament standings.
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 bg-white"
+              >
+                <RefreshCcw size={14} className="mr-1" />
+                Refresh Now
+              </Button>
             </AlertDescription>
           </Alert>
         )}
@@ -300,7 +332,8 @@ const Leaderboard = () => {
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-gray-600">
             <Info size={24} className="mx-auto mb-2 text-masters-green"/>
-            <p>No leaderboard data available for {dataYear || TOURNAMENT_YEAR} Masters. Please try refreshing.</p>
+            <p>No leaderboard data available for {dataYear || TOURNAMENT_YEAR} Masters.</p>
+            <p className="mt-2 text-sm text-gray-500">We're having trouble connecting to our data sources.</p>
             <button 
               onClick={handleManualRefresh}
               className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"

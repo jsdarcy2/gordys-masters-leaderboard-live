@@ -18,6 +18,10 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // First get the current leaderboard to ensure scores match
     const { leaderboard } = await fetchLeaderboardData();
     
+    if (!leaderboard || leaderboard.length === 0) {
+      throw new Error("No leaderboard data available to calculate pool standings");
+    }
+    
     // Create a map of golfer names to their current scores for quick lookup
     const golferScores = buildGolferScoreMap(leaderboard);
     
@@ -45,15 +49,30 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     
     // Try to use cached pool standings
     const cachedStandings = localStorage.getItem('poolStandingsData');
-    if (cachedStandings) {
+    const cachedTimestamp = localStorage.getItem('poolStandingsTimestamp');
+    
+    if (cachedStandings && cachedTimestamp) {
       try {
         console.log('Using cached pool standings as fallback');
-        return JSON.parse(cachedStandings);
+        
+        // Check if cached data is not too old (less than 1 hour)
+        const cachedTime = parseInt(cachedTimestamp, 10);
+        const currentTime = new Date().getTime();
+        const cacheAge = currentTime - cachedTime;
+        
+        if (cacheAge < 3600000) { // 1 hour in milliseconds
+          console.log(`Using cached data from ${new Date(cachedTime).toLocaleTimeString()}`);
+          return JSON.parse(cachedStandings);
+        } else {
+          console.log(`Cached data is too old (${Math.round(cacheAge / 60000)} minutes), rejecting`);
+          throw new Error("Cached data is outdated");
+        }
       } catch (e) {
-        console.error("Error parsing cached standings:", e);
+        console.error("Error processing cached standings:", e);
       }
     }
     
+    // When we can't get real data or valid cache, return empty array
     return [];
   }
 };
@@ -70,6 +89,10 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     
     // Get current leaderboard data to calculate real scores
     const { leaderboard } = await fetchLeaderboardData();
+    
+    if (!leaderboard || leaderboard.length === 0) {
+      throw new Error("No leaderboard data available to process player selections");
+    }
     
     // Create a map of golfer names to their current scores for quick lookup
     const golferScoreMap: Record<string, number> = {};
@@ -89,19 +112,28 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     console.log(`Have ${currentCount} base teams, need ${neededCount} more to reach 134 total`);
     
     if (neededCount > 0) {
-      // Available golfers to choose from
-      const availableGolfers = [
-        "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Bryson DeChambeau", 
-        "Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", 
-        "Viktor Hovland", "Ludvig Åberg", "Tommy Fleetwood", "Shane Lowry", 
-        "Justin Thomas", "Hideki Matsuyama", "Cameron Smith", "Jordan Spieth", 
-        "Will Zalatoris", "Russell Henley", "Tyrrell Hatton", "Adam Scott", 
-        "Dustin Johnson", "Tony Finau", "Joaquín Niemann", "Min Woo Lee", 
-        "Tom Kim", "Max Homa", "Sepp Straka", "Corey Conners", 
-        "Jason Day", "Matt Fitzpatrick", "Robert MacIntyre", "Cameron Young",
-        "Sahith Theegala", "Justin Rose", "Sungjae Im", "Danny Willett", 
-        "Phil Mickelson", "Patrick Reed", "Zach Johnson", "Chris Kirk"
-      ];
+      // Use only golfers that are actually in the current leaderboard
+      const availableGolfers = leaderboard.map(golfer => golfer.name).filter(Boolean);
+      
+      // If we don't have enough golfers in the leaderboard, use a default list
+      if (availableGolfers.length < 10) {
+        console.warn("Not enough golfers in leaderboard, using default list");
+        
+        // Default list of common golfers
+        const defaultGolfers = [
+          "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Bryson DeChambeau", 
+          "Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", 
+          "Viktor Hovland", "Ludvig Åberg", "Tommy Fleetwood", "Shane Lowry", 
+          "Justin Thomas", "Hideki Matsuyama", "Cameron Smith", "Jordan Spieth"
+        ];
+        
+        // Add any that aren't already in our available list
+        defaultGolfers.forEach(golfer => {
+          if (!availableGolfers.includes(golfer)) {
+            availableGolfers.push(golfer);
+          }
+        });
+      }
       
       for (let i = 0; i < neededCount; i++) {
         const teamIndex = currentCount + i + 1;
@@ -155,6 +187,19 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     return teamsData;
   } catch (error) {
     console.error('Error fetching player selections:', error);
+    
+    // Try to use cached player selections if available
+    const cachedSelections = localStorage.getItem('playerSelectionsData');
+    
+    if (cachedSelections) {
+      try {
+        console.log('Using cached player selections as fallback');
+        return JSON.parse(cachedSelections);
+      } catch (e) {
+        console.error("Error parsing cached selections:", e);
+      }
+    }
+    
     return {};
   }
 };
