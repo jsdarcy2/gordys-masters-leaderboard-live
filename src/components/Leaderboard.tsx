@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
@@ -7,11 +6,13 @@ import { AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Import our new components
+// Import our components
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
+
+const POLLING_INTERVAL = 15000; // 15 seconds in milliseconds
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -127,13 +128,13 @@ const Leaderboard = () => {
       loadLeaderboardData();
     }
     
-    const intervalTime = isMobile ? 120000 : 60000;
+    // Use 15 seconds interval for all devices
     const intervalId = setInterval(() => {
       loadLeaderboardData();
-    }, intervalTime);
+    }, POLLING_INTERVAL);
     
     return () => clearInterval(intervalId);
-  }, [isMobile]);
+  }, []);
 
   useEffect(() => {
     const showWinnings = localStorage.getItem('showPotentialWinnings');

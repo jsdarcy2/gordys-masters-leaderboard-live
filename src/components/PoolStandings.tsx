@@ -10,6 +10,9 @@ import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+const POLLING_INTERVAL = 15000; // 15 seconds in milliseconds
+const PREVIEW_COUNT = 15;
+
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +23,6 @@ const PoolStandings = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  const PREVIEW_COUNT = 15;
-
   const loadStandingsData = async () => {
     try {
       setLoading(true);
@@ -71,14 +72,13 @@ const PoolStandings = () => {
       loadStandingsData();
     }
     
-    // Set up polling for real-time updates (every 60 seconds for desktop, 120 seconds for mobile)
-    const intervalTime = isMobile ? 120000 : 60000;
+    // Set up polling every 15 seconds regardless of device
     const intervalId = setInterval(() => {
       loadStandingsData();
-    }, intervalTime);
+    }, POLLING_INTERVAL);
     
     return () => clearInterval(intervalId);
-  }, [isMobile]);
+  }, []);
 
   // Filter standings based on search query
   const filteredStandings = searchQuery 

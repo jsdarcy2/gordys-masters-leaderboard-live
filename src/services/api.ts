@@ -1,11 +1,13 @@
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
-// Function to fetch leaderboard data from Masters API or alternative sources
+// Function to fetch leaderboard data from ESPN API
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
+    // Add cache-busting timestamp to prevent stale data
     const timestamp = new Date().getTime();
     
-    const response = await fetch(`https://www.masters.com/en_US/scores/json/leaderboard_v2.json?t=${timestamp}`, {
+    // Use ESPN's leaderboard API 
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard?t=${timestamp}`, {
       headers: {
         'Accept': 'application/json',
       },
@@ -13,22 +15,75 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
     });
     
     if (!response.ok) {
-      const githubResponse = await fetch(`https://raw.githubusercontent.com/loisaidasam/the-masters-api/main/data/leaderboard.json?t=${timestamp}`);
-      
-      if (!githubResponse.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
-      }
-      
-      const githubData = await githubResponse.json();
-      return transformGitHubData(githubData);
+      throw new Error(`ESPN API responded with status: ${response.status}`);
     }
     
     const data = await response.json();
-    return transformOfficialData(data);
+    return transformESPNData(data);
   } catch (error) {
     console.error("Error fetching leaderboard data:", error);
     console.warn("Falling back to mock data due to API error");
     return getFallbackLeaderboardData();
+  }
+};
+
+// Transform ESPN's data format to our application format
+const transformESPNData = (apiData: any): TournamentData => {
+  try {
+    const competitors = apiData.events?.[0]?.competitions?.[0]?.competitors || [];
+    const roundData = apiData.events?.[0]?.competitions?.[0]?.status?.type?.detail || '';
+    const currentRound = determineRoundFromESPN(roundData);
+    
+    const leaderboard = competitors.map((competitor: any) => {
+      const playerData = competitor.athlete || {};
+      const status = competitor.status?.displayValue === 'CUT' ? 'cut' : 
+                     competitor.status?.displayValue === 'WD' ? 'withdrawn' : 'active';
+      
+      // Parse scores
+      const scoreToPar = parseInt(competitor.score || '0');
+      const todayScore = parseInt(competitor.linescores?.[currentRound - 1]?.value || '0');
+      
+      // Get thru information
+      let thru: string = 'F';
+      if (competitor.status?.thru !== undefined && competitor.status?.thru !== null) {
+        thru = competitor.status.thru.toString();
+      } else if (competitor.status?.displayValue === 'CUT' || competitor.status?.displayValue === 'WD') {
+        thru = '-';
+      }
+      
+      return {
+        position: parseInt(competitor.status?.position?.id || '0'),
+        name: playerData.displayName || '',
+        score: isNaN(scoreToPar) ? 0 : scoreToPar,
+        today: isNaN(todayScore) ? 0 : todayScore,
+        thru: thru,
+        status: status as 'cut' | 'active' | 'withdrawn'
+      };
+    });
+    
+    return {
+      lastUpdated: new Date().toISOString(),
+      currentRound: currentRound,
+      leaderboard: leaderboard
+    };
+  } catch (err) {
+    console.error("Error transforming ESPN leaderboard data:", err);
+    return getFallbackLeaderboardData();
+  }
+};
+
+// Helper function to determine current round from ESPN data
+const determineRoundFromESPN = (roundInfo: string): 1 | 2 | 3 | 4 => {
+  try {
+    // ESPN format is typically like "Round 2" or "Final Round"
+    if (roundInfo.includes("1")) return 1;
+    if (roundInfo.includes("2")) return 2;
+    if (roundInfo.includes("3")) return 3;
+    if (roundInfo.includes("4") || roundInfo.toLowerCase().includes("final")) return 4;
+    
+    return 1; // Default to round 1
+  } catch (e) {
+    return 1; // Default to round 1 in case of error
   }
 };
 
@@ -397,7 +452,19 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       participant.pickScores = {};
       
       participant.picks.forEach(golferName => {
-        const golfer = golferScoreMap.get(golferName);
+        // Try to find an exact match first
+        let golfer = golferScoreMap.get(golferName);
+        
+        // If not found, try a more flexible match (to handle name variations)
+        if (!golfer) {
+          for (const [key, value] of golferScoreMap.entries()) {
+            if (key.toLowerCase().includes(golferName.toLowerCase()) || 
+                golferName.toLowerCase().includes(key.toLowerCase())) {
+              golfer = value;
+              break;
+            }
+          }
+        }
         
         if (golfer) {
           participant.pickScores![golferName] = golfer.score;
@@ -407,6 +474,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
             round1Score.value += golfer.score;
           }
         } else {
+          // Player not found in leaderboard, use 0 as a fallback
           participant.pickScores![golferName] = 0;
         }
       });
@@ -418,6 +486,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       };
     });
     
+    // Sort participants by total score (lower is better)
     participants.sort((a, b) => {
       if (a.totalPoints !== b.totalPoints) {
         return a.totalPoints - b.totalPoints;
@@ -430,6 +499,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       return a.tiebreaker2 - b.tiebreaker2;
     });
     
+    // Assign positions
     let currentPosition = 1;
     let currentScore = participants[0]?.totalPoints ?? 0;
     let currentTiebreaker1 = participants[0]?.tiebreaker1 ?? 0;
