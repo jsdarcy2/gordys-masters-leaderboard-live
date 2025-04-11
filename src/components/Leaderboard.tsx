@@ -2,7 +2,6 @@
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
-import { Card } from "@/components/ui/card";
 import { AlertTriangle, Info, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
+import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
 const POLLING_INTERVAL = 15000; // 15 seconds in milliseconds
@@ -30,6 +30,7 @@ const Leaderboard = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const apiKeyRef = useRef<string | null>(localStorage.getItem('rapidApiKey'));
 
   // Load tournament information
   useEffect(() => {
@@ -48,14 +49,17 @@ const Leaderboard = () => {
     loadTournamentInfo();
   }, []);
 
-  const loadLeaderboardData = async (showToast = false) => {
+  const loadLeaderboardData = async (showToast = false, newApiKey: string | null = null) => {
     try {
       setLoading(!refreshing);
       if (showToast) {
         setRefreshing(true);
       }
       
-      const data = await fetchLeaderboardData();
+      // Use the new API key if provided, otherwise use the stored one
+      const apiKey = newApiKey || apiKeyRef.current;
+      
+      const data = await fetchLeaderboardData(apiKey);
       console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
       
       // Check if we might be using fallback data
@@ -134,6 +138,11 @@ const Leaderboard = () => {
 
   const handleManualRefresh = () => {
     loadLeaderboardData(true);
+  };
+
+  const handleApiKeySet = (apiKey: string) => {
+    apiKeyRef.current = apiKey;
+    loadLeaderboardData(true, apiKey);
   };
 
   const togglePotentialWinnings = () => {
@@ -230,10 +239,7 @@ const Leaderboard = () => {
         )}
         
         {needsApiKey && (
-          <div className="text-center text-amber-600 py-4 flex items-center justify-center mb-4 bg-amber-50 border border-amber-200 rounded-md">
-            <Info size={16} className="mr-1" />
-            Note: Using sample data. Set your RapidAPI key for live data.
-          </div>
+          <ApiKeyForm onApiKeySet={handleApiKeySet} />
         )}
         
         {error && (
