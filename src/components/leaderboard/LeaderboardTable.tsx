@@ -1,7 +1,7 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, CircleX } from "lucide-react";
 import WinnerIcons from "./WinnerIcons";
 import { 
   getScoreClass, 
@@ -79,9 +79,16 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     </div>
                   </td>
                   <td className="px-2 py-3 font-medium">
-                    {golfer.name}
-                    {golfer.status === 'cut' && <span className="ml-2 text-xs text-red-500">(CUT)</span>}
-                    {golfer.status === 'withdrawn' && <span className="ml-2 text-xs text-red-500">(WD)</span>}
+                    <div className="flex items-center">
+                      {golfer.name}
+                      {golfer.status === 'cut' && (
+                        <span className="ml-2 inline-flex items-center text-xs text-red-500 font-medium">
+                          <CircleX size={14} className="mr-0.5" />
+                          MC
+                        </span>
+                      )}
+                      {golfer.status === 'withdrawn' && <span className="ml-2 text-xs text-red-500">(WD)</span>}
+                    </div>
                   </td>
                   <td className={`px-2 py-3 text-right ${getScoreClass(golfer.score)}`}>
                     {formatScore(golfer.score)}
