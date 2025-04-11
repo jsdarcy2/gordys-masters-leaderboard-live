@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "@/components/ui/image";
 
@@ -39,9 +39,15 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4 relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-sm">
-              Gordy's Masters Pool 2025
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-sm">
+                Gordy's Masters Pool 2025
+              </h1>
+              <div className="flex items-center bg-masters-yellow text-masters-green px-2 py-0.5 rounded-md text-xs font-bold">
+                <Star size={12} className="mr-1" />
+                BETA
+              </div>
+            </div>
             <p className="text-masters-yellow font-serif text-sm md:text-base italic drop-shadow-sm">
               A tradition unlike any other
             </p>
