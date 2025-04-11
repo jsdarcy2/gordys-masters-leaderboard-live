@@ -1,4 +1,3 @@
-
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -26,6 +25,7 @@ export interface PoolParticipant {
   tiebreaker1?: number;
   tiebreaker2?: number;
   paid: boolean;
+  bestFourTotal?: number; // Optional to not break existing code
 }
 
 export type TournamentRound = 1 | 2 | 3 | 4;

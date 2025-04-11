@@ -1,5 +1,6 @@
 // Keep any existing imports at the top
 import { GolferScore, PoolParticipant } from "@/types";
+import { buildGolferScoreMap, calculatePoolStandings } from "@/utils/scoringUtils";
 
 export const fetchLeaderboardData = async () => {
   try {
@@ -87,67 +88,13 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     const { leaderboard } = await fetchLeaderboardData();
     
     // Create a map of golfer names to their current scores for quick lookup
-    const golferScores: Record<string, number> = {};
-    leaderboard.forEach(golfer => {
-      golferScores[golfer.name] = golfer.score;
-    });
-    
-    // Calculate bonus points for top 10 finishers
-    const getBonus = (position: number): number => {
-      if (position <= 3) return -3; // Extra -3 points (good) for top 3
-      if (position <= 10) return -1; // Extra -1 point (good) for positions 4-10
-      return 0; // No bonus for positions outside top 10
-    };
+    const golferScores = buildGolferScoreMap(leaderboard);
     
     // Get the player selections
     const selectionsData = await fetchPlayerSelections();
-    const poolParticipants: PoolParticipant[] = [];
     
-    // Process each participant's picks
-    Object.entries(selectionsData).forEach(([name, data]) => {
-      // Initialize pickScores object
-      const pickScores: Record<string, number> = {};
-      
-      // Calculate total score
-      let totalScore = 0;
-      
-      // Process each pick
-      data.picks.forEach(golferName => {
-        // Get current score for this golfer (or 0 if not found)
-        const golferScore = golferScores[golferName] !== undefined ? golferScores[golferName] : 0;
-        pickScores[golferName] = golferScore;
-        
-        // Add to total score
-        totalScore += golferScore;
-        
-        // Apply bonus points for top finishers
-        const golfer = leaderboard.find(g => g.name === golferName);
-        if (golfer) {
-          totalScore += getBonus(golfer.position);
-        }
-      });
-      
-      // Add this participant to the pool
-      poolParticipants.push({
-        position: 0, // Will be calculated after sorting
-        name: name,
-        totalScore: totalScore,
-        totalPoints: totalScore, // For compatibility
-        paid: Math.random() > 0.1, // 90% chance of being paid
-        picks: data.picks,
-        pickScores: pickScores
-      });
-    });
-    
-    // Sort by total score (lowest/best score first, golf scoring)
-    poolParticipants.sort((a, b) => a.totalScore - b.totalScore);
-    
-    // Update positions based on the sorted order
-    poolParticipants.forEach((participant, index) => {
-      participant.position = index + 1;
-    });
-    
-    return poolParticipants;
+    // Calculate and return the pool standings
+    return calculatePoolStandings(selectionsData, golferScores);
   } catch (error) {
     console.error('Error fetching pool standings:', error);
     return [];
