@@ -1,3 +1,4 @@
+
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData } from "@/services/api";
@@ -25,6 +26,7 @@ const Leaderboard = () => {
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadLeaderboardData = async (showToast = false) => {
     try {
@@ -34,6 +36,7 @@ const Leaderboard = () => {
       }
       
       const data = await fetchLeaderboardData();
+      console.log("Fetched leaderboard data:", data.leaderboard.length, "golfers");
       
       previousLeaderboard.current = [...leaderboard];
       
@@ -128,12 +131,21 @@ const Leaderboard = () => {
       loadLeaderboardData();
     }
     
-    // Use 15 seconds interval for all devices
-    const intervalId = setInterval(() => {
+    // Clear any existing interval
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
+    
+    // Set up polling every 15 seconds
+    pollingRef.current = setInterval(() => {
       loadLeaderboardData();
     }, POLLING_INTERVAL);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {

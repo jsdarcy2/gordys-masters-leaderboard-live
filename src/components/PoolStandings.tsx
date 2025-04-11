@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,11 +22,15 @@ const PoolStandings = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
   
   const loadStandingsData = async () => {
     try {
       setLoading(true);
       const data = await fetchPoolStandings();
+      
+      console.log("Fetched pool standings data:", data.length, "participants");
+      
       setStandings(data);
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
@@ -72,12 +76,21 @@ const PoolStandings = () => {
       loadStandingsData();
     }
     
-    // Set up polling every 15 seconds regardless of device
-    const intervalId = setInterval(() => {
+    // Clear any existing interval
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+    }
+    
+    // Set up polling every 15 seconds
+    pollingRef.current = setInterval(() => {
       loadStandingsData();
     }, POLLING_INTERVAL);
     
-    return () => clearInterval(intervalId);
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
   }, []);
 
   // Filter standings based on search query
