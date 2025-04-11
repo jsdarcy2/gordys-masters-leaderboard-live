@@ -1,7 +1,7 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw, GolfClub } from "lucide-react";
+import { RefreshCw, Golf } from "lucide-react";
 import WinnerIcons from "./leaderboard/WinnerIcons";
 import { 
   getScoreClass, 
