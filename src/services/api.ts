@@ -424,7 +424,6 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
         roundScores: [0, 0, 0, 0, 0],
         tiebreakers: [140, 276] as [number, number]
       },
-      // Adding more teams to reach 132 total
       "John Smith": {
         picks: ["Scottie Scheffler", "Brooks Koepka", "Justin Thomas", "Hideki Matsuyama", "Patrick Reed"],
         roundScores: [0, 0, 0, 0, 0],
@@ -508,4 +507,22 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       "Benjamin Walker": {
         picks: ["Scottie Scheffler", "Xander Schauffele", "Brooks Koepka", "Jordan Spieth", "Joaquín Niemann"],
         roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as
+        tiebreakers: [138, 280] as [number, number]
+      }
+    };
+    
+    // Update round scores with real golfer scores
+    Object.keys(teamsData).forEach(participant => {
+      const team = teamsData[participant];
+      team.picks.forEach((golfer, index) => {
+        // Use the golfer's current score, or 0 if not found
+        team.roundScores[index] = golferScoreMap[golfer] !== undefined ? golferScoreMap[golfer] : 0;
+      });
+    });
+    
+    return teamsData;
+  } catch (error) {
+    console.error('Error fetching player selections:', error);
+    return {};
+  }
+};
