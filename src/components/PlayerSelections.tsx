@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +25,7 @@ const PlayerSelections = () => {
   const [sortedGolfer, setSortedGolfer] = useState<string | null>(null);
   const { toast } = useToast();
   
-  const PREVIEW_COUNT = 20; // Number of selections to show in preview mode
+  const PREVIEW_COUNT = 50; // Increased from 20 to 50 to show more participants by default
 
   useEffect(() => {
     const loadData = async () => {
@@ -37,6 +38,7 @@ const PlayerSelections = () => {
           fetchPoolStandings()
         ]);
         
+        console.log(`Loaded ${Object.keys(selectionsData).length} team selections`);
         setSelections(selectionsData);
         setPoolStandings(standingsData);
         setError(null);
@@ -139,7 +141,7 @@ const PlayerSelections = () => {
             Player Selections
           </h2>
           <p className="text-sm text-white/80 mt-1">
-            View all team selections for The Masters, ordered by pool position
+            View all {Object.keys(selections).length} team selections for The Masters, ordered by pool position
           </p>
         </div>
         

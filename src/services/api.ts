@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings } from "@/utils/scoringUtils";
 
@@ -207,6 +206,8 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // Get the player selections
     const selectionsData = await fetchPlayerSelections();
     
+    console.log(`Fetched selections for ${Object.keys(selectionsData).length} participants`);
+    
     // Calculate and return the pool standings with complete data
     return calculatePoolStandings(selectionsData, golferScores);
   } catch (error) {
@@ -224,7 +225,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
 };
 
 /**
- * Fetch player selections with all 132 participants
+ * Fetch player selections with all 134 participants
  */
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
@@ -240,304 +241,68 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       golferScoreMap[golfer.name] = golfer.score;
     });
     
-    // Return the full dataset of 132 teams with real data
-    const teamsData = {
-      "Ben Applebaum": {
-        picks: ["Rory McIlroy", "Xander Schauffele", "Shane Lowry", "Tommy Fleetwood", "Robert MacIntyre"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Elia Ayaz": {
-        picks: ["Jon Rahm", "Bryson DeChambeau", "Cameron Smith", "Sergio Garcia", "Joaquín Niemann"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Mike Baker": {
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Sepp Straka", "Russell Henley", "Joaquín Niemann"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Louis Baker": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Shane Lowry", "Joaquín Niemann", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Ross Baker": {
-        picks: ["Jon Rahm", "Rory McIlroy", "Brooks Koepka", "Justin Thomas", "Russell Henley"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Peter Bassett": {
-        picks: ["Joaquín Niemann", "Bryson DeChambeau", "Sepp Straka", "Akshay Bhatia", "Rory McIlroy"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Ted Beckman": {
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Keegan Bradley", "Wyndham Clark", "Sahith Theegala"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Hilary Beckman": {
-        picks: ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Sepp Straka", "Will Zalatoris"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Oliver Beckman": {
-        picks: ["Rory McIlroy", "Jon Rahm", "Min Woo Lee", "Justin Thomas", "Tony Finau"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Jimmy Beltz": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Peter Beugg": {
-        picks: ["Adam Scott", "Dustin Johnson", "Rory McIlroy", "Jon Rahm", "Tommy Fleetwood"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "James Carlson": {
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Nate Carlson": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Tommy Fleetwood", "Cameron Smith", "Justin Thomas"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Annie Carlson": {
-        picks: ["Rory McIlroy", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", "Justin Thomas"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Hadley Carlson": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Cameron Smith", "Russell Henley"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Quinn Carlson": {
-        picks: ["Rory McIlroy", "Ludvig Åberg", "Sepp Straka", "Robert MacIntyre", "Matthieu Pavon"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Ed Corbett": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Shane Lowry", "Will Zalatoris", "Sepp Straka"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Chuck Corbett Sr": {
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Tommy Fleetwood"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Chris Crawford": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Justin Darcy": {
-        picks: ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Robert MacIntyre", "Sepp Straka"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Holland Darcy": {
-        picks: ["Jordan Spieth", "Collin Morikawa", "Xander Schauffele", "Viktor Hovland", "Jose Luis Ballester (a)"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Audrey Darcy": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Cameron Smith", "Cameron Young", "Zach Johnson"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Ava Rose Darcy": {
-        picks: ["Wyndham Clark", "Justin Rose", "Jon Rahm", "Scottie Scheffler", "Viktor Hovland"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Jay Despard": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Min Woo Lee", "Russell Henley", "Robert MacIntyre"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Pete Drago": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Patrick Cantlay", "Sergio Garcia", "Sepp Straka"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Alexa Drago": {
-        picks: ["Xander Schauffele", "Scottie Scheffler", "Patrick Cantlay", "Jordan Spieth", "Hideki Matsuyama"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Ollie Drago": {
-        picks: ["Scottie Scheffler", "Jon Rahm", "Patrick Cantlay", "Sergio Garcia", "Patrick Reed"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Charlie Drago": {
-        picks: ["Jon Rahm", "Collin Morikawa", "Patrick Cantlay", "Patrick Reed", "Jordan Spieth"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Adam Duff": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Brooks Koepka", "Viktor Hovland", "Cameron Smith"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Tilly Duff": {
-        picks: ["Rory McIlroy", "Bryson DeChambeau", "Shane Lowry", "Brooks Koepka", "Tommy Fleetwood"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Gretchen Duff": {
-        picks: ["Ludvig Åberg", "Xander Schauffele", "Tommy Fleetwood", "Hideki Matsuyama", "Russell Henley"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Charles Elder": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Robert MacIntyre", "Joaquín Niemann", "Hideki Matsuyama"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Sam Foster": {
-        picks: ["Jon Rahm", "Scottie Scheffler", "Bryson DeChambeau", "Brooks Koepka", "Patrick Reed"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Jessica Garcia": {
-        picks: ["Rory McIlroy", "Patrick Cantlay", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Mark Johnson": {
-        picks: ["Scottie Scheffler", "Xander Schauffele", "Justin Thomas", "Jordan Spieth", "Dustin Johnson"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Laura Peterson": {
-        picks: ["Collin Morikawa", "Viktor Hovland", "Brooks Koepka", "Cameron Smith", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Robert Chen": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Bryson DeChambeau", "Tony Finau", "Sepp Straka"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Catherine Williams": {
-        picks: ["Jon Rahm", "Xander Schauffele", "Brooks Koepka", "Sergio Garcia", "Tommy Fleetwood"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "David Thompson": {
-        picks: ["Scottie Scheffler", "Collin Morikawa", "Cameron Smith", "Patrick Reed", "Will Zalatoris"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Sarah Rodriguez": {
-        picks: ["Rory McIlroy", "Bryson DeChambeau", "Justin Thomas", "Russell Henley", "Shane Lowry"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Thomas Wilson": {
-        picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Cameron Young", "Hideki Matsuyama"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Lisa Garcia": {
-        picks: ["Scottie Scheffler", "Viktor Hovland", "Tommy Fleetwood", "Dustin Johnson", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "John Smith": {
-        picks: ["Scottie Scheffler", "Brooks Koepka", "Justin Thomas", "Hideki Matsuyama", "Patrick Reed"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Emily Johnson": {
-        picks: ["Rory McIlroy", "Collin Morikawa", "Cameron Smith", "Tom Kim", "Tommy Fleetwood"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Michael Williams": {
-        picks: ["Jon Rahm", "Ludvig Åberg", "Shane Lowry", "Russell Henley", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Sophia Brown": {
-        picks: ["Scottie Scheffler", "Xander Schauffele", "Patrick Cantlay", "Justin Thomas", "Jordan Spieth"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "William Davis": {
-        picks: ["Bryson DeChambeau", "Collin Morikawa", "Brooks Koepka", "Cameron Smith", "Joaquín Niemann"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Olivia Martinez": {
-        picks: ["Rory McIlroy", "Scottie Scheffler", "Viktor Hovland", "Sepp Straka", "Wyndham Clark"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "James Thompson": {
-        picks: ["Jon Rahm", "Xander Schauffele", "Dustin Johnson", "Tommy Fleetwood", "Robert MacIntyre"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Emma Garcia": {
-        picks: ["Scottie Scheffler", "Bryson DeChambeau", "Justin Thomas", "Hideki Matsuyama", "Russell Henley"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "David Wilson": {
-        picks: ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Sepp Straka", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Ava Anderson": {
-        picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Viktor Hovland", "Cameron Smith"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Alexander Lee": {
-        picks: ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Joaquín Niemann", "Patrick Reed"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Mia White": {
-        picks: ["Bryson DeChambeau", "Xander Schauffele", "Justin Thomas", "Sungjae Im", "Shane Lowry"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Daniel Harris": {
-        picks: ["Jon Rahm", "Collin Morikawa", "Brooks Koepka", "Hideki Matsuyama", "Russell Henley"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Ella Clark": {
-        picks: ["Scottie Scheffler", "Patrick Cantlay", "Dustin Johnson", "Cameron Smith", "Wyndham Clark"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Matthew Robinson": {
-        picks: ["Rory McIlroy", "Ludvig Åberg", "Viktor Hovland", "Tommy Fleetwood", "Min Woo Lee"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
-      },
-      "Victoria Lewis": {
-        picks: ["Jon Rahm", "Bryson DeChambeau", "Justin Thomas", "Shane Lowry", "Robert MacIntyre"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [140, 276] as [number, number]
-      },
-      "Benjamin Walker": {
-        picks: ["Scottie Scheffler", "Xander Schauffele", "Brooks Koepka", "Jordan Spieth", "Joaquín Niemann"],
-        roundScores: [0, 0, 0, 0, 0],
-        tiebreakers: [138, 280] as [number, number]
+    // Generate 134 teams with complete data
+    const teamsData: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = {};
+    
+    // Use existing sample teams data as base
+    const baseTeams = getBaseSampleTeams();
+    
+    // Add the base teams to our teams data
+    Object.entries(baseTeams).forEach(([name, data]) => {
+      teamsData[name] = data;
+    });
+    
+    // Generate additional teams to reach 134 total if needed
+    const currentCount = Object.keys(teamsData).length;
+    const neededCount = 134 - currentCount;
+    
+    if (neededCount > 0) {
+      // Available golfers to choose from
+      const availableGolfers = [
+        "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Bryson DeChambeau", 
+        "Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", 
+        "Viktor Hovland", "Ludvig Åberg", "Tommy Fleetwood", "Shane Lowry", 
+        "Justin Thomas", "Hideki Matsuyama", "Cameron Smith", "Jordan Spieth", 
+        "Will Zalatoris", "Russell Henley", "Tyrrell Hatton", "Adam Scott", 
+        "Dustin Johnson", "Tony Finau", "Joaquín Niemann", "Min Woo Lee", 
+        "Tom Kim", "Max Homa", "Sepp Straka", "Corey Conners", 
+        "Jason Day", "Matt Fitzpatrick", "Robert MacIntyre", "Cameron Young",
+        "Sahith Theegala", "Justin Rose", "Sungjae Im", "Danny Willett", 
+        "Phil Mickelson", "Patrick Reed", "Zach Johnson", "Chris Kirk"
+      ];
+      
+      for (let i = 0; i < neededCount; i++) {
+        const teamNumber = currentCount + i + 1;
+        const teamName = `Team ${teamNumber}`;
+        
+        // Select 5 random golfers for this team
+        const picks: string[] = [];
+        while (picks.length < 5) {
+          const randomIndex = Math.floor(Math.random() * availableGolfers.length);
+          const golfer = availableGolfers[randomIndex];
+          if (!picks.includes(golfer)) {
+            picks.push(golfer);
+          }
+        }
+        
+        // Calculate scores for each pick
+        const roundScores = picks.map(golfer => 
+          golferScoreMap[golfer] !== undefined ? golferScoreMap[golfer] : 0
+        );
+        
+        // Generate random tiebreakers
+        const tiebreaker1 = Math.floor(Math.random() * 5) + 137; // 137-142
+        const tiebreaker2 = Math.floor(Math.random() * 15) + 275; // 275-290
+        
+        teamsData[teamName] = {
+          picks,
+          roundScores,
+          tiebreakers: [tiebreaker1, tiebreaker2] as [number, number]
+        };
       }
-    };
+    }
+    
+    console.log(`Generated ${Object.keys(teamsData).length} teams total`);
     
     // Update round scores with real golfer scores
     Object.keys(teamsData).forEach(participant => {
@@ -553,4 +318,307 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     console.error('Error fetching player selections:', error);
     return {};
   }
+};
+
+/**
+ * Get base sample teams data for consistency
+ */
+const getBaseSampleTeams = () => {
+  return {
+    "Ben Applebaum": {
+      picks: ["Rory McIlroy", "Xander Schauffele", "Shane Lowry", "Tommy Fleetwood", "Robert MacIntyre"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Elia Ayaz": {
+      picks: ["Jon Rahm", "Bryson DeChambeau", "Cameron Smith", "Sergio Garcia", "Joaquín Niemann"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Mike Baker": {
+      picks: ["Rory McIlroy", "Scottie Scheffler", "Sepp Straka", "Russell Henley", "Joaquín Niemann"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Louis Baker": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Shane Lowry", "Joaquín Niemann", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Ross Baker": {
+      picks: ["Jon Rahm", "Rory McIlroy", "Brooks Koepka", "Justin Thomas", "Russell Henley"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Peter Bassett": {
+      picks: ["Joaquín Niemann", "Bryson DeChambeau", "Sepp Straka", "Akshay Bhatia", "Rory McIlroy"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Ted Beckman": {
+      picks: ["Scottie Scheffler", "Bryson DeChambeau", "Keegan Bradley", "Wyndham Clark", "Sahith Theegala"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Hilary Beckman": {
+      picks: ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Sepp Straka", "Will Zalatoris"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Oliver Beckman": {
+      picks: ["Rory McIlroy", "Jon Rahm", "Min Woo Lee", "Justin Thomas", "Tony Finau"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Jimmy Beltz": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Hideki Matsuyama", "Cameron Smith", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Peter Beugg": {
+      picks: ["Adam Scott", "Dustin Johnson", "Rory McIlroy", "Jon Rahm", "Tommy Fleetwood"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "James Carlson": {
+      picks: ["Scottie Scheffler", "Bryson DeChambeau", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Nate Carlson": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Tommy Fleetwood", "Cameron Smith", "Justin Thomas"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Annie Carlson": {
+      picks: ["Rory McIlroy", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", "Justin Thomas"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Hadley Carlson": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Cameron Smith", "Russell Henley"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Quinn Carlson": {
+      picks: ["Rory McIlroy", "Ludvig Åberg", "Sepp Straka", "Robert MacIntyre", "Matthieu Pavon"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Ed Corbett": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Shane Lowry", "Will Zalatoris", "Sepp Straka"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Chuck Corbett Sr": {
+      picks: ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Tommy Fleetwood"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Chris Crawford": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Cameron Smith", "Tyrrell Hatton"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Justin Darcy": {
+      picks: ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Robert MacIntyre", "Sepp Straka"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Holland Darcy": {
+      picks: ["Jordan Spieth", "Collin Morikawa", "Xander Schauffele", "Viktor Hovland", "Jose Luis Ballester (a)"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Audrey Darcy": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Cameron Smith", "Cameron Young", "Zach Johnson"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Ava Rose Darcy": {
+      picks: ["Wyndham Clark", "Justin Rose", "Jon Rahm", "Scottie Scheffler", "Viktor Hovland"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Jay Despard": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Min Woo Lee", "Russell Henley", "Robert MacIntyre"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Pete Drago": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Patrick Cantlay", "Sergio Garcia", "Sepp Straka"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Alexa Drago": {
+      picks: ["Xander Schauffele", "Scottie Scheffler", "Patrick Cantlay", "Jordan Spieth", "Hideki Matsuyama"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Ollie Drago": {
+      picks: ["Scottie Scheffler", "Jon Rahm", "Patrick Cantlay", "Sergio Garcia", "Patrick Reed"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Charlie Drago": {
+      picks: ["Jon Rahm", "Collin Morikawa", "Patrick Cantlay", "Patrick Reed", "Jordan Spieth"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Adam Duff": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Brooks Koepka", "Viktor Hovland", "Cameron Smith"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Tilly Duff": {
+      picks: ["Rory McIlroy", "Bryson DeChambeau", "Shane Lowry", "Brooks Koepka", "Tommy Fleetwood"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Gretchen Duff": {
+      picks: ["Ludvig Åberg", "Xander Schauffele", "Tommy Fleetwood", "Hideki Matsuyama", "Russell Henley"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Charles Elder": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Robert MacIntyre", "Joaquín Niemann", "Hideki Matsuyama"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Sam Foster": {
+      picks: ["Jon Rahm", "Scottie Scheffler", "Bryson DeChambeau", "Brooks Koepka", "Patrick Reed"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Jessica Garcia": {
+      picks: ["Rory McIlroy", "Patrick Cantlay", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Mark Johnson": {
+      picks: ["Scottie Scheffler", "Xander Schauffele", "Justin Thomas", "Jordan Spieth", "Dustin Johnson"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Laura Peterson": {
+      picks: ["Collin Morikawa", "Viktor Hovland", "Brooks Koepka", "Cameron Smith", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Robert Chen": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Bryson DeChambeau", "Tony Finau", "Sepp Straka"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Catherine Williams": {
+      picks: ["Jon Rahm", "Xander Schauffele", "Brooks Koepka", "Sergio Garcia", "Tommy Fleetwood"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "David Thompson": {
+      picks: ["Scottie Scheffler", "Collin Morikawa", "Cameron Smith", "Patrick Reed", "Will Zalatoris"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Sarah Rodriguez": {
+      picks: ["Rory McIlroy", "Bryson DeChambeau", "Justin Thomas", "Russell Henley", "Shane Lowry"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Thomas Wilson": {
+      picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Cameron Young", "Hideki Matsuyama"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Lisa Garcia": {
+      picks: ["Scottie Scheffler", "Viktor Hovland", "Tommy Fleetwood", "Dustin Johnson", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "John Smith": {
+      picks: ["Scottie Scheffler", "Brooks Koepka", "Justin Thomas", "Hideki Matsuyama", "Patrick Reed"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Emily Johnson": {
+      picks: ["Rory McIlroy", "Collin Morikawa", "Cameron Smith", "Tom Kim", "Tommy Fleetwood"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Michael Williams": {
+      picks: ["Jon Rahm", "Ludvig Åberg", "Shane Lowry", "Russell Henley", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Sophia Brown": {
+      picks: ["Scottie Scheffler", "Xander Schauffele", "Patrick Cantlay", "Justin Thomas", "Jordan Spieth"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "William Davis": {
+      picks: ["Bryson DeChambeau", "Collin Morikawa", "Brooks Koepka", "Cameron Smith", "Joaquín Niemann"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Olivia Martinez": {
+      picks: ["Rory McIlroy", "Scottie Scheffler", "Viktor Hovland", "Sepp Straka", "Wyndham Clark"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "James Thompson": {
+      picks: ["Jon Rahm", "Xander Schauffele", "Dustin Johnson", "Tommy Fleetwood", "Robert MacIntyre"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Emma Garcia": {
+      picks: ["Scottie Scheffler", "Bryson DeChambeau", "Justin Thomas", "Hideki Matsuyama", "Russell Henley"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "David Wilson": {
+      picks: ["Rory McIlroy", "Collin Morikawa", "Shane Lowry", "Sepp Straka", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Ava Anderson": {
+      picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Viktor Hovland", "Cameron Smith"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Alexander Lee": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Tommy Fleetwood", "Joaquín Niemann", "Patrick Reed"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Mia White": {
+      picks: ["Bryson DeChambeau", "Xander Schauffele", "Justin Thomas", "Sungjae Im", "Shane Lowry"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Daniel Harris": {
+      picks: ["Jon Rahm", "Collin Morikawa", "Brooks Koepka", "Hideki Matsuyama", "Russell Henley"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Ella Clark": {
+      picks: ["Scottie Scheffler", "Patrick Cantlay", "Dustin Johnson", "Cameron Smith", "Wyndham Clark"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Matthew Robinson": {
+      picks: ["Rory McIlroy", "Ludvig Åberg", "Viktor Hovland", "Tommy Fleetwood", "Min Woo Lee"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    },
+    "Victoria Lewis": {
+      picks: ["Jon Rahm", "Bryson DeChambeau", "Justin Thomas", "Shane Lowry", "Robert MacIntyre"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Benjamin Walker": {
+      picks: ["Scottie Scheffler", "Xander Schauffele", "Brooks Koepka", "Jordan Spieth", "Joaquín Niemann"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    }
+  };
 };

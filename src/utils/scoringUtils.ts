@@ -75,7 +75,18 @@ export const calculatePoolStandings = (
   // Process each participant's picks - ensure we process ALL participants
   console.log(`Processing ${Object.keys(selectionsData).length} participants from selections data`);
   
+  if (Object.keys(selectionsData).length === 0) {
+    console.warn("Warning: No participant data received in selectionsData");
+    return [];
+  }
+  
   Object.entries(selectionsData).forEach(([name, data]) => {
+    // Skip entries with invalid data
+    if (!data || !data.picks || !Array.isArray(data.picks)) {
+      console.warn(`Skipping invalid participant data for: ${name}`);
+      return;
+    }
+    
     // Initialize pickScores object
     const pickScores: Record<string, number> = {};
     
