@@ -1,13 +1,17 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { GolferScore, DataSource } from "@/types";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 import { getFromCache, saveToCache } from "@/utils/cacheUtils";
+import { getApiHealthStatus, getBestDataSource, checkApiHealth, API_ENDPOINTS } from "@/services/api";
+import { isTournamentInProgress } from "@/services/tournament";
 
 const LEADERBOARD_CACHE_KEY = "leaderboardData";
 const CACHE_EXPIRY = 30 * 60 * 1000; // 30 minutes
-const RETRY_INTERVALS = [5000, 15000, 30000, 60000]; // Progressive retry delays in ms
+const RETRY_INTERVALS = [3000, 5000, 15000, 30000, 60000]; // More aggressive retry delays in ms
+const EMERGENCY_MOCK_DATA_THRESHOLD = 3; // Number of failed attempts before using mock data
+const HEALTH_CHECK_INTERVAL = 60000; // Check API health every minute
 
 interface UseLeaderboardResult {
   leaderboard: GolferScore[];
@@ -18,11 +22,20 @@ interface UseLeaderboardResult {
   dataYear: string | undefined;
   refreshData: (force?: boolean) => Promise<void>;
   hasLiveData: boolean;
+  dataHealth: {
+    status: "healthy" | "degraded" | "offline";
+    message: string;
+    timestamp: string;
+  };
 }
 
 /**
- * A custom hook that manages tournament leaderboard data from multiple sources
- * with smart retries, caching, and fallbacks
+ * Enhanced tournament data hook with high-availability features
+ * - Multi-source data fetching with health-aware source selection
+ * - Aggressive retries with smart backoff
+ * - Persistent cache with TTL and versioning
+ * - Fallback mechanisms including mock data generation
+ * - Real-time API health monitoring
  */
 export function useTournamentData(): UseLeaderboardResult {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -34,7 +47,20 @@ export function useTournamentData(): UseLeaderboardResult {
   const [retryCount, setRetryCount] = useState(0);
   const [retryTimer, setRetryTimer] = useState<NodeJS.Timeout | null>(null);
   const [hasLiveData, setHasLiveData] = useState(false);
+  const [dataHealth, setDataHealth] = useState<{
+    status: "healthy" | "degraded" | "offline";
+    message: string;
+    timestamp: string;
+  }>({
+    status: "healthy",
+    message: "Data systems operational",
+    timestamp: new Date().toISOString()
+  });
+  
+  const healthCheckRef = useRef<NodeJS.Timeout | null>(null);
+  const failedAttempts = useRef(0);
   const { toast } = useToast();
+  const currentYear = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 
   // Helper function to extract and update leaderboard data
   const updateLeaderboardData = useCallback((data: any) => {
@@ -46,21 +72,37 @@ export function useTournamentData(): UseLeaderboardResult {
     setLastUpdated(data.lastUpdated || new Date().toISOString());
     setDataSource(data.source);
     setDataYear(data.year);
-    setHasLiveData(data.source !== "mock-data" && data.source !== "cached-data");
+    setHasLiveData(data.source !== "mock-data" && data.source !== "cached-data" && data.source !== "historical-data");
+    
+    // Reset failed attempts counter on success
+    failedAttempts.current = 0;
     
     return data;
   }, []);
 
-  // Try to fetch data from a specific source
+  // Enhanced fetch from source with health checks and detailed logging
   const fetchFromSource = useCallback(async (
     sourceName: string, 
     fetcher: () => Promise<any>
   ): Promise<any | null> => {
     try {
-      console.log(`Attempting to fetch data from ${sourceName}...`);
-      const data = await fetcher();
+      // Check if this source has been consistently failing
+      const healthStatus = getApiHealthStatus().find(s => 
+        s.endpoint.includes(sourceName.toLowerCase().replace('-api', ''))
+      );
       
-      console.log(`Successfully fetched data from ${sourceName}:`, 
+      if (healthStatus && healthStatus.status === 'offline' && healthStatus.consecutiveFailures > 3) {
+        console.log(`Skipping ${sourceName} as it's been offline (${healthStatus.consecutiveFailures} consecutive failures)`);
+        return null;
+      }
+      
+      console.log(`Attempting to fetch data from ${sourceName}...`);
+      const startTime = performance.now();
+      const data = await fetcher();
+      const endTime = performance.now();
+      const fetchTime = endTime - startTime;
+      
+      console.log(`Successfully fetched data from ${sourceName} in ${fetchTime.toFixed(0)}ms:`, 
         Array.isArray(data?.leaderboard) ? `${data.leaderboard.length} players` : "invalid data");
       
       if (!data || !Array.isArray(data.leaderboard) || data.leaderboard.length === 0) {
@@ -70,6 +112,14 @@ export function useTournamentData(): UseLeaderboardResult {
       
       // Tag the source
       data.source = sourceName as DataSource;
+      
+      // Update the data health based on success
+      setDataHealth({
+        status: "healthy",
+        message: `Data successfully retrieved from ${sourceName}`,
+        timestamp: new Date().toISOString()
+      });
+      
       return data;
     } catch (error) {
       console.error(`Error fetching from ${sourceName}:`, error);
@@ -77,10 +127,13 @@ export function useTournamentData(): UseLeaderboardResult {
     }
   }, []);
 
-  // Try PGA Tour official API (new source)
+  // Try PGA Tour official API (primary source)
   const fetchFromPGATour = useCallback(async () => {
     return fetchFromSource("pgatour-api", async () => {
-      const response = await fetch("https://statdata.pgatour.com/r/current/leaderboard-v2mini.json", {
+      // Check API health first
+      await checkApiHealth(API_ENDPOINTS.PGA_TOUR);
+      
+      const response = await fetch(API_ENDPOINTS.PGA_TOUR, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache" }
       });
@@ -119,7 +172,8 @@ export function useTournamentData(): UseLeaderboardResult {
           score: totalScore,
           today: todayScore,
           thru: player.thru || "F",
-          status: status
+          status: status,
+          strokes: player.total_strokes ? parseInt(player.total_strokes, 10) : undefined
         };
       });
       
@@ -138,14 +192,18 @@ export function useTournamentData(): UseLeaderboardResult {
     });
   }, [fetchFromSource]);
 
-  // Try ESPN API (existing source)
+  // Try ESPN API (first backup source)
   const fetchFromESPN = useCallback(async () => {
-    const currentYear = new Date().getFullYear().toString();
+    const year = currentYear;
+    const endpoint = API_ENDPOINTS.ESPN.replace('{year}', year);
+    
     return fetchFromSource("espn-api", async () => {
-      const response = await fetch(
-        `https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard/events/${currentYear}/masters/leaderboard`, 
-        { headers: { "Cache-Control": "no-cache" } }
-      );
+      // Check API health first
+      await checkApiHealth(endpoint);
+      
+      const response = await fetch(endpoint, { 
+        headers: { "Cache-Control": "no-cache" } 
+      });
       
       if (!response.ok) throw new Error(`ESPN API error: ${response.status}`);
       
@@ -178,7 +236,8 @@ export function useTournamentData(): UseLeaderboardResult {
           score: totalScoreNum,
           today: todayScoreNum,
           thru: player.status?.thru || player.status?.type?.shortDetail || "F", 
-          status: status
+          status: status,
+          strokes: player.statistics?.find((s: any) => s.name === "totalStrokes")?.value
         });
       });
       
@@ -188,7 +247,7 @@ export function useTournamentData(): UseLeaderboardResult {
       // Get tournament year from ESPN data
       const tournamentYear = events?.date 
         ? new Date(events.date).getFullYear().toString() 
-        : currentYear;
+        : year;
       
       return {
         leaderboard,
@@ -196,13 +255,23 @@ export function useTournamentData(): UseLeaderboardResult {
         year: tournamentYear
       };
     });
-  }, [fetchFromSource]);
+  }, [fetchFromSource, currentYear]);
 
-  // Try Sports Data API (existing source)
+  // Try Sports Data API (second backup)
   const fetchFromSportsData = useCallback(async () => {
-    const currentYear = new Date().getFullYear().toString();
+    const year = currentYear;
+    const endpoint = API_ENDPOINTS.SPORTS_DATA.replace('{year}', year);
+    
     return fetchFromSource("sportsdata-api", async () => {
-      const response = await fetch(`https://golf-live-data.p.rapidapi.com/leaderboard/masters/${currentYear}`, {
+      // Check API health first
+      await checkApiHealth(endpoint, {
+        headers: {
+          'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
+          'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+        }
+      });
+      
+      const response = await fetch(endpoint, {
         headers: {
           'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
           'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com',
@@ -239,7 +308,8 @@ export function useTournamentData(): UseLeaderboardResult {
           score: totalScoreNum,
           today: todayScoreNum,
           thru: player.thru || "F",
-          status: status
+          status: status,
+          strokes: player.total_strokes ? parseInt(player.total_strokes, 10) : undefined
         });
       });
       
@@ -249,14 +319,17 @@ export function useTournamentData(): UseLeaderboardResult {
       return {
         leaderboard,
         lastUpdated: new Date().toISOString(),
-        year: data.year?.toString() || currentYear
+        year: data.year?.toString() || year
       };
     });
-  }, [fetchFromSource]);
+  }, [fetchFromSource, currentYear]);
 
-  // Try Masters.com scraping (existing source)
+  // Try Masters.com scraping (final backup)
   const fetchFromMastersScraper = useCallback(async () => {
     return fetchFromSource("masters-scraper", async () => {
+      // Check API health first
+      await checkApiHealth(API_ENDPOINTS.MASTERS_WEB);
+      
       // Import the scraper function dynamically to avoid initialization issues
       const { scrapeMastersWebsite } = await import("@/services/leaderboard/scraper");
       const scrapedLeaderboard = await scrapeMastersWebsite();
@@ -273,7 +346,34 @@ export function useTournamentData(): UseLeaderboardResult {
     });
   }, [fetchFromSource]);
 
-  // Main data fetching function that tries multiple sources
+  // Generate realistic mock data with warning as absolute last resort
+  const generateEmergencyMockData = useCallback((): GolferScore[] => {
+    const playerNames = [
+      "Scottie Scheffler", "Rory McIlroy", "Brooks Koepka", "Jon Rahm", 
+      "Bryson DeChambeau", "Tiger Woods", "Jordan Spieth", "Justin Thomas", 
+      "Dustin Johnson", "Collin Morikawa", "Xander Schauffele", "Patrick Cantlay",
+      "Viktor Hovland", "Cameron Smith", "Hideki Matsuyama", "Will Zalatoris", 
+      "Tony Finau", "Matt Fitzpatrick", "Shane Lowry", "Tommy Fleetwood"
+    ];
+    
+    // Generate more realistic mock data
+    return playerNames.map((name, index) => {
+      const position = index + 1;
+      const score = Math.floor(Math.random() * 10) - 5; // Random score between -5 and 4
+      const today = Math.floor(Math.random() * 6) - 3; // Random today score between -3 and 2
+      
+      return {
+        position,
+        name,
+        score,
+        today,
+        thru: "F",
+        status: "active" as const
+      };
+    });
+  }, []);
+
+  // Main data fetching function with improved reliability
   const fetchLeaderboardData = useCallback(async (force = false): Promise<void> => {
     // If not forcing a refresh and we already have data, don't fetch again
     if (!force && leaderboard.length > 0 && !loading) {
@@ -304,25 +404,34 @@ export function useTournamentData(): UseLeaderboardResult {
         }
       }
       
-      // Try multiple data sources in order of reliability
+      // Get the best data source based on health checks
+      const recommendedSource = getBestDataSource();
+      console.log(`Health system recommends using ${recommendedSource} as primary data source`);
+      
+      // Try data sources in intelligent order based on health status
       let data = null;
       
-      // 1. Try PGA Tour API (new source)
-      data = await fetchFromPGATour();
-      
-      // 2. Try ESPN API if PGA Tour failed
-      if (!data) {
+      // Use recommended source first, then try others as fallback
+      if (recommendedSource === 'pgatour-api' || recommendedSource === 'cached-data') {
+        data = await fetchFromPGATour();
+        if (!data) data = await fetchFromESPN();
+        if (!data) data = await fetchFromSportsData();
+        if (!data) data = await fetchFromMastersScraper();
+      } else if (recommendedSource === 'espn-api') {
         data = await fetchFromESPN();
-      }
-      
-      // 3. Try Sports Data API if ESPN failed
-      if (!data) {
+        if (!data) data = await fetchFromPGATour();
+        if (!data) data = await fetchFromSportsData();
+        if (!data) data = await fetchFromMastersScraper();
+      } else if (recommendedSource === 'sportsdata-api') {
         data = await fetchFromSportsData();
-      }
-      
-      // 4. Try Masters.com scraping if all else fails
-      if (!data) {
+        if (!data) data = await fetchFromPGATour();
+        if (!data) data = await fetchFromESPN();
+        if (!data) data = await fetchFromMastersScraper();
+      } else if (recommendedSource === 'masters-scraper') {
         data = await fetchFromMastersScraper();
+        if (!data) data = await fetchFromPGATour();
+        if (!data) data = await fetchFromESPN();
+        if (!data) data = await fetchFromSportsData();
       }
       
       // If we got data from any source, update the state and cache
@@ -346,13 +455,21 @@ export function useTournamentData(): UseLeaderboardResult {
           localStorage.setItem('leaderboardYear', data.year);
         }
         
+        // Update system health status
+        setDataHealth({
+          status: "healthy",
+          message: `Data successfully retrieved from ${data.source}`,
+          timestamp: new Date().toISOString()
+        });
+        
         console.log(`Successfully updated leaderboard from ${data.source} with ${data.leaderboard.length} players`);
       } else {
         // All sources failed, try to get data from cache regardless of age
+        failedAttempts.current++;
         const lastResortCache = getFromCache(LEADERBOARD_CACHE_KEY, 0); // 0 = ignore expiration
         
         if (lastResortCache.data && Array.isArray(lastResortCache.data) && lastResortCache.data.length > 0) {
-          console.log(`All sources failed. Using expired cache as last resort (${Math.round(lastResortCache.age / 60000)}m old)`);
+          console.log(`All sources failed. Using expired cache as fallback (${Math.round(lastResortCache.age / 60000)}m old)`);
           
           const cachedData = {
             leaderboard: lastResortCache.data,
@@ -362,7 +479,25 @@ export function useTournamentData(): UseLeaderboardResult {
           };
           
           updateLeaderboardData(cachedData);
+          
+          // Update system health
+          setDataHealth({
+            status: "degraded",
+            message: "Using cached data - live sources unavailable",
+            timestamp: new Date().toISOString()
+          });
+          
           setError("All data sources are currently unavailable. Using cached data.");
+          
+          // Generate and show emergency notification for site administrators
+          if (failedAttempts.current >= 5) {
+            console.error("CRITICAL: All data sources have failed 5+ times in a row");
+            toast({
+              title: "Data Access Critical",
+              description: "All data sources have failed multiple times. Emergency protocols activated.",
+              variant: "destructive",
+            });
+          }
           
           // Set up retry with progressive backoff
           if (retryCount < RETRY_INTERVALS.length) {
@@ -377,15 +512,85 @@ export function useTournamentData(): UseLeaderboardResult {
             setRetryTimer(timer);
             setRetryCount(prev => prev + 1);
           }
+        } else if (failedAttempts.current >= EMERGENCY_MOCK_DATA_THRESHOLD) {
+          // EMERGENCY: If all sources failed and no cache, generate mock data with clear warning
+          console.error("CRITICAL: No data available from any source or cache! Using emergency mock data");
+          
+          const mockLeaderboard = generateEmergencyMockData();
+          const mockData = {
+            leaderboard: mockLeaderboard,
+            lastUpdated: new Date().toISOString(),
+            source: "mock-data" as DataSource,
+            year: currentYear
+          };
+          
+          updateLeaderboardData(mockData);
+          
+          // Update system health to offline
+          setDataHealth({
+            status: "offline",
+            message: "ALL DATA SOURCES OFFLINE - Emergency mock data activated",
+            timestamp: new Date().toISOString()
+          });
+          
+          // Clear error to avoid double messages
+          setError("EMERGENCY MODE: Using mock data as all data sources failed");
+          
+          // Show emergency toast for users
+          toast({
+            title: "Emergency Data Mode",
+            description: "All data sources are currently unavailable. Displaying backup data.",
+            variant: "destructive",
+          });
+          
+          // Set up retry with progressive backoff
+          if (retryCount < RETRY_INTERVALS.length) {
+            const nextRetryDelay = RETRY_INTERVALS[retryCount];
+            if (retryTimer) clearTimeout(retryTimer);
+            const timer = setTimeout(() => {
+              fetchLeaderboardData(true);
+            }, nextRetryDelay);
+            
+            setRetryTimer(timer);
+            setRetryCount(prev => prev + 1);
+          }
         } else {
-          // No cache, no data from any source
+          // No cache, no data from any source, but not enough failures for mock data yet
           setError("Unable to fetch tournament data from any source. Please try again later.");
           console.error("All data sources failed and no cache available");
+          
+          // Update system health
+          setDataHealth({
+            status: "offline",
+            message: "All data sources unavailable",
+            timestamp: new Date().toISOString()
+          });
+          
+          // Set up retry with progressive backoff
+          if (retryCount < RETRY_INTERVALS.length) {
+            const nextRetryDelay = RETRY_INTERVALS[retryCount];
+            console.log(`Scheduling retry in ${nextRetryDelay / 1000} seconds (attempt ${retryCount + 1})`);
+            
+            if (retryTimer) clearTimeout(retryTimer);
+            const timer = setTimeout(() => {
+              fetchLeaderboardData(true);
+            }, nextRetryDelay);
+            
+            setRetryTimer(timer);
+            setRetryCount(prev => prev + 1);
+          }
         }
       }
     } catch (error) {
       console.error("Error in fetchLeaderboardData:", error);
       setError("Failed to load leaderboard data. Please try again later.");
+      
+      // Update health status
+      setDataHealth({
+        status: "degraded",
+        message: "Error fetching data: " + (error instanceof Error ? error.message : "Unknown error"),
+        timestamp: new Date().toISOString()
+      });
       
       // Set up retry with progressive backoff
       if (retryCount < RETRY_INTERVALS.length) {
@@ -412,21 +617,97 @@ export function useTournamentData(): UseLeaderboardResult {
     fetchFromESPN, 
     fetchFromSportsData, 
     fetchFromMastersScraper, 
-    updateLeaderboardData
+    updateLeaderboardData,
+    toast,
+    generateEmergencyMockData,
+    currentYear
   ]);
 
-  // Initialize data fetching
+  // Setup health monitoring and periodic check for API health
   useEffect(() => {
-    fetchLeaderboardData();
+    const checkAllApiHealth = async () => {
+      const year = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
+      
+      // Check health of all endpoints
+      await checkApiHealth(API_ENDPOINTS.PGA_TOUR);
+      await checkApiHealth(API_ENDPOINTS.ESPN.replace('{year}', year));
+      await checkApiHealth(API_ENDPOINTS.SPORTS_DATA.replace('{year}', year), {
+        headers: {
+          'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
+          'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+        }
+      });
+      await checkApiHealth(API_ENDPOINTS.MASTERS_WEB);
+      
+      // Get all health statuses
+      const allStatus = getApiHealthStatus();
+      const offlineCount = allStatus.filter(s => s.status === 'offline').length;
+      const totalSources = allStatus.length;
+      
+      // Update overall system health based on API health
+      if (offlineCount === totalSources && totalSources > 0) {
+        setDataHealth({
+          status: "offline",
+          message: "All data sources are currently offline",
+          timestamp: new Date().toISOString()
+        });
+      } else if (offlineCount > 0 || allStatus.some(s => s.status === 'degraded')) {
+        setDataHealth({
+          status: "degraded",
+          message: `${offlineCount} of ${totalSources} data sources offline`,
+          timestamp: new Date().toISOString()
+        });
+      } else if (allStatus.length > 0) {
+        setDataHealth({
+          status: "healthy",
+          message: "All data systems operational",
+          timestamp: new Date().toISOString()
+        });
+      }
+    };
     
-    // Set up periodic polling (every 30 seconds during tournament)
-    const pollingInterval = setInterval(() => {
-      fetchLeaderboardData();
-    }, 30000);
+    // Run initial health check
+    checkAllApiHealth();
+    
+    // Set up periodic health monitoring
+    if (healthCheckRef.current) {
+      clearInterval(healthCheckRef.current);
+    }
+    
+    healthCheckRef.current = setInterval(checkAllApiHealth, HEALTH_CHECK_INTERVAL);
     
     return () => {
-      clearInterval(pollingInterval);
+      if (healthCheckRef.current) {
+        clearInterval(healthCheckRef.current);
+      }
+    };
+  }, []);
+
+  // Initialize data fetching and set up polling
+  useEffect(() => {
+    const initializeData = async () => {
+      await fetchLeaderboardData();
+      
+      // Determine polling interval based on if tournament is in progress
+      const isActive = await isTournamentInProgress();
+      const pollingInterval = isActive ? 30000 : 5 * 60 * 1000; // 30 seconds during tournament, 5 minutes otherwise
+      
+      console.log(`Setting up polling interval: ${pollingInterval / 1000} seconds (tournament active: ${isActive})`);
+      
+      // Set up periodic polling
+      const interval = setInterval(() => {
+        fetchLeaderboardData();
+      }, pollingInterval);
+      
+      return interval;
+    };
+    
+    const pollingIntervalPromise = initializeData();
+    
+    return () => {
+      pollingIntervalPromise.then(interval => clearInterval(interval));
       if (retryTimer) clearTimeout(retryTimer);
+      if (healthCheckRef.current) clearInterval(healthCheckRef.current);
     };
   }, [fetchLeaderboardData]);
 
@@ -438,6 +719,7 @@ export function useTournamentData(): UseLeaderboardResult {
     dataSource,
     dataYear,
     refreshData: fetchLeaderboardData,
-    hasLiveData
+    hasLiveData,
+    dataHealth
   };
 }

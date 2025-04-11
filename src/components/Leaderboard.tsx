@@ -15,7 +15,7 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 
 const Leaderboard = () => {
-  // Use our new custom hook for tournament data
+  // Use our enhanced tournament data hook
   const { 
     leaderboard, 
     loading, 
@@ -24,7 +24,8 @@ const Leaderboard = () => {
     dataSource, 
     dataYear,
     refreshData,
-    hasLiveData
+    hasLiveData,
+    dataHealth
   } = useTournamentData();
   
   const [refreshing, setRefreshing] = useState(false);
@@ -110,6 +111,8 @@ const Leaderboard = () => {
       setDataSourceError(errorMessage);
     } else if (dataSource === 'no-data') {
       setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
+    } else if (dataSource === 'mock-data') {
+      setDataSourceError("EMERGENCY MODE: All data sources are unavailable. Displaying backup data.");
     } else {
       setDataSourceError(undefined);
     }
@@ -124,7 +127,7 @@ const Leaderboard = () => {
       await refreshData(true);
       toast({
         title: "Leaderboard Updated",
-        description: `Data refreshed at ${formatLastUpdated(lastUpdated)}${dataSource ? ` from ${dataSource}` : ''}`,
+        description: `Data refreshed at ${formatLastUpdated(new Date().toISOString())}${dataSource ? ` from ${dataSource}` : ''}`,
       });
     } catch (error) {
       toast({
@@ -181,6 +184,7 @@ const Leaderboard = () => {
         errorMessage={dataSourceError}
         tournamentYear={dataYear || TOURNAMENT_YEAR}
         hasLiveData={hasLiveData}
+        dataHealth={dataHealth}
       />
       
       <div className="p-4 bg-white">
@@ -204,7 +208,7 @@ const Leaderboard = () => {
         )}
         
         {dataSource === 'cached-data' && (
-          <Alert variant="warning" className="mb-4 bg-amber-50 border-amber-200">
+          <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
             <AlertTitle className="text-amber-800">Using Cached Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
             <AlertDescription className="text-amber-700 text-sm">
@@ -217,6 +221,26 @@ const Leaderboard = () => {
               >
                 <RefreshCcw size={14} className="mr-1" />
                 Refresh Now
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {dataSource === 'mock-data' && (
+          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTitle className="text-red-800">EMERGENCY MODE: Using Backup Data</AlertTitle>
+            <AlertDescription className="text-red-700 text-sm">
+              All data sources are currently unavailable. The data shown is not live tournament data.
+              Our systems are continuously attempting to restore live data.
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 bg-white"
+              >
+                <RefreshCcw size={14} className="mr-1" />
+                Try Again
               </Button>
             </AlertDescription>
           </Alert>

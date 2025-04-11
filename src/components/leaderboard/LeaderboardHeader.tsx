@@ -1,8 +1,9 @@
 
 import React from "react";
-import { RefreshCcw, Clock, Save, Signal } from "lucide-react";
+import { RefreshCcw, Clock, Save, Signal, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import DataSourceInfo from "./DataSourceInfo";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
@@ -17,6 +18,11 @@ interface LeaderboardHeaderProps {
   errorMessage?: string;
   tournamentYear?: string;
   hasLiveData?: boolean;
+  dataHealth?: {
+    status: "healthy" | "degraded" | "offline";
+    message: string;
+    timestamp: string;
+  };
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -29,8 +35,69 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   dataSource,
   errorMessage,
   tournamentYear,
-  hasLiveData = false
+  hasLiveData = false,
+  dataHealth
 }) => {
+  const renderHealthIndicator = () => {
+    if (!dataHealth) return null;
+    
+    switch (dataHealth.status) {
+      case "healthy":
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center text-xs bg-green-600/30 text-white px-2 py-0.5 rounded-full ml-2">
+                  <ShieldCheck size={12} className="mr-1" />
+                  <span>HEALTHY</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{dataHealth.message}</p>
+                <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "degraded":
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center text-xs bg-amber-500/30 text-white px-2 py-0.5 rounded-full ml-2">
+                  <ShieldAlert size={12} className="mr-1" />
+                  <span>DEGRADED</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{dataHealth.message}</p>
+                <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      case "offline":
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center text-xs bg-red-600/30 text-white px-2 py-0.5 rounded-full ml-2">
+                  <ShieldX size={12} className="mr-1" />
+                  <span>OFFLINE</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{dataHealth.message}</p>
+                <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      default:
+        return null;
+    }
+  };
+  
   return (
     <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-masters-green text-white">
       <div className="flex-1 mb-2 sm:mb-0">
@@ -42,6 +109,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
               LIVE
             </span>
           )}
+          {renderHealthIndicator()}
         </h3>
         
         <DataSourceInfo 
