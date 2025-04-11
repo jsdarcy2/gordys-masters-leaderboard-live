@@ -1,3 +1,4 @@
+
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
 // Function to fetch leaderboard data from Masters API or alternative sources
@@ -299,7 +300,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       const roundScores: number[] = [];
       
       // Add each pick and its score to our arrays
-      Object.entries(participant.pickScores).forEach(([golfer, score]) => {
+      Object.entries(participant.pickScores || {}).forEach(([golfer, score]) => {
         picks.push(golfer);
         roundScores.push(score);
       });
@@ -314,7 +315,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       playerSelections[participant.name] = {
         picks,
         roundScores,
-        tiebreakers: [participant.tiebreaker1, participant.tiebreaker2]
+        tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
       };
     });
     
@@ -690,4 +691,90 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
         position: 101,
         name,
         totalPoints: 2,
-        picks: generateRandomPicks
+        picks: generateRandomPicks(),
+        pickScores: generateRandomPickScores(),
+        roundScores: { round1: 2 },
+        tiebreaker1: Math.floor(Math.random() * 5) - 12,
+        tiebreaker2: Math.floor(Math.random() * 5),
+        paid: Math.random() > 0.15
+      });
+    });
+    
+    // Add tied for 110th place (+3) - 15 participants
+    const tiedForHundredTenth = [
+      "Hilary Beckman", "Oliver Beckman", "Justin Darcy", "Mik Gusenius", "Henry Herfurth", 
+      "Jess Herfurth", "Decker Herfurth", "Kevin McClintock", "Jon Moseley", "C.J. Nibbe", 
+      "Ravi Ramalingam", "Jack Simmons", "Hayden Simmons", "Winfield Stephens", "Scott Tande"
+    ];
+    
+    tiedForHundredTenth.forEach(name => {
+      participants.push({
+        position: 110,
+        name,
+        totalPoints: 3,
+        picks: generateRandomPicks(),
+        pickScores: generateRandomPickScores(),
+        roundScores: { round1: 3 },
+        tiebreaker1: Math.floor(Math.random() * 5) - 12,
+        tiebreaker2: Math.floor(Math.random() * 5),
+        paid: Math.random() > 0.15
+      });
+    });
+    
+    // Add tied for 125th place (+4) - 4 participants
+    const tiedForHundredTwentyFifth = [
+      "Annie Carlson", "Amy Jones", "Sarah Kepic", "Chad Kollar"
+    ];
+    
+    tiedForHundredTwentyFifth.forEach(name => {
+      participants.push({
+        position: 125,
+        name,
+        totalPoints: 4,
+        picks: generateRandomPicks(),
+        pickScores: generateRandomPickScores(),
+        roundScores: { round1: 4 },
+        tiebreaker1: Math.floor(Math.random() * 5) - 12,
+        tiebreaker2: Math.floor(Math.random() * 5),
+        paid: Math.random() > 0.15
+      });
+    });
+    
+    // Add 129th place (+5) - 1 participant
+    participants.push({
+      position: 129,
+      name: "Quinn Carlson",
+      totalPoints: 5,
+      picks: generateRandomPicks(),
+      pickScores: generateRandomPickScores(),
+      roundScores: { round1: 5 },
+      tiebreaker1: -12,
+      tiebreaker2: 2,
+      paid: true
+    });
+    
+    // Add tied for 130th place (+6) - 3 participants
+    const tiedForHundredThirtieth = [
+      "Ross Baker", "Peter Beugg", "Victoria Simmons"
+    ];
+    
+    tiedForHundredThirtieth.forEach(name => {
+      participants.push({
+        position: 130,
+        name,
+        totalPoints: 6,
+        picks: generateRandomPicks(),
+        pickScores: generateRandomPickScores(),
+        roundScores: { round1: 6 },
+        tiebreaker1: Math.floor(Math.random() * 5) - 12,
+        tiebreaker2: Math.floor(Math.random() * 5),
+        paid: Math.random() > 0.15
+      });
+    });
+    
+    return participants;
+  } catch (error) {
+    console.error("Error fetching pool standings:", error);
+    throw new Error("Failed to load pool standings data. Please try again later.");
+  }
+};
