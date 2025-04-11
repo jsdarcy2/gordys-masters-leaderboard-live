@@ -34,8 +34,8 @@ const SelectionsPage = () => {
 
     loadParticipantCount();
     
-    // Set up refresh interval during the tournament - every 2 minutes
-    const refreshInterval = setInterval(loadParticipantCount, 2 * 60 * 1000);
+    // Set up refresh interval during the tournament - every minute
+    const refreshInterval = setInterval(loadParticipantCount, 60 * 1000);
     
     return () => {
       clearInterval(refreshInterval);
@@ -45,6 +45,20 @@ const SelectionsPage = () => {
   // Log component mount for debugging
   useEffect(() => {
     console.log("Selections page mounted");
+    
+    // Add detailed logging to debug participant count
+    const debugParticipants = async () => {
+      try {
+        const selectionsData = await fetchPlayerSelections();
+        const participants = Object.keys(selectionsData);
+        console.log(`Total participants: ${participants.length}`);
+        console.log("Participant names:", participants);
+      } catch (error) {
+        console.error("Error in debug logging:", error);
+      }
+    };
+    
+    debugParticipants();
   }, []);
 
   return (
