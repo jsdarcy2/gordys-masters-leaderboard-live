@@ -1,5 +1,33 @@
+
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings } from "@/utils/scoringUtils";
+
+/**
+ * Check if the tournament is currently in progress
+ */
+export const isTournamentInProgress = async (): Promise<boolean> => {
+  try {
+    // For demo purposes, we'll simulate a network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // In a real app, we would check the tournament dates and current time
+    // For this demo, we'll determine if the tournament is active based on today's date
+    const today = new Date();
+    const tournamentStart = new Date('2024-04-11');
+    const tournamentEnd = new Date('2024-04-14');
+    
+    // Add time to the end date to include the full day
+    tournamentEnd.setHours(23, 59, 59, 999);
+    
+    // Check if today is between start and end dates
+    const isActive = today >= tournamentStart && today <= tournamentEnd;
+    
+    return isActive;
+  } catch (error) {
+    console.error('Error checking tournament status:', error);
+    return false; // Default to inactive if there's an error
+  }
+};
 
 /**
  * Fetch current tournament leaderboard data with fallback handling
