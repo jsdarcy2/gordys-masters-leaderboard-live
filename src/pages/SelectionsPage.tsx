@@ -7,7 +7,7 @@ import { fetchPlayerSelections } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
 const SelectionsPage = () => {
-  const [participantCount, setParticipantCount] = useState<number>(134);
+  const [participantCount, setParticipantCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
@@ -33,6 +33,13 @@ const SelectionsPage = () => {
     };
 
     loadParticipantCount();
+    
+    // Set up refresh interval during the tournament
+    const refreshInterval = setInterval(loadParticipantCount, 5 * 60 * 1000); // Refresh every 5 minutes
+    
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, [toast]);
 
   // Log component mount for debugging

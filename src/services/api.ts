@@ -1,3 +1,4 @@
+
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings, generateParticipantName } from "@/utils/scoringUtils";
 import { validateLeaderboardData } from "@/utils/leaderboardUtils";
@@ -31,63 +32,46 @@ export const isTournamentInProgress = async (): Promise<boolean> => {
 };
 
 /**
- * Fetch current tournament leaderboard data with fallback handling
+ * Fetch current tournament leaderboard data from live API
  */
 export const fetchLeaderboardData = async () => {
   try {
-    console.log("Fetching leaderboard data...");
+    console.log("Fetching live leaderboard data...");
     
-    // In a production app, we would fetch from a real API
-    // For demo purposes, simulate a network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Try to fetch from the ESPN API for live Masters data
+    const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard');
     
-    // Check if we have fresh data in localStorage
-    const cachedData = localStorage.getItem('leaderboardData');
-    const cachedTimestamp = localStorage.getItem('leaderboardTimestamp');
-    
-    // If we have cached data less than 5 minutes old, use it
-    if (cachedData && cachedTimestamp) {
-      const now = new Date().getTime();
-      const cacheTime = parseInt(cachedTimestamp, 10);
-      
-      // Cache is valid for 5 minutes
-      if (now - cacheTime < 5 * 60 * 1000) {
-        console.log('Using cached leaderboard data');
-        const parsedData = JSON.parse(cachedData);
-        
-        // Validate the data structure
-        if (validateLeaderboardData(parsedData)) {
-          return parsedData;
-        }
-        
-        console.warn("Cached data failed validation, fetching fresh data");
-      }
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`);
     }
     
-    // Simulate fetching from API
-    const data = getFallbackData();
+    const espnData = await response.json();
+    console.log("Received ESPN data:", espnData);
+    
+    // Transform ESPN data to our application format
+    const leaderboardData = transformESPNData(espnData);
     
     // Validate the data before caching
-    if (!validateLeaderboardData(data)) {
+    if (!validateLeaderboardData(leaderboardData)) {
       console.error("API returned invalid data structure");
       throw new Error("Invalid data structure from API");
     }
     
-    console.log(`Fetched ${data.leaderboard.length} golfers for leaderboard`);
+    console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
     
     // Cache the fresh data
-    localStorage.setItem('leaderboardData', JSON.stringify(data));
+    localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData));
     localStorage.setItem('leaderboardTimestamp', new Date().getTime().toString());
     
-    return data;
+    return leaderboardData;
   } catch (error) {
-    console.error('Error fetching leaderboard data:', error);
+    console.error('Error fetching live leaderboard data:', error);
     
-    // Try to use cached data even if it's older than 5 minutes
+    // Try to use cached data as fallback
     const cachedData = localStorage.getItem('leaderboardData');
     if (cachedData) {
       try {
-        console.log('Using older cached data as fallback');
+        console.log('Using cached data as fallback');
         const parsedData = JSON.parse(cachedData);
         
         // Validate the data structure
@@ -105,17 +89,74 @@ export const fetchLeaderboardData = async () => {
 };
 
 /**
+ * Transform ESPN API data to our application format
+ */
+function transformESPNData(espnData: any) {
+  try {
+    const competitors = espnData?.events?.[0]?.competitions?.[0]?.competitors || [];
+    const leaderboard: GolferScore[] = [];
+    
+    competitors.forEach((competitor: any) => {
+      const athlete = competitor.athlete || {};
+      const score = competitor.score || "E";
+      const scoreValue = score === "E" ? 0 : parseInt(score, 10);
+      
+      const status = competitor.status?.type?.description?.toLowerCase() === "cut" 
+        ? "cut" 
+        : competitor.status?.type?.description?.toLowerCase() === "withdrawn" 
+          ? "withdrawn" 
+          : "active";
+          
+      const thru = competitor.status?.thru || "F";
+      const todayScore = competitor.linescores?.[competitor.linescores.length - 1]?.value || 0;
+      
+      leaderboard.push({
+        position: parseInt(competitor.status?.position?.id || competitor.rankOrder, 10),
+        name: athlete.displayName || "",
+        score: scoreValue,
+        today: todayScore === "E" ? 0 : parseInt(todayScore, 10),
+        thru: thru,
+        status: status
+      });
+    });
+    
+    // Sort by position
+    leaderboard.sort((a, b) => a.position - b.position);
+    
+    return {
+      leaderboard,
+      lastUpdated: new Date().toISOString(),
+      currentRound: getCurrentRound()
+    };
+  } catch (error) {
+    console.error("Error transforming ESPN data:", error);
+    throw new Error("Failed to transform ESPN data");
+  }
+}
+
+/**
  * Get information about the current tournament
  */
 export const getCurrentTournament = async (): Promise<any> => {
   try {
-    // For now, return a hardcoded tournament for The Masters
+    // Attempt to fetch from ESPN API
+    const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/golf/pga/leaderboard');
+    
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Extract tournament info from ESPN data
+    const event = data?.events?.[0] || {};
+    
     return {
-      tournId: "401353338",
-      name: "The Masters",
-      startDate: "2024-04-11",
-      endDate: "2024-04-14",
-      course: "Augusta National Golf Club",
+      tournId: event.id || "401353338",
+      name: event.name || "The Masters",
+      startDate: event.competitions?.[0]?.date || "2024-04-11",
+      endDate: calculateEndDate(event.competitions?.[0]?.date || "2024-04-11"),
+      course: event.competitions?.[0]?.venue?.fullName || "Augusta National Golf Club",
       isUpcoming: false,
       currentRound: getCurrentRound()
     };
@@ -131,6 +172,16 @@ export const getCurrentTournament = async (): Promise<any> => {
       currentRound: 1 as TournamentRound
     };
   }
+};
+
+/**
+ * Calculate end date based on start date (tournament is typically 4 days)
+ */
+const calculateEndDate = (startDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 3); // 4-day tournament
+  return end.toISOString().split('T')[0];
 };
 
 /**

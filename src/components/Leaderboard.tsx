@@ -13,7 +13,8 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 
-const POLLING_INTERVAL = 15000; // 15 seconds in milliseconds
+// More frequent polling interval for live data (60 seconds)
+const POLLING_INTERVAL = 60000; 
 
 const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
@@ -47,6 +48,13 @@ const Leaderboard = () => {
     };
     
     loadTournamentInfo();
+    
+    // Refresh tournament data periodically
+    const tournamentRefreshInterval = setInterval(loadTournamentInfo, 30 * 60 * 1000); // 30 minutes
+    
+    return () => {
+      clearInterval(tournamentRefreshInterval);
+    };
   }, []);
 
   const loadLeaderboardData = async (showToast = false) => {
@@ -169,7 +177,7 @@ const Leaderboard = () => {
       clearInterval(pollingRef.current);
     }
     
-    // Set up polling every 15 seconds
+    // Set up polling every minute for live data
     pollingRef.current = setInterval(() => {
       console.log("Polling for leaderboard updates...");
       loadLeaderboardData();

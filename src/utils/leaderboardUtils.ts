@@ -1,4 +1,3 @@
-
 /**
  * Format the last updated timestamp into a readable string
  */
@@ -44,12 +43,20 @@ export const formatScore = (score: number | undefined): string => {
 export const formatGolfScore = (score: number | string | undefined): string => {
   if (score === undefined || score === null) return "-";
   
-  const numericScore = typeof score === "string" ? parseFloat(score) : score;
+  if (typeof score === "string") {
+    if (score === "E") return "E";
+    if (score === "-") return "-";
+    const numericScore = parseFloat(score);
+    if (isNaN(numericScore)) return "-";
+    if (numericScore === 0) return "E";
+    if (numericScore < 0) return numericScore.toString();
+    return `+${numericScore}`;
+  }
   
-  if (isNaN(numericScore)) return "-";
-  if (numericScore === 0) return "E";
-  if (numericScore < 0) return numericScore.toString();
-  return `+${numericScore}`;
+  if (isNaN(score)) return "-";
+  if (score === 0) return "E";
+  if (score < 0) return score.toString();
+  return `+${score}`;
 };
 
 /**
@@ -114,7 +121,7 @@ export const validateLeaderboardData = (data: any): boolean => {
   return (
     typeof firstItem.position === 'number' &&
     typeof firstItem.name === 'string' &&
-    (typeof firstItem.score === 'number' || firstItem.score === null)
+    (typeof firstItem.score === 'number' || firstItem.score === null || firstItem.score === undefined)
   );
 };
 
