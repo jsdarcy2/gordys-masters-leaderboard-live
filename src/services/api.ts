@@ -735,4 +735,19 @@ const getBaseSampleTeams = () => {
       tiebreakers: [140, 276] as [number, number]
     },
     "J.J. Furst": {
-      picks: ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Hideki Mats
+      picks: ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Hideki Matsuyama", "Joaquín Niemann"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Brian Ginkel": {
+      picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Min Woo Lee", "Brooks Koepka"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    },
+    "Grayson Ginkel": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Patrick Cantlay", "Hideki Matsuyama", "Jordan Spieth"],
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [138, 280] as [number, number]
+    }
+  };
+};
