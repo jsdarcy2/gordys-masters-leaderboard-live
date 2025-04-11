@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
 import PersonalizedDashboard from "@/components/PersonalizedDashboard";
-import { GolfClub, Trophy, Clock, UserPlus } from "lucide-react";
+import { Golf, Trophy, Clock, UserPlus } from "lucide-react";
 
 const Index = () => {
+  // Mock data for PersonalizedDashboard
+  const mockPoolStandings = [];
+  const isLoading = false;
+
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card icon={<GolfClub className="text-masters-yellow" />} 
+        <Card icon={<Golf className="text-masters-yellow" />} 
               title="Tournament" 
               subtitle="Follow the live leaderboard" 
               href="/leaderboard" />
@@ -37,7 +41,7 @@ const Index = () => {
           <PoolStandings />
         </div>
         <div>
-          <PersonalizedDashboard />
+          <PersonalizedDashboard poolStandings={mockPoolStandings} loading={isLoading} />
         </div>
       </div>
     </Layout>

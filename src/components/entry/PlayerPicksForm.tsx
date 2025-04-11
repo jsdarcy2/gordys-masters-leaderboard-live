@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trophy, Loader2, Check, GolfClub } from "lucide-react";
+import { Trophy, Loader2, Check, Golf } from "lucide-react";
 
-// Zod type for the form values
 const PlayerPicksSchema = z.object({
   participantName: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -27,7 +25,6 @@ interface PlayerPicksFormProps {
   onSubmit: () => void;
 }
 
-// Mock data for available golfers (would come from API in real app)
 const availableGolfers = [
   "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Bryson DeChambeau", 
   "Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Patrick Cantlay", 
@@ -57,7 +54,6 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
   const handleSubmit = (data: PlayerPicksFormValues) => {
     setIsSubmitting(true);
     
-    // Simulate API call with timeout
     setTimeout(() => {
       console.log("Form submitted with data:", data);
       setIsSubmitting(false);
@@ -132,7 +128,7 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
             
             <div className="space-y-3">
               <h3 className="font-serif text-masters-green text-lg flex items-center gap-2">
-                <GolfClub className="text-masters-green" size={20} />
+                <Golf className="text-masters-green" size={20} />
                 Select Your 4 Golfers
               </h3>
               
@@ -162,7 +158,6 @@ const PlayerPicksForm = ({ onSubmit }: PlayerPicksFormProps) => {
                                         ? [...field.value, golfer]
                                         : field.value.filter((value) => value !== golfer);
                                       
-                                      // Ensure we never have more than 4 selections
                                       field.onChange(updatedValue.slice(0, 4));
                                     }}
                                   />
