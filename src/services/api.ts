@@ -281,6 +281,50 @@ const generateRandomPickScores = (): { [golferName: string]: number } => {
   return pickScores;
 };
 
+// Add the missing fetchPlayerSelections function that returns player selections
+export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
+  try {
+    // Add a small delay to simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Get pool standings data to use consistent data
+    const poolStandingsData = await fetchPoolStandings();
+    
+    // Convert pool standings data to the format expected by PlayerSelections component
+    const playerSelections: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = {};
+    
+    poolStandingsData.forEach(participant => {
+      // Extract the five picks and their round scores
+      const picks: string[] = [];
+      const roundScores: number[] = [];
+      
+      // Add each pick and its score to our arrays
+      Object.entries(participant.pickScores).forEach(([golfer, score]) => {
+        picks.push(golfer);
+        roundScores.push(score);
+      });
+      
+      // Ensure we always have exactly 5 picks and scores
+      while (picks.length < 5) {
+        picks.push(`Golfer ${picks.length + 1}`);
+        roundScores.push(0);
+      }
+      
+      // Add this participant's data to our result
+      playerSelections[participant.name] = {
+        picks,
+        roundScores,
+        tiebreakers: [participant.tiebreaker1, participant.tiebreaker2]
+      };
+    });
+    
+    return playerSelections;
+  } catch (error) {
+    console.error("Error fetching player selections:", error);
+    throw new Error("Failed to load player selections data. Please try again later.");
+  }
+};
+
 // Update the fetchPoolStandings to match the data in the image
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
@@ -646,90 +690,4 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
         position: 101,
         name,
         totalPoints: 2,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 2 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 110th place (+3) - 15 participants
-    const tiedForHundredTenth = [
-      "Hilary Beckman", "Oliver Beckman", "Justin Darcy", "Mik Gusenius", "Henry Herfurth", 
-      "Jess Herfurth", "Decker Herfurth", "Kevin McClintock", "Jon Moseley", "C.J. Nibbe", 
-      "Ravi Ramalingam", "Jack Simmons", "Hayden Simmons", "Winfield Stephens", "Scott Tande"
-    ];
-    
-    tiedForHundredTenth.forEach(name => {
-      participants.push({
-        position: 110,
-        name,
-        totalPoints: 3,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 3 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add tied for 125th place (+4) - 4 participants
-    const tiedForHundredTwentyFifth = [
-      "Annie Carlson", "Amy Jones", "Sarah Kepic", "Chad Kollar"
-    ];
-    
-    tiedForHundredTwentyFifth.forEach(name => {
-      participants.push({
-        position: 125,
-        name,
-        totalPoints: 4,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 4 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    // Add 129th place (+5) - 1 participant
-    participants.push({
-      position: 129,
-      name: "Quinn Carlson",
-      totalPoints: 5,
-      picks: generateRandomPicks(),
-      pickScores: generateRandomPickScores(),
-      roundScores: { round1: 5 },
-      tiebreaker1: -12,
-      tiebreaker2: 2,
-      paid: true
-    });
-    
-    // Add tied for 130th place (+6) - 3 participants
-    const tiedForHundredThirtieth = [
-      "Ross Baker", "Peter Beugg", "Victoria Simmons"
-    ];
-    
-    tiedForHundredThirtieth.forEach(name => {
-      participants.push({
-        position: 130,
-        name,
-        totalPoints: 6,
-        picks: generateRandomPicks(),
-        pickScores: generateRandomPickScores(),
-        roundScores: { round1: 6 },
-        tiebreaker1: Math.floor(Math.random() * 5) - 12,
-        tiebreaker2: Math.floor(Math.random() * 5),
-        paid: Math.random() > 0.15
-      });
-    });
-    
-    return participants;
-  } catch (error) {
-    console.error("Error fetching pool standings:", error);
-    throw new Error("Failed to load pool standings data. Please try again later.");
-  }
-};
+        picks: generateRandomPicks
