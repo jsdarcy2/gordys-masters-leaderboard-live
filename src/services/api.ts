@@ -1,7 +1,8 @@
+
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
 // Your RapidAPI Key - you'll need to set this in your environment
-const RAPIDAPI_KEY = "YOUR_API_KEY"; // Replace with your actual API key
+const RAPIDAPI_KEY = "37e38c9bb1mshf4136d9a6ccdc34p1fb92bjsn20ccf89a6f5b"; // Using the provided API key
 
 // Function to fetch leaderboard data from the RapidAPI endpoint
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
@@ -35,6 +36,90 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
     console.error("Error fetching RapidAPI leaderboard data:", error);
     console.warn("Falling back to backup data");
     return getFallbackLeaderboardData();
+  }
+};
+
+// Function to fetch current tournament schedule
+export const fetchTournamentSchedule = async () => {
+  try {
+    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "YOUR_API_KEY") {
+      console.warn("RapidAPI key not set. Cannot fetch tournament schedule.");
+      return null;
+    }
+    
+    const currentYear = new Date().getFullYear();
+    
+    const response = await fetch(`https://live-golf-data.p.rapidapi.com/schedule?orgId=1&year=${currentYear}`, {
+      headers: {
+        'X-RapidAPI-Host': 'live-golf-data.p.rapidapi.com',
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
+        'Accept': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    if (!response.ok) {
+      console.error(`RapidAPI schedule responded with status: ${response.status}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching tournament schedule:", error);
+    return null;
+  }
+};
+
+// Function to get the current tournament from the schedule
+export const getCurrentTournament = async () => {
+  try {
+    const scheduleData = await fetchTournamentSchedule();
+    
+    if (!scheduleData || !scheduleData.tournaments) {
+      return null;
+    }
+    
+    const now = new Date();
+    
+    // Find the current or next upcoming tournament
+    const currentTournament = scheduleData.tournaments.find((tournament: any) => {
+      const startDate = new Date(tournament.startDate);
+      const endDate = new Date(tournament.endDate);
+      return now >= startDate && now <= endDate;
+    });
+    
+    if (currentTournament) {
+      return {
+        name: currentTournament.name,
+        startDate: currentTournament.startDate,
+        endDate: currentTournament.endDate,
+        location: currentTournament.location,
+        course: currentTournament.course
+      };
+    }
+    
+    // If no current tournament, find the next one
+    const upcomingTournaments = scheduleData.tournaments
+      .filter((tournament: any) => new Date(tournament.startDate) > now)
+      .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    
+    if (upcomingTournaments.length > 0) {
+      const nextTournament = upcomingTournaments[0];
+      return {
+        name: nextTournament.name,
+        startDate: nextTournament.startDate,
+        endDate: nextTournament.endDate,
+        location: nextTournament.location,
+        course: nextTournament.course,
+        isUpcoming: true
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error getting current tournament:", error);
+    return null;
   }
 };
 

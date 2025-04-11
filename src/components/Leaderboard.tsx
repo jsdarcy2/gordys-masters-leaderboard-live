@@ -1,9 +1,9 @@
 
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
-import { fetchLeaderboardData } from "@/services/api";
+import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
 import { Card } from "@/components/ui/card";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Info, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,10 +24,29 @@ const Leaderboard = () => {
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
   const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
   const [needsApiKey, setNeedsApiKey] = useState<boolean>(false);
+  const [currentTournament, setCurrentTournament] = useState<any>(null);
+  const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const previousLeaderboard = useRef<GolferScore[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load tournament information
+  useEffect(() => {
+    const loadTournamentInfo = async () => {
+      try {
+        setTournamentLoading(true);
+        const tournamentInfo = await getCurrentTournament();
+        setCurrentTournament(tournamentInfo);
+      } catch (error) {
+        console.error("Error loading tournament info:", error);
+      } finally {
+        setTournamentLoading(false);
+      }
+    };
+    
+    loadTournamentInfo();
+  }, []);
 
   const loadLeaderboardData = async (showToast = false) => {
     try {
@@ -165,6 +184,15 @@ const Leaderboard = () => {
     }
   }, []);
 
+  // Format tournament dates
+  const formatTournamentDates = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
+  };
+
   return (
     <div className="masters-card">
       <LeaderboardHeader 
@@ -177,6 +205,30 @@ const Leaderboard = () => {
       />
       
       <div className="p-4 bg-white">
+        {currentTournament && !tournamentLoading && (
+          <div className="mb-4 bg-masters-green/5 border border-masters-green/20 rounded-md p-3">
+            <div className="flex items-center gap-2 text-masters-dark">
+              <Calendar size={18} className="text-masters-green" />
+              <div className="flex flex-col sm:flex-row sm:justify-between w-full">
+                <h3 className="font-medium text-masters-green">
+                  {currentTournament.name}
+                  {currentTournament.isUpcoming && 
+                    <span className="ml-2 text-xs bg-masters-yellow/20 text-masters-dark px-2 py-0.5 rounded-full">
+                      Upcoming
+                    </span>
+                  }
+                </h3>
+                <div className="text-sm text-masters-dark/80">
+                  {formatTournamentDates(currentTournament.startDate, currentTournament.endDate)}
+                  {currentTournament.course && 
+                    <span className="ml-2">• {currentTournament.course}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {needsApiKey && (
           <div className="text-center text-amber-600 py-4 flex items-center justify-center mb-4 bg-amber-50 border border-amber-200 rounded-md">
             <Info size={16} className="mr-1" />
