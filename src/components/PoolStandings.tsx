@@ -9,9 +9,12 @@ import SearchBar from "@/components/pool/SearchBar";
 import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
-const PREVIEW_COUNT = 200; // Increased from 15 to 200 to show all participants
+const PREVIEW_COUNT = 134; // Show all 134 participants by default
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -32,14 +35,24 @@ const PoolStandings = () => {
       
       console.log("Fetched pool standings data:", data.length, "participants");
       
+      if (data.length === 0) {
+        setError("No data available. Please try again later.");
+        return;
+      }
+      
+      if (data.length < 134) {
+        console.warn(`Only received ${data.length} participants, expected 134`);
+        toast({
+          title: "Data inconsistency detected",
+          description: `Expected 134 participants but only received ${data.length}. Refreshing...`,
+          variant: "destructive",
+        });
+      }
+      
       setStandings(data);
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
       setError(null);
-      
-      // Store data in localStorage for consistency across devices
-      localStorage.setItem('poolStandingsLastUpdated', timestamp);
-      localStorage.setItem('poolStandingsData', JSON.stringify(data));
       
     } catch (err) {
       setError("Failed to load pool standings");
@@ -52,6 +65,14 @@ const PoolStandings = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleManualRefresh = () => {
+    loadStandingsData();
+    toast({
+      title: "Refreshing data",
+      description: "Getting the latest pool standings...",
+    });
   };
 
   // Check tournament status effect
@@ -82,27 +103,8 @@ const PoolStandings = () => {
   }, [toast]);
 
   useEffect(() => {
-    // First check if we have cached data
-    const cachedLastUpdated = localStorage.getItem('poolStandingsLastUpdated');
-    const cachedData = localStorage.getItem('poolStandingsData');
-    
-    if (cachedLastUpdated && cachedData) {
-      try {
-        const parsedData = JSON.parse(cachedData);
-        setStandings(parsedData);
-        setLastUpdated(cachedLastUpdated);
-        setLoading(false);
-        
-        // Then fetch fresh data in the background
-        loadStandingsData();
-      } catch (e) {
-        // If there's an error parsing cached data, load fresh data
-        loadStandingsData();
-      }
-    } else {
-      // If no cached data, load fresh data
-      loadStandingsData();
-    }
+    // Load fresh data immediately
+    loadStandingsData();
     
     return () => {
       if (pollingRef.current) {
@@ -163,7 +165,22 @@ const PoolStandings = () => {
       
       <div className="p-4 bg-white">
         {error && (
-          <div className="text-center text-red-500 py-4">{error}</div>
+          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertTitle className="text-red-800">Unable to load pool standings</AlertTitle>
+            <AlertDescription className="text-red-700 text-sm">
+              {error}
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 bg-white"
+              >
+                <RefreshCcw size={14} className="mr-1" />
+                Try Again
+              </Button>
+            </AlertDescription>
+          </Alert>
         )}
         
         {/* Search bar */}
@@ -187,17 +204,31 @@ const PoolStandings = () => {
           </div>
         ) : (
           <>
-            <ParticipantTable 
-              displayStandings={displayStandings}
-              searchQuery={searchQuery}
-            />
-            
-            {filteredStandings.length > PREVIEW_COUNT && !searchQuery && (
-              <ShowMoreButton 
-                showAll={showAll}
-                setShowAll={setShowAll}
-                totalCount={filteredStandings.length}
-              />
+            {standings.length === 0 ? (
+              <div className="text-center py-8">
+                <AlertTriangle size={24} className="text-amber-500 mx-auto mb-2" />
+                <p className="text-gray-700 font-medium">No pool standings data available</p>
+                <p className="text-gray-500 text-sm mb-4">We couldn't retrieve the current standings</p>
+                <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
+                  <RefreshCcw size={16} className="mr-2" />
+                  Refresh Data
+                </Button>
+              </div>
+            ) : (
+              <>
+                <ParticipantTable 
+                  displayStandings={displayStandings}
+                  searchQuery={searchQuery}
+                />
+                
+                {filteredStandings.length > PREVIEW_COUNT && !searchQuery && (
+                  <ShowMoreButton 
+                    showAll={showAll}
+                    setShowAll={setShowAll}
+                    totalCount={filteredStandings.length}
+                  />
+                )}
+              </>
             )}
           </>
         )}

@@ -1,4 +1,3 @@
-
 import { GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound } from "../tournament";
 
@@ -43,7 +42,7 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
 
 /**
  * Fetch current tournament leaderboard data
- * Using multiple data sources with fallback strategy, prioritizing real-time data
+ * Only fetches real-time data with no historical fallbacks
  */
 export const fetchLeaderboardData = async () => {
   try {
@@ -78,6 +77,8 @@ export const fetchLeaderboardData = async () => {
       const tournamentYear = new Date(espnData?.events?.[0]?.date).getFullYear().toString();
       if (tournamentYear !== TOURNAMENT_YEAR) {
         console.warn(`Warning: ESPN API returned ${tournamentYear} tournament data instead of ${TOURNAMENT_YEAR}`);
+        // We no longer want historical data, so throw an error
+        throw new Error(`ESPN API returned data for ${tournamentYear} instead of ${TOURNAMENT_YEAR}`);
       }
       
       // Transform ESPN data to our application format
@@ -149,6 +150,8 @@ export const fetchLeaderboardData = async () => {
       // Verify this is data for the current year's tournament
       if (sportsData.year && sportsData.year.toString() !== TOURNAMENT_YEAR) {
         console.warn(`Warning: Sports Data API returned ${sportsData.year} tournament data instead of ${TOURNAMENT_YEAR}`);
+        // We no longer want historical data, so throw an error
+        throw new Error(`Sports Data API returned data for ${sportsData.year} instead of ${TOURNAMENT_YEAR}`);
       }
       
       // Transform Sports Data API format to our application format
@@ -163,37 +166,16 @@ export const fetchLeaderboardData = async () => {
       
       return leaderboardData;
     } catch (fallbackError) {
-      console.error('Fallback API also failed:', fallbackError);
+      console.error('All API requests failed:', fallbackError);
       
-      // Try to use cached data as last resort
-      const cachedData = localStorage.getItem('leaderboardData');
-      const cachedLastUpdated = localStorage.getItem('leaderboardLastUpdated');
-      const cachedYear = localStorage.getItem('leaderboardYear');
-      
-      if (cachedData && cachedLastUpdated) {
-        try {
-          console.log('Using cached data as fallback');
-          
-          // Verify this is cached data for the current year's tournament
-          if (cachedYear !== TOURNAMENT_YEAR) {
-            console.warn(`Warning: Cached data is from ${cachedYear} instead of ${TOURNAMENT_YEAR}`);
-          }
-          
-          return {
-            leaderboard: JSON.parse(cachedData),
-            lastUpdated: cachedLastUpdated,
-            currentRound: getCurrentRound(),
-            source: "cached-data",
-            year: cachedYear || TOURNAMENT_YEAR
-          };
-        } catch (e) {
-          console.error("Error parsing cached data:", e);
-        }
-      }
-      
-      // If all attempts fail, show an error rather than using historical data
-      console.error("All data sources failed, no real-time data available");
-      throw new Error("Unable to fetch tournament data from any source. Please try again later.");
+      // NEVER use historical data. Return an empty leaderboard with error
+      return {
+        leaderboard: [],
+        lastUpdated: new Date().toISOString(),
+        currentRound: getCurrentRound(),
+        source: "no-data",
+        year: TOURNAMENT_YEAR
+      };
     }
   }
 };
