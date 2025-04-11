@@ -1,3 +1,4 @@
+
 /**
  * Format the last updated timestamp into a readable string
  */
@@ -42,7 +43,6 @@ export const formatScore = (score: number | undefined): string => {
  */
 export const formatGolfScore = (score: number | string | undefined): string => {
   if (score === undefined || score === null) return "-";
-  if (score === 0) return "E";
   
   const numericScore = typeof score === "string" ? parseFloat(score) : score;
   
@@ -116,4 +116,15 @@ export const validateLeaderboardData = (data: any): boolean => {
     typeof firstItem.name === 'string' &&
     (typeof firstItem.score === 'number' || firstItem.score === null)
   );
+};
+
+/**
+ * Determine if a current score is under par, even, or over par
+ * Used for displaying score colors consistently
+ */
+export const getScoreStatus = (score: number | undefined): 'under-par' | 'even-par' | 'over-par' => {
+  if (score === undefined || score === null) return 'even-par';
+  if (score < 0) return 'under-par';
+  if (score > 0) return 'over-par';
+  return 'even-par';
 };

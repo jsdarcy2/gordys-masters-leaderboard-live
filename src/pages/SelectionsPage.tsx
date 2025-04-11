@@ -4,10 +4,12 @@ import Layout from "@/components/Layout";
 import PlayerSelections from "@/components/PlayerSelections";
 import PaymentStatus from "@/components/PaymentStatus";
 import { fetchPlayerSelections } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 const SelectionsPage = () => {
   const [participantCount, setParticipantCount] = useState<number>(134);
   const [loading, setLoading] = useState<boolean>(true);
+  const { toast } = useToast();
 
   // Load participant count
   useEffect(() => {
@@ -20,13 +22,18 @@ const SelectionsPage = () => {
         setParticipantCount(count);
       } catch (error) {
         console.error("Error loading participant count:", error);
+        toast({
+          title: "Error loading data",
+          description: "Could not fetch participant information. Please try refreshing the page.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadParticipantCount();
-  }, []);
+  }, [toast]);
 
   // Log component mount for debugging
   useEffect(() => {
