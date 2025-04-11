@@ -107,24 +107,24 @@ const getFallbackData = () => {
   };
 };
 
-// Implement the missing fetchPoolStandings function
+// Update the fetchPoolStandings function to include totalPoints property
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Return mock data for now
+    // Return mock data for now, making sure to include totalPoints
     return [
-      { position: 1, name: "John Smith", totalScore: -15, paid: true, picks: ["Scottie Scheffler", "Collin Morikawa", "Max Homa", "Xander Schauffele", "Jon Rahm"], pickScores: {"Scottie Scheffler": -10, "Collin Morikawa": -8, "Max Homa": -7, "Xander Schauffele": -4, "Jon Rahm": 0} },
-      { position: 2, name: "Emily Johnson", totalScore: -12, paid: true, picks: ["Scottie Scheffler", "Bryson DeChambeau", "Rory McIlroy", "Tommy Fleetwood", "Jordan Spieth"], pickScores: {"Scottie Scheffler": -10, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Tommy Fleetwood": -3, "Jordan Spieth": +2} },
-      { position: 3, name: "Mike Williams", totalScore: -8, paid: true, picks: ["Collin Morikawa", "Brooks Koepka", "Dustin Johnson", "Tiger Woods", "Viktor Hovland"], pickScores: {"Collin Morikawa": -8, "Brooks Koepka": -2, "Dustin Johnson": +4, "Tiger Woods": +5, "Viktor Hovland": +8} },
-      { position: 4, name: "Sarah Davis", totalScore: -5, paid: true, picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Patrick Cantlay", "Phil Mickelson"], pickScores: {"Scottie Scheffler": -10, "Ludvig Åberg": -6, "Justin Thomas": +1, "Patrick Cantlay": +3, "Phil Mickelson": +10} },
-      { position: 5, name: "Robert Jones", totalScore: -2, paid: true, picks: ["Max Homa", "Bryson DeChambeau", "Rory McIlroy", "Brooks Koepka", "Tiger Woods"], pickScores: {"Max Homa": -7, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Brooks Koepka": -2, "Tiger Woods": +5} },
-      { position: 6, name: "Jessica Brown", totalScore: +1, paid: false, picks: ["Collin Morikawa", "Ludvig Åberg", "Tommy Fleetwood", "Jon Rahm", "Justin Thomas"], pickScores: {"Collin Morikawa": -8, "Ludvig Åberg": -6, "Tommy Fleetwood": -3, "Jon Rahm": 0, "Justin Thomas": +1} },
-      { position: 7, name: "David Miller", totalScore: +3, paid: true, picks: ["Scottie Scheffler", "Xander Schauffele", "Jon Rahm", "Jordan Spieth", "Hideki Matsuyama"], pickScores: {"Scottie Scheffler": -10, "Xander Schauffele": -4, "Jon Rahm": 0, "Jordan Spieth": +2, "Hideki Matsuyama": +6} },
-      { position: 8, name: "Lisa Wilson", totalScore: +5, paid: true, picks: ["Max Homa", "Xander Schauffele", "Tommy Fleetwood", "Rory McIlroy", "Cameron Smith"], pickScores: {"Max Homa": -7, "Xander Schauffele": -4, "Tommy Fleetwood": -3, "Rory McIlroy": -1, "Cameron Smith": +7} },
-      { position: 9, name: "Kevin Taylor", totalScore: +8, paid: true, picks: ["Bryson DeChambeau", "Brooks Koepka", "Jon Rahm", "Dustin Johnson", "Shane Lowry"], pickScores: {"Bryson DeChambeau": -5, "Brooks Koepka": -2, "Jon Rahm": 0, "Dustin Johnson": +4, "Shane Lowry": +9} },
-      { position: 10, name: "Jennifer Anderson", totalScore: +10, paid: false, picks: ["Ludvig Åberg", "Xander Schauffele", "Rory McIlroy", "Justin Thomas", "Patrick Cantlay"], pickScores: {"Ludvig Åberg": -6, "Xander Schauffele": -4, "Rory McIlroy": -1, "Justin Thomas": +1, "Patrick Cantlay": +3} }
+      { position: 1, name: "John Smith", totalScore: -15, totalPoints: -15, paid: true, picks: ["Scottie Scheffler", "Collin Morikawa", "Max Homa", "Xander Schauffele", "Jon Rahm"], pickScores: {"Scottie Scheffler": -10, "Collin Morikawa": -8, "Max Homa": -7, "Xander Schauffele": -4, "Jon Rahm": 0} },
+      { position: 2, name: "Emily Johnson", totalScore: -12, totalPoints: -12, paid: true, picks: ["Scottie Scheffler", "Bryson DeChambeau", "Rory McIlroy", "Tommy Fleetwood", "Jordan Spieth"], pickScores: {"Scottie Scheffler": -10, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Tommy Fleetwood": -3, "Jordan Spieth": +2} },
+      { position: 3, name: "Mike Williams", totalScore: -8, totalPoints: -8, paid: true, picks: ["Collin Morikawa", "Brooks Koepka", "Dustin Johnson", "Tiger Woods", "Viktor Hovland"], pickScores: {"Collin Morikawa": -8, "Brooks Koepka": -2, "Dustin Johnson": +4, "Tiger Woods": +5, "Viktor Hovland": +8} },
+      { position: 4, name: "Sarah Davis", totalScore: -5, totalPoints: -5, paid: true, picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Patrick Cantlay", "Phil Mickelson"], pickScores: {"Scottie Scheffler": -10, "Ludvig Åberg": -6, "Justin Thomas": +1, "Patrick Cantlay": +3, "Phil Mickelson": +10} },
+      { position: 5, name: "Robert Jones", totalScore: -2, totalPoints: -2, paid: true, picks: ["Max Homa", "Bryson DeChambeau", "Rory McIlroy", "Brooks Koepka", "Tiger Woods"], pickScores: {"Max Homa": -7, "Bryson DeChambeau": -5, "Rory McIlroy": -1, "Brooks Koepka": -2, "Tiger Woods": +5} },
+      { position: 6, name: "Jessica Brown", totalScore: +1, totalPoints: +1, paid: false, picks: ["Collin Morikawa", "Ludvig Åberg", "Tommy Fleetwood", "Jon Rahm", "Justin Thomas"], pickScores: {"Collin Morikawa": -8, "Ludvig Åberg": -6, "Tommy Fleetwood": -3, "Jon Rahm": 0, "Justin Thomas": +1} },
+      { position: 7, name: "David Miller", totalScore: +3, totalPoints: +3, paid: true, picks: ["Scottie Scheffler", "Xander Schauffele", "Jon Rahm", "Jordan Spieth", "Hideki Matsuyama"], pickScores: {"Scottie Scheffler": -10, "Xander Schauffele": -4, "Jon Rahm": 0, "Jordan Spieth": +2, "Hideki Matsuyama": +6} },
+      { position: 8, name: "Lisa Wilson", totalScore: +5, totalPoints: +5, paid: true, picks: ["Max Homa", "Xander Schauffele", "Tommy Fleetwood", "Rory McIlroy", "Cameron Smith"], pickScores: {"Max Homa": -7, "Xander Schauffele": -4, "Tommy Fleetwood": -3, "Rory McIlroy": -1, "Cameron Smith": +7} },
+      { position: 9, name: "Kevin Taylor", totalScore: +8, totalPoints: +8, paid: true, picks: ["Bryson DeChambeau", "Brooks Koepka", "Jon Rahm", "Dustin Johnson", "Shane Lowry"], pickScores: {"Bryson DeChambeau": -5, "Brooks Koepka": -2, "Jon Rahm": 0, "Dustin Johnson": +4, "Shane Lowry": +9} },
+      { position: 10, name: "Jennifer Anderson", totalScore: +10, totalPoints: +10, paid: false, picks: ["Ludvig Åberg", "Xander Schauffele", "Rory McIlroy", "Justin Thomas", "Patrick Cantlay"], pickScores: {"Ludvig Åberg": -6, "Xander Schauffele": -4, "Rory McIlroy": -1, "Justin Thomas": +1, "Patrick Cantlay": +3} }
     ];
   } catch (error) {
     console.error('Error fetching pool standings:', error);
@@ -132,7 +132,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   }
 };
 
-// Implement the missing fetchPlayerSelections function
+// Keep the fetchPlayerSelections function unchanged
 export const fetchPlayerSelections = async (): Promise<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}> => {
   try {
     // Simulate API call delay
@@ -197,7 +197,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
   }
 };
 
-// Implement the missing isTournamentInProgress function
+// Keep the isTournamentInProgress function unchanged
 export const isTournamentInProgress = async (): Promise<boolean> => {
   try {
     const tournament = await getCurrentTournament();
