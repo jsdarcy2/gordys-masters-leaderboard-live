@@ -1,3 +1,4 @@
+
 import { DataSource, GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound, TOURNAMENT_YEAR, isTournamentInProgress } from "../tournament";
 import { scrapeMastersWebsite } from "./scraper";
@@ -135,7 +136,7 @@ export const fetchLeaderboardData = async () => {
           throw new Error("Invalid data structure from ESPN API");
         }
         
-        console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
+        console.log(`Fetched ${Array.isArray(leaderboardData.leaderboard) ? leaderboardData.leaderboard.length : 0} golfers for leaderboard`);
         
         // Cache the fresh data with year information
         saveToCache(LEADERBOARD_DATA_CACHE_KEY, leaderboardData.leaderboard, "espn-api");
@@ -177,7 +178,7 @@ export const fetchLeaderboardData = async () => {
           throw new Error("Invalid data structure from ESPN API");
         }
         
-        console.log(`Fetched ${leaderboardData.leaderboard.length} golfers for leaderboard`);
+        console.log(`Fetched ${Array.isArray(leaderboardData.leaderboard) ? leaderboardData.leaderboard.length : 0} golfers for leaderboard`);
         
         // Cache the fresh data
         saveToCache(LEADERBOARD_DATA_CACHE_KEY, leaderboardData.leaderboard, "espn-api");
@@ -239,7 +240,7 @@ export const fetchLeaderboardData = async () => {
           console.log("All APIs failed. Attempting to scrape Masters.com website...");
           const scrapedLeaderboard = await scrapeMastersWebsite();
           
-          if (scrapedLeaderboard && scrapedLeaderboard.length > 0) {
+          if (scrapedLeaderboard && Array.isArray(scrapedLeaderboard) && scrapedLeaderboard.length > 0) {
             console.log(`Successfully scraped ${scrapedLeaderboard.length} players from Masters.com`);
             
             const leaderboardData = {
@@ -266,7 +267,7 @@ export const fetchLeaderboardData = async () => {
           // If we have ANY cached data, even if expired, return it as last resort
           const cachedDataLastResort = getFromCache(LEADERBOARD_DATA_CACHE_KEY, 0); // 0 = ignore expiration
           
-          if (cachedDataLastResort.data && cachedDataLastResort.data.length > 0) {
+          if (cachedDataLastResort.data && Array.isArray(cachedDataLastResort.data) && cachedDataLastResort.data.length > 0) {
             console.log(`Using expired cache as last resort (${Math.round(cachedDataLastResort.age / 60000)}m old)`);
             
             return {
@@ -295,7 +296,7 @@ export const fetchLeaderboardData = async () => {
     // Last resort fallback to any cached data
     const cachedDataLastResort = getFromCache(LEADERBOARD_DATA_CACHE_KEY, 0); // 0 = ignore expiration
     
-    if (cachedDataLastResort.data && cachedDataLastResort.data.length > 0) {
+    if (cachedDataLastResort.data && Array.isArray(cachedDataLastResort.data) && cachedDataLastResort.data.length > 0) {
       console.log(`Using expired cache as last resort (${Math.round(cachedDataLastResort.age / 60000)}m old)`);
       
       return {
