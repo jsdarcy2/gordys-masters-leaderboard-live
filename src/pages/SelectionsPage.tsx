@@ -20,8 +20,21 @@ const SelectionsPage = () => {
         setLoading(true);
         const selectionsData = await fetchPlayerSelections();
         const count = Object.keys(selectionsData).length;
-        console.log(`Loaded ${count} participants`);
+        console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
         setParticipantCount(count);
+        
+        // Additional verification to check if we have all expected participants
+        if (count !== 134) {
+          console.warn(`Expected 134 participants but got ${count}`);
+          toast({
+            title: "Data inconsistency detected",
+            description: `Expected 134 participants but loaded ${count}. Refreshing data...`,
+            variant: "destructive",
+          });
+          
+          // Try loading data again after a delay
+          setTimeout(loadParticipantCount, 2000);
+        }
       } catch (error) {
         console.error("Error loading participant count:", error);
         toast({
@@ -55,6 +68,16 @@ const SelectionsPage = () => {
         const participants = Object.keys(selectionsData);
         console.log(`Total participants: ${participants.length}`);
         console.log("Participant names:", participants);
+        
+        // Check for specific teams that might be missing
+        const requiredTeams = ["Sam Foster", "Jessica Garcia"];
+        requiredTeams.forEach(team => {
+          if (!participants.includes(team)) {
+            console.error(`Missing required team: ${team}`);
+          } else {
+            console.log(`Found required team: ${team}`);
+          }
+        });
       } catch (error) {
         console.error("Error in debug logging:", error);
       }

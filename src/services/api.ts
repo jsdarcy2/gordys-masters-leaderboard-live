@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant, TournamentRound } from "@/types";
 import { buildGolferScoreMap, calculatePoolStandings, generateParticipantName } from "@/utils/scoringUtils";
 import { validateLeaderboardData } from "@/utils/leaderboardUtils";
@@ -367,18 +366,12 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       golferScoreMap[golfer.name] = golfer.score;
     });
     
-    // Generate 134 teams with complete data
-    const teamsData: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = {};
+    // Get base teams data including participants from the text data
+    const teamsData: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }} = getBaseSampleTeams();
     
-    // Use existing sample teams data as base
-    const baseTeams = getBaseSampleTeams();
+    console.log(`Base teams data has ${Object.keys(teamsData).length} teams`);
     
-    // Add the base teams to our teams data
-    Object.entries(baseTeams).forEach(([name, data]) => {
-      teamsData[name] = data;
-    });
-    
-    // Generate additional teams to reach 134 total if needed
+    // Generate additional teams if needed to reach 134 total
     const currentCount = Object.keys(teamsData).length;
     const neededCount = 134 - currentCount;
     
@@ -401,7 +394,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       
       for (let i = 0; i < neededCount; i++) {
         const teamIndex = currentCount + i + 1;
-        // Generate a realistic name instead of "Team X"
+        // Generate a realistic name
         const teamName = generateParticipantName(teamIndex);
         
         // Select 5 random golfers for this team
@@ -414,7 +407,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
           }
         }
         
-        // Calculate scores for each pick
+        // Calculate scores for each pick based on actual leaderboard data
         const roundScores = picks.map(golfer => 
           golferScoreMap[golfer] !== undefined ? golferScoreMap[golfer] : 0
         );
@@ -431,9 +424,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       }
     }
     
-    console.log(`Generated ${Object.keys(teamsData).length} teams total`);
-    
-    // Update round scores with real golfer scores
+    // Update round scores with real golfer scores for ALL teams
     Object.keys(teamsData).forEach(participant => {
       const team = teamsData[participant];
       team.picks.forEach((golfer, index) => {
@@ -441,6 +432,14 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
         team.roundScores[index] = golferScoreMap[golfer] !== undefined ? golferScoreMap[golfer] : 0;
       });
     });
+    
+    console.log(`Generated ${Object.keys(teamsData).length} teams total`);
+    
+    // Ensure we have exactly 134 teams
+    const finalCount = Object.keys(teamsData).length;
+    if (finalCount !== 134) {
+      console.warn(`Expected 134 teams but generated ${finalCount}`);
+    }
     
     return teamsData;
   } catch (error) {
@@ -453,6 +452,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
  * Get base sample teams data for consistency
  */
 const getBaseSampleTeams = () => {
+  // Include all teams from the participants list (132 confirmed teams)
   return {
     "Ben Applebaum": {
       picks: ["Rory McIlroy", "Xander Schauffele", "Shane Lowry", "Tommy Fleetwood", "Robert MacIntyre"],
@@ -614,80 +614,72 @@ const getBaseSampleTeams = () => {
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "Sam Foster": {
-      picks: ["Jon Rahm", "Scottie Scheffler", "Bryson DeChambeau", "Brooks Koepka", "Patrick Reed"],
+    "Eric Fox": {
+      picks: ["Bryson DeChambeau", "Rory McIlroy", "Wyndham Clark", "Viktor Hovland", "Sepp Straka"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Jessica Garcia": {
-      picks: ["Rory McIlroy", "Patrick Cantlay", "Tommy Fleetwood", "Hideki Matsuyama", "Shane Lowry"],
+    "Kyle Flippen": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Min Woo Lee", "Jordan Spieth", "Brian Harman"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "Mark Johnson": {
-      picks: ["Scottie Scheffler", "Xander Schauffele", "Justin Thomas", "Jordan Spieth", "Dustin Johnson"],
+    "J.J. Furst": {
+      picks: ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Hideki Matsuyama", "Joaquín Niemann"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Laura Peterson": {
-      picks: ["Collin Morikawa", "Viktor Hovland", "Brooks Koepka", "Cameron Smith", "Min Woo Lee"],
+    "Brian Ginkel": {
+      picks: ["Scottie Scheffler", "Ludvig Åberg", "Justin Thomas", "Min Woo Lee", "Brooks Koepka"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "Robert Chen": {
-      picks: ["Scottie Scheffler", "Rory McIlroy", "Bryson DeChambeau", "Tony Finau", "Sepp Straka"],
+    "Grayson Ginkel": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Patrick Cantlay", "Hideki Matsuyama", "Jordan Spieth"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Catherine Williams": {
-      picks: ["Jon Rahm", "Xander Schauffele", "Brooks Koepka", "Sergio Garcia", "Tommy Fleetwood"],
+    "Mik Gusenius": {
+      picks: ["Collin Morikawa", "Xander Schauffele", "Brooks Koepka", "Justin Thomas", "Jordan Spieth"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "David Thompson": {
-      picks: ["Scottie Scheffler", "Collin Morikawa", "Cameron Smith", "Patrick Reed", "Will Zalatoris"],
+    "John Gustafson": {
+      picks: ["Rory McIlroy", "Ludvig Åberg", "Jordan Spieth", "Justin Thomas", "Hideki Matsuyama"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Sarah Rodriguez": {
-      picks: ["Rory McIlroy", "Bryson DeChambeau", "Justin Thomas", "Russell Henley", "Shane Lowry"],
+    "Andy Gustafson": {
+      picks: ["Scottie Scheffler", "Rory McIlroy", "Justin Thomas", "Brooks Koepka", "Hideki Matsuyama"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "Thomas Wilson": {
-      picks: ["Jon Rahm", "Patrick Cantlay", "Brooks Koepka", "Cameron Young", "Hideki Matsuyama"],
+    "Lily Gustafson": {
+      picks: ["Collin Morikawa", "Bryson DeChambeau", "Cameron Smith", "Justin Thomas", "Russell Henley"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Lisa Garcia": {
-      picks: ["Scottie Scheffler", "Viktor Hovland", "Tommy Fleetwood", "Dustin Johnson", "Min Woo Lee"],
+    "David Hardt": {
+      picks: ["Rory McIlroy", "Scottie Scheffler", "Will Zalatoris", "Joaquín Niemann", "Brooks Koepka"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "John Smith": {
-      picks: ["Scottie Scheffler", "Brooks Koepka", "Justin Thomas", "Hideki Matsuyama", "Patrick Reed"],
+    "Brack Herfurth": {
+      picks: ["Jon Rahm", "Xander Schauffele", "Joaquín Niemann", "Tommy Fleetwood", "Sungjae Im"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Emily Johnson": {
-      picks: ["Rory McIlroy", "Collin Morikawa", "Cameron Smith", "Tom Kim", "Tommy Fleetwood"],
+    "Darby Herfurth": {
+      picks: ["Rory McIlroy", "Ludvig Åberg", "Patrick Cantlay", "Corey Conners", "Sepp Straka"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    "Michael Williams": {
-      picks: ["Jon Rahm", "Ludvig Åberg", "Shane Lowry", "Russell Henley", "Min Woo Lee"],
+    "Henry Herfurth": {
+      picks: ["Collin Morikawa", "Hideki Matsuyama", "Wyndham Clark", "Cameron Smith", "Chris Kirk"],
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [138, 280] as [number, number]
     },
-    "Sophia Brown": {
-      picks: ["Scottie Scheffler", "Xander Schauffele", "Patrick Cantlay", "Justin Thomas", "Jordan Spieth"],
+    "Jess Herfurth": {
+      picks: ["Rory McIlroy", "Xander Schauffele", "Russell Henley", "Justin Thomas", "Tommy Fleetwood"],
       roundScores: [0, 0, 0, 0, 0],
-      tiebreakers: [140, 276] as [number, number]
-    },
-    "William Davis": {
-      picks: ["Bryson DeChambeau", "Collin Morikawa", "Brooks Koepka", "Cameron Smith", "Joaquín Niemann"],
-      roundScores: [0, 0, 0, 0, 0],
-      tiebreakers: [138, 280] as [number, number]
-    }
-  };
-};
+      tiebreakers: [140, 27
