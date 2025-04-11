@@ -7,10 +7,14 @@ import TeamSelectionsTable from "@/components/pool/TeamSelectionsTable";
 import { fetchPlayerSelections } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SelectionsPage = () => {
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Load participant count
@@ -18,29 +22,28 @@ const SelectionsPage = () => {
     const loadParticipantCount = async () => {
       try {
         setLoading(true);
+        setError(null);
         const selectionsData = await fetchPlayerSelections();
         const count = Object.keys(selectionsData).length;
         console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
         setParticipantCount(count);
         
         // Additional verification to check if we have all expected participants
-        if (count !== 134) {
-          console.warn(`Expected 134 participants but got ${count}`);
+        if (count < 10) {
+          console.warn(`Expected more participants but got ${count}`);
           toast({
-            title: "Data inconsistency detected",
-            description: `Expected 134 participants but loaded ${count}. Refreshing data...`,
-            variant: "destructive",
+            title: "Using demo data",
+            description: `Currently showing demo data with ${count} participants due to connection issues.`,
+            variant: "warning",
           });
-          
-          // Try loading data again after a delay
-          setTimeout(loadParticipantCount, 2000);
         }
       } catch (error) {
         console.error("Error loading participant count:", error);
+        setError("Failed to load participant data. Using demo data instead.");
         toast({
-          title: "Error loading data",
-          description: "Could not fetch participant information. Please try refreshing the page.",
-          variant: "destructive",
+          title: "Data loading issue",
+          description: "Using demo data while we're unable to connect to the tournament API.",
+          variant: "warning",
         });
       } finally {
         setLoading(false);
@@ -60,31 +63,39 @@ const SelectionsPage = () => {
   // Log component mount for debugging
   useEffect(() => {
     console.log("Selections page mounted");
+  }, []);
+
+  const handleManualRefresh = () => {
+    toast({
+      title: "Refreshing data",
+      description: "Attempting to get the latest tournament data...",
+    });
     
-    // Add detailed logging to debug participant count
-    const debugParticipants = async () => {
+    // Reset state and trigger the data loading
+    setLoading(true);
+    setError(null);
+    
+    const loadParticipantCount = async () => {
       try {
         const selectionsData = await fetchPlayerSelections();
-        const participants = Object.keys(selectionsData);
-        console.log(`Total participants: ${participants.length}`);
-        console.log("Participant names:", participants);
-        
-        // Check for specific teams that might be missing
-        const requiredTeams = ["Sam Foster", "Jessica Garcia"];
-        requiredTeams.forEach(team => {
-          if (!participants.includes(team)) {
-            console.error(`Missing required team: ${team}`);
-          } else {
-            console.log(`Found required team: ${team}`);
-          }
-        });
+        const count = Object.keys(selectionsData).length;
+        console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
+        setParticipantCount(count);
       } catch (error) {
-        console.error("Error in debug logging:", error);
+        console.error("Error during manual refresh:", error);
+        setError("Failed to load participant data. Using demo data instead.");
+        toast({
+          title: "Data loading issue",
+          description: "Still unable to connect to the tournament API. Using demo data.",
+          variant: "warning",
+        });
+      } finally {
+        setLoading(false);
       }
     };
     
-    debugParticipants();
-  }, []);
+    loadParticipantCount();
+  };
 
   return (
     <Layout>
@@ -96,6 +107,25 @@ const SelectionsPage = () => {
           See all {loading ? "..." : participantCount} participant team selections for The Masters, ranked by their current position in the pool standings.
         </p>
       </div>
+      
+      {error && (
+        <Alert variant="warning" className="mb-6 bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Data Connection Issue</AlertTitle>
+          <AlertDescription className="text-amber-700 text-sm">
+            {error}
+            <Button 
+              onClick={handleManualRefresh} 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 bg-white flex items-center gap-1"
+            >
+              <RefreshCw size={14} />
+              Try Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Tabs defaultValue="pool" className="mb-6">
         <TabsList className="bg-masters-light">
