@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
 import PersonalizedDashboard from "@/components/PersonalizedDashboard";
-import { Flag, Trophy, Clock, UserPlus } from "lucide-react";
+import { Flag, Trophy, Clock } from "lucide-react";
 
 const Index = () => {
   // Mock data for PersonalizedDashboard
@@ -13,7 +13,7 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Card icon={<Flag className="text-masters-yellow" />} 
               title="Tournament" 
               subtitle="Follow the live leaderboard" 
@@ -28,12 +28,6 @@ const Index = () => {
               title="Past Champions" 
               subtitle="Celebrating 20 years" 
               href="/archive" />
-              
-        <Card icon={<UserPlus className="text-masters-yellow" />} 
-              title="Enter Pool" 
-              subtitle="Join this year's competition" 
-              href="/entry"
-              highlight={true} />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
