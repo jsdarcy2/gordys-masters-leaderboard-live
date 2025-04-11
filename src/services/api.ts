@@ -1,292 +1,130 @@
 import { GolferScore, PoolParticipant, TournamentData } from "@/types";
 
-// Your SportsData.io API key - you'll need to set this in your environment
-const SPORTSDATA_API_KEY = "YOUR_API_KEY"; // Replace with your actual API key
+// Your RapidAPI Key - you'll need to set this in your environment
+const RAPIDAPI_KEY = "YOUR_API_KEY"; // Replace with your actual API key
 
-// Function to fetch leaderboard data from SportsData.io API
+// Function to fetch leaderboard data from the RapidAPI endpoint
 export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
     // Add cache-busting timestamp to prevent stale data
     const timestamp = new Date().getTime();
     
-    if (!SPORTSDATA_API_KEY || SPORTSDATA_API_KEY === "YOUR_API_KEY") {
-      console.warn("SportsData.io API key not set. Falling back to ESPN API.");
-      return fetchESPNLeaderboardData();
+    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "YOUR_API_KEY") {
+      console.warn("RapidAPI key not set. Falling back to fallback data.");
+      return getFallbackLeaderboardData();
     }
     
-    // Use SportsData.io tournament leaderboard endpoint
-    // This gets the current tournament's leaderboard
-    const response = await fetch(`https://api.sportsdata.io/golf/v2/json/Leaderboard/masters?key=${SPORTSDATA_API_KEY}&t=${timestamp}`, {
+    // Use RapidAPI Golf leaderboard endpoint
+    const response = await fetch(`https://live-golf-data.p.rapidapi.com/leaderboard?t=${timestamp}`, {
       headers: {
+        'X-RapidAPI-Host': 'live-golf-data.p.rapidapi.com',
+        'X-RapidAPI-Key': RAPIDAPI_KEY,
         'Accept': 'application/json',
       },
       cache: 'no-store',
     });
     
     if (!response.ok) {
-      console.error(`SportsData.io API responded with status: ${response.status}`);
-      return fetchESPNLeaderboardData();
+      console.error(`RapidAPI responded with status: ${response.status}`);
+      return getFallbackLeaderboardData();
     }
     
     const data = await response.json();
-    return transformSportsDataAPI(data);
+    return transformRapidAPIData(data);
   } catch (error) {
-    console.error("Error fetching SportsData.io leaderboard data:", error);
-    console.warn("Falling back to ESPN API");
-    return fetchESPNLeaderboardData();
+    console.error("Error fetching RapidAPI leaderboard data:", error);
+    console.warn("Falling back to backup data");
+    return getFallbackLeaderboardData();
   }
 };
 
-// Transform SportsData.io API data to our application format
-const transformSportsDataAPI = (apiData: any): TournamentData => {
+// Transform RapidAPI data to our application format
+const transformRapidAPIData = (apiData: any): TournamentData => {
   try {
-    console.log("Processing SportsData.io data");
+    console.log("Processing RapidAPI data:", apiData);
     
-    // Extract tournament info
-    const tournament = apiData.Tournament || {};
-    const rounds = tournament.Rounds || [];
-    const players = apiData.Players || [];
-    
-    // Determine current round (1-4)
-    let currentRound = 1;
-    for (let i = rounds.length - 1; i >= 0; i--) {
-      if (rounds[i].IsComplete === false) {
-        currentRound = Math.min(rounds[i].Number, 4);
-        break;
-      } else if (i === rounds.length - 1) {
-        // If all rounds are complete, use the last round
-        currentRound = Math.min(rounds[i].Number, 4);
-      }
-    }
+    // Extract the leaderboard data from the API response
+    const players = apiData.leaderboard || [];
     
     // Transform player data to our format
     const leaderboard = players.map((player: any) => {
       // Handle CUT or WD status
-      const status = player.IsCut ? 'cut' : 
-                     player.IsWithdrawn ? 'withdrawn' : 'active';
-      
-      // Calculate score relative to par
-      const score = player.TotalScore === null ? 0 : player.TotalScore;
-      
-      // Get today's score from current round
-      let todayScore = 0;
-      if (player.Rounds && player.Rounds.length > 0) {
-        const todayRound = player.Rounds.find((r: any) => r.Number === currentRound);
-        if (todayRound) {
-          todayScore = todayRound.Score || 0;
-        }
+      let status: 'cut' | 'active' | 'withdrawn' = 'active';
+      if (player.status && (player.status.toLowerCase().includes('cut') || player.status === 'CUT')) {
+        status = 'cut';
+      } else if (player.status && (player.status.toLowerCase().includes('wd') || player.status === 'WD')) {
+        status = 'withdrawn';
       }
       
-      // Determine thru status
-      let thru: string | number = 'F';
-      if (status === 'cut' || status === 'withdrawn') {
-        thru = '-';
-      } else if (player.IsActive && player.TotalHolesParsed !== null) {
-        const todayHoles = player.TotalHolesParsed % 18 || 18;
-        thru = todayHoles === 18 ? 'F' : todayHoles;
+      // Calculate score relative to par
+      let score = 0;
+      if (player.total_to_par !== undefined) {
+        score = player.total_to_par;
+      } else if (player.score !== undefined) {
+        // Handle "E" (even par) value
+        score = player.score === "E" ? 0 : parseInt(player.score);
+      } else if (player.topar !== undefined) {
+        score = player.topar === "E" ? 0 : parseInt(player.topar);
+      }
+      
+      // Get today's score
+      let todayScore = 0;
+      if (player.today !== undefined) {
+        todayScore = player.today === "E" ? 0 : parseInt(player.today);
+      } else if (player.today_score !== undefined) {
+        todayScore = player.today_score === "E" ? 0 : parseInt(player.today_score);
+      } else if (player.round_score !== undefined) {
+        todayScore = player.round_score === "E" ? 0 : parseInt(player.round_score);
+      }
+      
+      // Format position correctly
+      let position = 0;
+      if (player.position !== undefined) {
+        position = parseInt(player.position) || 0;
+      } else if (player.pos !== undefined) {
+        const posString = player.pos.toString().replace(/T/g, '');
+        position = parseInt(posString) || 0;
       }
       
       return {
-        position: player.Rank || 0,
-        name: `${player.FirstName} ${player.LastName}`.trim(),
-        score: score,
-        today: todayScore,
-        thru: thru,
-        status: status as 'cut' | 'active' | 'withdrawn'
+        position: position,
+        name: player.name || `${player.first_name || ''} ${player.last_name || ''}`.trim(),
+        score: isNaN(score) ? 0 : score,
+        today: isNaN(todayScore) ? 0 : todayScore,
+        thru: player.thru || player.thruHole || 'F',
+        status: status
       };
     })
-    .filter(entry => entry.name.trim() !== '')
-    .sort((a: GolferScore, b: GolferScore) => a.position - b.position);
+    .filter((entry: any) => entry.name && entry.name.trim() !== '');
+    
+    // Sort by position if needed
+    const sortedLeaderboard = leaderboard.sort((a: GolferScore, b: GolferScore) => a.position - b.position);
     
     return {
       lastUpdated: new Date().toISOString(),
-      currentRound: currentRound as 1 | 2 | 3 | 4,
-      leaderboard: leaderboard
+      currentRound: determineCurrentRound(apiData),
+      leaderboard: sortedLeaderboard
     };
   } catch (err) {
-    console.error("Error transforming SportsData.io data:", err);
+    console.error("Error transforming RapidAPI data:", err);
     return getFallbackLeaderboardData();
   }
 };
 
-// Fallback to ESPN API if SportsData.io fails
-const fetchESPNLeaderboardData = async (): Promise<TournamentData> => {
+// Helper function to determine current round
+const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
   try {
-    // Add cache-busting timestamp to prevent stale data
-    const timestamp = new Date().getTime();
+    // Try to extract round information from API data
+    const round = data.current_round || data.round || 1;
     
-    // Use ESPN's main golf leaderboard API endpoint
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?t=${timestamp}`, {
-      headers: {
-        'Accept': 'application/json',
-      },
-      cache: 'no-store',
-    });
-    
-    if (!response.ok) {
-      throw new Error(`ESPN API responded with status: ${response.status}`);
+    if (round >= 1 && round <= 4) {
+      return round as 1 | 2 | 3 | 4;
     }
-    
-    const data = await response.json();
-    return transformESPNData(data);
-  } catch (error) {
-    console.error("Error fetching ESPN leaderboard data:", error);
-    console.warn("Falling back to mock data due to API error");
-    return getFallbackLeaderboardData();
-  }
-};
-
-// Helper function to determine current round from ESPN data
-const determineRoundFromESPN = (roundInfo: string): 1 | 2 | 3 | 4 => {
-  try {
-    // ESPN format is typically like "Round 2" or "Final Round"
-    if (roundInfo.includes("1")) return 1;
-    if (roundInfo.includes("2")) return 2;
-    if (roundInfo.includes("3")) return 3;
-    if (roundInfo.includes("4") || roundInfo.toLowerCase().includes("final")) return 4;
     
     return 1; // Default to round 1
   } catch (e) {
     return 1; // Default to round 1 in case of error
   }
-};
-
-// Helper function to transform official Masters.com data
-const transformOfficialData = (apiData: any): TournamentData => {
-  try {
-    const players = apiData.data?.players || [];
-    
-    const leaderboard = players.map((player: any) => {
-      const status = player.status === 'C' ? 'cut' : 
-                    player.status === 'W' ? 'withdrawn' : 'active';
-      
-      const score = player.today_total_rel_to_par !== undefined ? 
-                    parseInt(player.today_total_rel_to_par) : 
-                    parseInt(player.topar || '0');
-      
-      const today = player.today_value !== undefined ? 
-                   parseInt(player.today_value) : 0;
-                   
-      let thru = player.thru || '';
-      if (player.status === 'C' || player.status === 'W') {
-        thru = '-';
-      } else if (player.rankFlg === 'Y' && player.thru === '') {
-        thru = 'F';
-      }
-      
-      return {
-        position: player.pos ? parseInt(player.pos) : 0,
-        name: `${player.first_name} ${player.last_name}`,
-        score: score,
-        today: today, 
-        thru: thru,
-        status: status as 'cut' | 'active' | 'withdrawn'
-      };
-    });
-    
-    return {
-      lastUpdated: new Date().toISOString(),
-      currentRound: determineCurrentRound(apiData),
-      leaderboard: leaderboard
-    };
-  } catch (err) {
-    console.error("Error transforming official leaderboard data:", err);
-    return getFallbackLeaderboardData();
-  }
-};
-
-// Helper function to transform GitHub API data
-const transformGitHubData = (apiData: any): TournamentData => {
-  try {
-    const players = apiData.players || apiData.data || apiData.leaderboard || apiData;
-    
-    const leaderboard = players.map((player: any) => {
-      return {
-        position: player.position || player.pos || player.place || parseInt(player.pos_num || '0'),
-        name: player.name || player.player_name || 
-              (player.player_bio?.first_name && player.player_bio?.last_name ? 
-              `${player.player_bio.first_name} ${player.player_bio.last_name}` : 
-              player.player_bio?.name || ''),
-        score: calculateScore(player),
-        today: calculateTodayScore(player),
-        thru: player.thru || player.thru_num || player.today_round?.thru || 'F',
-        status: determineStatus(player)
-      };
-    }).filter((player: any) => player.name);
-    
-    return {
-      lastUpdated: new Date().toISOString(),
-      currentRound: determineCurrentRound(apiData),
-      leaderboard: leaderboard
-    };
-  } catch (err) {
-    console.error("Error transforming GitHub leaderboard data:", err);
-    return getFallbackLeaderboardData();
-  }
-};
-
-// Helper function to transform API data to our app format
-const transformLeaderboardData = (apiData: any): GolferScore[] => {
-  try {
-    const players = apiData.players || apiData.data || apiData.leaderboard || apiData;
-    
-    return players.map((player: any) => {
-      return {
-        position: player.position || player.pos || player.place || parseInt(player.pos_num || '0'),
-        name: player.name || player.player_name || 
-              (player.player_bio?.first_name && player.player_bio?.last_name ? 
-              `${player.player_bio.first_name} ${player.player_bio.last_name}` : 
-              player.player_bio?.name || ''),
-        score: calculateScore(player),
-        today: calculateTodayScore(player),
-        thru: player.thru || player.thru_num || player.today_round?.thru || 'F',
-        status: determineStatus(player)
-      };
-    }).filter((player: any) => player.name);
-  } catch (err) {
-    console.error("Error transforming leaderboard data:", err);
-    return [];
-  }
-};
-
-// Helper function to calculate total score
-const calculateScore = (player: any): number => {
-  if (typeof player.total_to_par !== 'undefined') return player.total_to_par;
-  if (typeof player.score !== 'undefined') return parseInt(player.score);
-  if (typeof player.topar !== 'undefined') return parseInt(player.topar);
-  
-  return 0;
-};
-
-// Helper function to calculate today's score
-const calculateTodayScore = (player: any): number => {
-  if (typeof player.today !== 'undefined') return player.today;
-  if (player.today_round?.strokes_to_par) return player.today_round.strokes_to_par;
-  if (typeof player.round_score !== 'undefined') return parseInt(player.round_score);
-  
-  return 0;
-};
-
-// Helper function to determine player status
-const determineStatus = (player: any): 'cut' | 'active' | 'withdrawn' | undefined => {
-  const status = player.status || player.player_status;
-  if (!status) return 'active';
-  
-  if (status.toLowerCase().includes('cut')) return 'cut';
-  if (status.toLowerCase().includes('wd')) return 'withdrawn';
-  
-  return 'active';
-};
-
-// Helper function to determine current round
-const determineCurrentRound = (data: any): 1 | 2 | 3 | 4 => {
-  const round = data.current_round || data.round || data.data?.currentRound || 1;
-  
-  if (round >= 1 && round <= 4) {
-    return round as 1 | 2 | 3 | 4;
-  }
-  
-  return 1;
 };
 
 // Updated fallback data to match current tournament (2024 Masters)

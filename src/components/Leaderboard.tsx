@@ -180,7 +180,7 @@ const Leaderboard = () => {
         {needsApiKey && (
           <div className="text-center text-amber-600 py-4 flex items-center justify-center mb-4 bg-amber-50 border border-amber-200 rounded-md">
             <Info size={16} className="mr-1" />
-            Note: Using sample data. Set your SportsData.io API key for live data.
+            Note: Using sample data. Set your RapidAPI key for live data.
           </div>
         )}
         
