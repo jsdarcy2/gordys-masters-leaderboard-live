@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 
 export const getScoreClass = (score: number) => {
@@ -21,6 +20,13 @@ export const formatLastUpdated = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+// Format a golf score to show proper golf notation (e.g. -3, +2, E)
+export const formatGolfScore = (score: number): string => {
+  if (score === 0) return 'E'; // Even par
+  if (score > 0) return `+${score}`; // Over par
+  return score.toString(); // Under par (already has the minus sign)
 };
 
 // Configuration for the Masters pool prize distribution

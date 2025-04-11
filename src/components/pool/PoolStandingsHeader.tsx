@@ -1,5 +1,5 @@
 
-import { Clock, Users, Activity } from "lucide-react";
+import { Clock, Users, Activity, Trophy } from "lucide-react";
 
 interface PoolStandingsHeaderProps {
   lastUpdated: string;
@@ -18,9 +18,12 @@ const PoolStandingsHeader = ({ lastUpdated, totalParticipants, loading, isTourna
   return (
     <div className="masters-header">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl md:text-2xl font-serif">
-          Gordy's Masters Pool Standings
-        </h2>
+        <div className="flex items-center gap-2">
+          <Trophy size={20} className="text-masters-green hidden md:inline-block" />
+          <h2 className="text-xl md:text-2xl font-serif">
+            Gordy's Masters Pool Standings
+          </h2>
+        </div>
         <div className="flex items-center gap-2">
           {isTournamentActive && (
             <div className="flex items-center text-sm text-green-400">

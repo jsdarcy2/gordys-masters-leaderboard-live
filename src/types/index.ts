@@ -1,4 +1,3 @@
-
 // Masters tournament data types
 export type GolferScore = {
   position: number;
@@ -10,22 +9,22 @@ export type GolferScore = {
   status?: 'cut' | 'active' | 'withdrawn';
 }
 
-export type PoolParticipant = {
+export interface PoolParticipant {
   name: string;
   position: number;
-  totalPoints: number;
+  totalScore: number; // Golf-style score (lower is better)
+  totalPoints: number; // Keep for compatibility
   picks: string[];
-  pickScores?: { [golferName: string]: number };
+  pickScores: { [golferName: string]: number };
   roundScores?: {
     round1?: number;
     round2?: number;
     round3?: number;
     round4?: number;
   };
-  total?: number;
   tiebreaker1?: number;
   tiebreaker2?: number;
-  paid?: boolean;
+  paid: boolean;
 }
 
 export type TournamentRound = 1 | 2 | 3 | 4;

@@ -467,7 +467,7 @@ export const fetchPlayerSelections = async () => {
   }
 };
 
-// Function to fetch pool standings data based on golfer positions
+// Function to fetch pool standings data based on golfer scores
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
     // Get the current leaderboard data to calculate positions
@@ -481,29 +481,30 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     Object.entries(teamSelections).forEach(([participantName, data]) => {
       const { picks, roundScores, tiebreakers } = data;
       
-      // Calculate total points based on players' positions in the leaderboard
-      let totalPoints = 0;
+      // Calculate total golf score based on players' scores in the leaderboard
+      let totalScore = 0;
       const pickScores: { [golferName: string]: number } = {};
       
-      // Go through each pick and find their current standing
+      // Go through each pick and find their current score
       picks.forEach((golferName) => {
         const golfer = leaderboardData.leaderboard.find(g => g.name === golferName);
         
         if (golfer) {
-          // If player made the cut or is active, use their position for scoring
+          // If player made the cut or is active, use their score
           if (!golfer.status || golfer.status === 'active') {
-            // Calculate points based on position (lower position = better score)
-            // Using 150 - position to make it more intuitive (higher number = better)
-            const points = 150 - golfer.position;
-            totalPoints += points;
-            pickScores[golferName] = points;
+            totalScore += golfer.score; // Add the player's score to the total
+            pickScores[golferName] = golfer.score;
           } else {
-            // If cut or withdrawn, zero points
-            pickScores[golferName] = 0;
+            // If cut or withdrawn, add a penalty score
+            const cutPenalty = 10; // 10 over par penalty for cut players
+            totalScore += cutPenalty;
+            pickScores[golferName] = cutPenalty;
           }
         } else {
-          // If golfer not found, assume zero points
-          pickScores[golferName] = 0;
+          // If golfer not found, assume a high score
+          const notFoundPenalty = 12; // Even higher penalty
+          totalScore += notFoundPenalty;
+          pickScores[golferName] = notFoundPenalty;
         }
       });
       
@@ -511,7 +512,8 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       standings.push({
         name: participantName,
         position: 0, // Will be calculated after sorting
-        totalPoints,
+        totalScore,
+        totalPoints: 0, // Keep for compatibility
         picks,
         pickScores,
         roundScores: {
@@ -523,14 +525,14 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       });
     });
     
-    // Sort by totalPoints (descending) and assign positions
+    // Sort by totalScore (ascending - lower score is better in golf)
     standings.sort((a, b) => {
-      // First sort by points
-      if (b.totalPoints !== a.totalPoints) {
-        return b.totalPoints - a.totalPoints;
+      // First sort by total score
+      if (a.totalScore !== b.totalScore) {
+        return a.totalScore - b.totalScore;
       }
       
-      // If points are equal, check round 1 scores
+      // If scores are equal, check round 1 scores
       if (a.roundScores?.round1 !== b.roundScores?.round1) {
         return (a.roundScores?.round1 || 0) - (b.roundScores?.round1 || 0);
       }
@@ -548,17 +550,17 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // Assign positions
     let currentPosition = 1;
     let samePositionCount = 0;
-    let previousPoints = -1;
+    let previousScore = -999;
     let previousRound1 = -999;
     
     standings.forEach((participant, index) => {
       if (index === 0) {
         participant.position = currentPosition;
-        previousPoints = participant.totalPoints;
+        previousScore = participant.totalScore;
         previousRound1 = participant.roundScores?.round1 || 0;
       } else {
-        // If this participant has the same points and round1 score as previous, assign same position
-        if (participant.totalPoints === previousPoints && participant.roundScores?.round1 === previousRound1) {
+        // If this participant has the same score and round1 score as previous, assign same position
+        if (participant.totalScore === previousScore && participant.roundScores?.round1 === previousRound1) {
           participant.position = currentPosition;
           samePositionCount++;
         } else {
@@ -566,7 +568,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
           currentPosition = index + 1;
           participant.position = currentPosition;
           samePositionCount = 0;
-          previousPoints = participant.totalPoints;
+          previousScore = participant.totalScore;
           previousRound1 = participant.roundScores?.round1 || 0;
         }
       }
