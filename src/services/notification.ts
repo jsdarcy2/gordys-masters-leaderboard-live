@@ -15,13 +15,16 @@ export const notify = (
   type: NotificationType = 'info', 
   duration: number = 5000
 ) => {
-  const variant = type === 'error' 
-    ? 'destructive' 
-    : type === 'success' 
-      ? 'default' 
-      : type === 'warning' 
-        ? 'warning' 
-        : 'default';
+  // In shadcn/ui, variant only supports 'default' | 'destructive'
+  // So we map our types to those variants
+  let variant: 'default' | 'destructive';
+  
+  if (type === 'error') {
+    variant = 'destructive';
+  } else {
+    // All other types use the default variant
+    variant = 'default';
+  }
         
   toast({
     title,
@@ -66,7 +69,7 @@ export const notifyCachedData = (dataType: string, age: string) => {
   toast({
     title: `Using Cached ${dataType}`,
     description: `Live data unavailable. Showing data from ${age}.`,
-    variant: 'warning',
+    variant: 'default', // Using default instead of warning since warning is not supported
     duration: 7000
   });
 };

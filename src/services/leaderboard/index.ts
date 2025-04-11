@@ -1,5 +1,5 @@
 import { DataSource, GolferScore, TournamentRound } from "@/types";
-import { getCurrentRound, TOURNAMENT_YEAR } from "../tournament";
+import { getCurrentRound, TOURNAMENT_YEAR, isTournamentInProgress } from "../tournament";
 import { scrapeMastersWebsite } from "./scraper";
 import { getFromCache, saveToCache } from "@/utils/cacheUtils";
 
@@ -42,6 +42,47 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
   return golferScores;
 };
 
+// Helper function to check if tournament is active
+// This is a simplified version that doesn't trigger the full tournament status check
+const isTournamentActive = async (): Promise<boolean> => {
+  const cachedStatus = localStorage.getItem('tournamentStatus');
+  
+  if (cachedStatus) {
+    try {
+      const { active, timestamp } = JSON.parse(cachedStatus);
+      const age = Date.now() - timestamp;
+      
+      // Use cached status if it's less than 15 minutes old
+      if (age < 15 * 60 * 1000) {
+        return active;
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }
+  
+  // For testing purposes
+  if (import.meta.env.VITE_FORCE_TOURNAMENT_ACTIVE === "true") {
+    return true;
+  }
+  
+  const now = new Date();
+  const year = TOURNAMENT_YEAR;
+  const startDate = new Date(`${year}-04-10`);
+  const endDate = new Date(`${year}-04-13`);
+  endDate.setHours(23, 59, 59);
+  
+  const active = now >= startDate && now <= endDate;
+  
+  // Cache the status
+  localStorage.setItem('tournamentStatus', JSON.stringify({
+    active,
+    timestamp: Date.now()
+  }));
+  
+  return active;
+};
+
 /**
  * Fetch current tournament leaderboard data
  * Uses multiple sources with fallbacks and smart caching
@@ -52,7 +93,7 @@ export const fetchLeaderboardData = async () => {
     
     // Check for cached data first (valid for 2 minutes during tournament, longer otherwise)
     // During tournament play, we want fresh data more frequently
-    const isTournamentActive = await isTournamentActive();
+    const isTournamentActive = await isTournamentProgress();
     const cacheMaxAge = isTournamentActive ? 2 * 60 * 1000 : 30 * 60 * 1000; // 2 mins or 30 mins
     
     const cachedData = getFromCache(LEADERBOARD_DATA_CACHE_KEY, cacheMaxAge);
@@ -277,45 +318,9 @@ export const fetchLeaderboardData = async () => {
   }
 };
 
-// Helper function to check if tournament is active
-// This is a simplified version that doesn't trigger the full tournament status check
-const isTournamentActive = async (): Promise<boolean> => {
-  const cachedStatus = localStorage.getItem('tournamentStatus');
-  
-  if (cachedStatus) {
-    try {
-      const { active, timestamp } = JSON.parse(cachedStatus);
-      const age = Date.now() - timestamp;
-      
-      // Use cached status if it's less than 15 minutes old
-      if (age < 15 * 60 * 1000) {
-        return active;
-      }
-    } catch (e) {
-      // Ignore parse errors
-    }
-  }
-  
-  // For testing purposes
-  if (import.meta.env.VITE_FORCE_TOURNAMENT_ACTIVE === "true") {
-    return true;
-  }
-  
-  const now = new Date();
-  const year = TOURNAMENT_YEAR;
-  const startDate = new Date(`${year}-04-10`);
-  const endDate = new Date(`${year}-04-13`);
-  endDate.setHours(23, 59, 59);
-  
-  const active = now >= startDate && now <= endDate;
-  
-  // Cache the status
-  localStorage.setItem('tournamentStatus', JSON.stringify({
-    active,
-    timestamp: Date.now()
-  }));
-  
-  return active;
+// Fix the naming conflict by renaming the helper function
+const isTournamentProgress = async (): Promise<boolean> => {
+  return await isTournamentInProgress();
 };
 
 /**

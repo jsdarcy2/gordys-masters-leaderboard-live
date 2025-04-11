@@ -1,5 +1,34 @@
-
 import { GolferScore } from "@/types";
+
+/**
+ * Parse a golf score value that might be text like "E" (even), "+2", "-4"
+ */
+const parseScoreValue = (scoreText: string): number => {
+  if (!scoreText) return 0;
+  
+  const trimmed = scoreText.trim();
+  
+  if (trimmed === 'E' || trimmed === 'EV' || trimmed === 'EVEN') {
+    return 0;
+  }
+  
+  if (trimmed.startsWith('+')) {
+    return parseInt(trimmed.substring(1), 10) || 0;
+  }
+  
+  if (trimmed.startsWith('-')) {
+    return -1 * (parseInt(trimmed.substring(1), 10) || 0);
+  }
+  
+  return parseInt(trimmed, 10) || 0;
+};
+
+/**
+ * Extract plain text content from an HTML string
+ */
+const extractTextContent = (html: string): string => {
+  return html.replace(/<[^>]*>/g, '').trim();
+};
 
 /**
  * Scrape leaderboard data from the Masters.com website
@@ -46,13 +75,26 @@ export const scrapeMastersWebsite = async (): Promise<GolferScore[]> => {
               const score = parseScoreValue(player.score || player.total || '0');
               const today = parseScoreValue(player.today || player.round || '0');
               
+              // Use type assertion to enforce the correct status type
+              let playerStatus: "active" | "cut" | "withdrawn" = "active";
+              
+              // Determine the status based on player data
+              if (player.status) {
+                const statusText = String(player.status).toLowerCase();
+                if (statusText.includes('cut')) {
+                  playerStatus = "cut";
+                } else if (statusText.includes('wd') || statusText.includes('withdrawn')) {
+                  playerStatus = "withdrawn";
+                }
+              }
+              
               leaderboard.push({
                 position: parseInt(player.position || (index + 1).toString(), 10),
                 name: player.name || player.playerName || 'Unknown',
                 score: score,
                 today: today,
                 thru: player.thru || player.through || 'F',
-                status: player.status === 'cut' ? 'cut' : player.status === 'wd' ? 'withdrawn' : 'active'
+                status: playerStatus
               });
             });
           }
@@ -86,11 +128,12 @@ export const scrapeMastersWebsite = async (): Promise<GolferScore[]> => {
             const thruText = cellMatches.length > 4 ? extractTextContent(cellMatches[4]) : 'F';
             
             // Handle status (cut or withdrawn)
-            let status = 'active';
+            let playerStatus: "active" | "cut" | "withdrawn" = "active";
+            
             if (row.toLowerCase().includes('cut') || row.toLowerCase().includes('mc')) {
-              status = 'cut';
+              playerStatus = "cut";
             } else if (row.toLowerCase().includes('wd') || row.toLowerCase().includes('withdrawn')) {
-              status = 'withdrawn';
+              playerStatus = "withdrawn";
             }
             
             // Parse scores, handling text like "E" (even), "+2", "-4"
@@ -103,7 +146,7 @@ export const scrapeMastersWebsite = async (): Promise<GolferScore[]> => {
               score: score,
               today: today,
               thru: thruText.trim() || 'F',
-              status: status
+              status: playerStatus
             });
           }
         }
@@ -187,13 +230,14 @@ const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
             const today = todayRound ? parseScoreValue(todayRound.value) : 0;
             
             // Handle status - active, cut, or withdrawn
-            let status = 'active';
+            let playerStatus: "active" | "cut" | "withdrawn" = "active";
+            
             if (player.status && player.status.type) {
               const statusType = player.status.type.description.toLowerCase();
               if (statusType.includes('cut')) {
-                status = 'cut';
+                playerStatus = "cut";
               } else if (statusType.includes('wd') || statusType.includes('withdrawn')) {
-                status = 'withdrawn';
+                playerStatus = "withdrawn";
               }
             }
             
@@ -203,7 +247,7 @@ const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
               score: score,
               today: today,
               thru: player.status && player.status.thru ? player.status.thru : 'F',
-              status: status
+              status: playerStatus
             });
           });
         }
@@ -237,11 +281,11 @@ const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
               const thruText = cellMatches.length > 4 ? extractTextContent(cellMatches[4]) : 'F';
               
               // Handle status
-              let status = 'active';
+              let playerStatus: "active" | "cut" | "withdrawn" = "active";
               if (row.toLowerCase().includes('cut') || row.toLowerCase().includes('mc')) {
-                status = 'cut';
+                playerStatus = 'cut';
               } else if (row.toLowerCase().includes('wd') || row.toLowerCase().includes('withdrawn')) {
-                status = 'withdrawn';
+                playerStatus = 'withdrawn';
               }
               
               // Parse scores
@@ -254,7 +298,7 @@ const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
                 score: score,
                 today: today,
                 thru: thruText.trim() || 'F',
-                status: status
+                status: playerStatus
               });
             }
           }
@@ -275,35 +319,4 @@ const scrapeESPNWebsite = async (): Promise<GolferScore[]> => {
     console.error("Error scraping ESPN:", error);
     return [];
   }
-};
-
-/**
- * Extract text content from HTML, removing all tags
- */
-const extractTextContent = (html: string): string => {
-  return html.replace(/<[^>]*>/g, '').trim();
-};
-
-/**
- * Parse golf score values, handling "E" (even), "+2", "-4", etc.
- */
-const parseScoreValue = (scoreText: string): number => {
-  if (!scoreText) return 0;
-  
-  const cleanScore = scoreText.toString().trim().toUpperCase();
-  
-  if (cleanScore === 'E' || cleanScore === 'EV') {
-    return 0; // Even par
-  }
-  
-  if (cleanScore.startsWith('+')) {
-    return parseInt(cleanScore.substring(1), 10) || 0;
-  }
-  
-  if (cleanScore.startsWith('-')) {
-    return -parseInt(cleanScore.substring(1), 10) || 0;
-  }
-  
-  // Try to parse as a simple number
-  return parseInt(cleanScore, 10) || 0;
 };

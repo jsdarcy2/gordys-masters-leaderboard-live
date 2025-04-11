@@ -85,7 +85,7 @@ export const getCurrentRound = (): TournamentRound => {
     
     // Check if tournament hasn't started yet
     if (now < startDate) {
-      return 0;
+      return 1; // Return round 1 instead of 0 to comply with TournamentRound type
     }
     
     // Calculate days since start to determine round

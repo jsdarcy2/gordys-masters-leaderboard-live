@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { fetchLeaderboardData, getCurrentTournament } from "@/services/api";
@@ -8,7 +7,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
-import ApiKeyForm from "./leaderboard/ApiKeyForm";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -42,8 +40,8 @@ const Leaderboard = () => {
         const tournamentInfo = await getCurrentTournament();
         console.log("Tournament info loaded:", tournamentInfo);
         setCurrentTournament(tournamentInfo);
-        if (tournamentInfo.source) {
-          setDataSource(tournamentInfo.source);
+        if (tournamentInfo && typeof tournamentInfo === 'object' && 'source' in tournamentInfo) {
+          setDataSource(tournamentInfo.source as string);
         }
       } catch (error) {
         console.error("Error loading tournament info:", error);
@@ -71,9 +69,9 @@ const Leaderboard = () => {
       console.log(`Loading leaderboard data for ${TOURNAMENT_YEAR} Masters, initialized:`, dataInitialized);
       
       const data = await fetchLeaderboardData();
-      console.log("Fetched leaderboard data:", data.leaderboard?.length || 0, "golfers");
+      console.log("Fetched leaderboard data:", data && typeof data === 'object' && 'leaderboard' in data && Array.isArray(data.leaderboard) ? data.leaderboard.length : 0, "golfers");
       
-      if (!data || !data.leaderboard || !Array.isArray(data.leaderboard)) {
+      if (!data || typeof data !== 'object' || !('leaderboard' in data) || !Array.isArray(data.leaderboard)) {
         throw new Error("Invalid leaderboard data structure");
       }
       
@@ -82,22 +80,26 @@ const Leaderboard = () => {
       const sortedLeaderboard = data.leaderboard.sort((a, b) => a.position - b.position);
       setLeaderboard(sortedLeaderboard);
       setLastUpdated(data.lastUpdated);
-      setDataSource(data.source);
-      setDataYear(data.year);
+      if ('source' in data) {
+        setDataSource(data.source as string);
+      }
+      if ('year' in data) {
+        setDataYear(data.year as string);
+      }
       setDataSourceError(undefined); // Clear any previous errors on successful fetch
       setError(null);
       setDataInitialized(true);
       
       // Show more specific messages based on data source
-      if (data.source === 'cached-data') {
+      if ('source' in data && data.source === 'cached-data') {
         let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(data.lastUpdated)}`;
         
-        if (data.year && data.year !== TOURNAMENT_YEAR) {
+        if ('year' in data && data.year && data.year !== TOURNAMENT_YEAR) {
           errorMessage += ` Data is from ${data.year} instead of ${TOURNAMENT_YEAR}.`;
         }
         
         setDataSourceError(errorMessage);
-      } else if (data.source === 'no-data') {
+      } else if ('source' in data && data.source === 'no-data') {
         setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
       }
       

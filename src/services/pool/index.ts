@@ -19,19 +19,20 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // Check for recent cache first (valid for 2 minutes)
     const cachedStandings = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 2 * 60 * 1000);
     
-    if (cachedStandings.data && cachedStandings.data.length > 0) {
+    if (cachedStandings.data && Array.isArray(cachedStandings.data) && cachedStandings.data.length > 0) {
       console.log(`Using cached standings data (${Math.round(cachedStandings.age / 1000)}s old)`);
       return cachedStandings.data;
     }
     
     // First get the current leaderboard to ensure scores match
-    const { leaderboard } = await fetchLeaderboardData();
+    const leaderboardData = await fetchLeaderboardData();
+    const leaderboard = leaderboardData.leaderboard || [];
     
-    if (!leaderboard || leaderboard.length === 0) {
+    if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       // If no leaderboard data, check for any cached standings (even if expired)
       const fallbackCache = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
       
-      if (fallbackCache.data && fallbackCache.data.length > 0) {
+      if (fallbackCache.data && Array.isArray(fallbackCache.data) && fallbackCache.data.length > 0) {
         console.log(`Using expired cache as fallback (${Math.round(fallbackCache.age / 60000)}m old)`);
         return fallbackCache.data;
       }
@@ -53,7 +54,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
       // Check for any cached standings as fallback
       const fallbackCache = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
       
-      if (fallbackCache.data && fallbackCache.data.length > 0) {
+      if (fallbackCache.data && Array.isArray(fallbackCache.data) && fallbackCache.data.length > 0) {
         console.log(`Using expired cache as fallback (${Math.round(fallbackCache.age / 60000)}m old)`);
         return fallbackCache.data;
       }
@@ -75,7 +76,7 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     // Try to get any cached standings, even if expired
     const cachedStandings = getFromCache<PoolParticipant[]>(POOL_STANDINGS_CACHE_KEY, 0); // 0 = ignore expiration
     
-    if (cachedStandings.data && cachedStandings.data.length > 0) {
+    if (cachedStandings.data && Array.isArray(cachedStandings.data) && cachedStandings.data.length > 0) {
       console.log(`Using expired cache due to error (${Math.round(cachedStandings.age / 60000)}m old)`);
       return cachedStandings.data;
     }
@@ -103,9 +104,10 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       
       // Get current leaderboard data to update scores
       try {
-        const { leaderboard } = await fetchLeaderboardData();
+        const leaderboardData = await fetchLeaderboardData();
+        const leaderboard = leaderboardData.leaderboard || [];
         
-        if (leaderboard && leaderboard.length > 0) {
+        if (Array.isArray(leaderboard) && leaderboard.length > 0) {
           // Create a map of golfer names to their current scores
           const golferScoreMap: Record<string, number> = {};
           leaderboard.forEach(golfer => {
@@ -138,9 +140,10 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     }
     
     // Get current leaderboard data to calculate real scores
-    const { leaderboard } = await fetchLeaderboardData();
+    const leaderboardData = await fetchLeaderboardData();
+    const leaderboard = leaderboardData.leaderboard || [];
     
-    if (!leaderboard || leaderboard.length === 0) {
+    if (!Array.isArray(leaderboard) || leaderboard.length === 0) {
       // If no leaderboard, try to use any cached selections
       const fallbackCache = getFromCache<{[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }}>(
         PLAYER_SELECTIONS_CACHE_KEY, 
@@ -171,15 +174,17 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     console.log(`Found ${completeTeamSelectionsData.length} teams in TeamSelectionsTable`);
     
     // Add any teams from TeamSelectionsTable that aren't in the base data
-    completeTeamSelectionsData.forEach(team => {
-      if (!teamsData[team.name]) {
-        teamsData[team.name] = {
-          picks: team.picks,
-          roundScores: [0, 0, 0, 0, 0],
-          tiebreakers: [Math.floor(Math.random() * 5) + 137, Math.floor(Math.random() * 15) + 275] as [number, number]
-        };
-      }
-    });
+    if (Array.isArray(completeTeamSelectionsData)) {
+      completeTeamSelectionsData.forEach(team => {
+        if (!teamsData[team.name]) {
+          teamsData[team.name] = {
+            picks: team.picks,
+            roundScores: [0, 0, 0, 0, 0],
+            tiebreakers: [Math.floor(Math.random() * 5) + 137, Math.floor(Math.random() * 15) + 275] as [number, number]
+          };
+        }
+      });
+    }
     
     // Generate additional teams if needed to reach 134 total
     const currentCount = Object.keys(teamsData).length;
@@ -189,7 +194,8 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
     
     if (neededCount > 0) {
       // Use only golfers that are actually in the current leaderboard
-      const availableGolfers = leaderboard.map(golfer => golfer.name).filter(Boolean);
+      const availableGolfers = Array.isArray(leaderboard) ? 
+        leaderboard.map(golfer => golfer.name).filter(Boolean) : [];
       
       for (let i = 0; i < neededCount; i++) {
         const teamIndex = currentCount + i + 1;
@@ -253,7 +259,7 @@ export const fetchPlayerSelections = async (): Promise<{[participant: string]: {
       0
     ); // 0 = ignore expiration
     
-    if (cachedSelections.data && Object.keys(cachedSelections.data).length > 0) {
+    if (cachedSelections.data && Array.isArray(cachedSelections.data) && cachedSelections.data.length > 0) {
       console.log(`Using expired player selections cache due to error (${Math.round(cachedSelections.age / 60000)}m old)`);
       return cachedSelections.data;
     }
@@ -357,7 +363,7 @@ const getCompleteTeamSelections = (): {name: string, picks: string[]}[] => {
     { name: "Peggy McClintock", picks: ["Scottie Scheffler", "Collin Morikawa", "Wyndham Clark", "Will Zalatoris", "Sepp Straka"] },
     { name: "Kevin McClintock", picks: ["Rory McIlroy", "Collin Morikawa", "Justin Thomas", "Will Zalatoris", "Russell Henley"] },
     { name: "Rich McClintock", picks: ["Rory McIlroy", "Scottie Scheffler", "Hideki Matsuyama", "Shane Lowry", "Billy Horschel"] },
-    { name: "Johnny McWhite", picks: ["Scottie Scheffler", "Jon Rahm", "Jordan Spieth", "Hideki Matsuyama", "Justin Thomas"] },
+    { name: "Johnny McWhite", picks: ["Scottie Scheffler", "Jon Rahm", "Hideki Matsuyama", "Brooks Koepka", "Justin Thomas"] },
     { name: "Charles Meech Jr", picks: ["Dustin Johnson", "Scottie Scheffler", "Viktor Hovland", "Brooks Koepka", "Bryson DeChambeau"] },
     { name: "Jon Moseley", picks: ["Rory McIlroy", "Collin Morikawa", "Robert MacIntyre", "Shane Lowry", "Russell Henley"] },
     { name: "Chad Murphy", picks: ["Joaquín Niemann", "Ludvig Åberg", "Min Woo Lee", "Justin Thomas", "Rory McIlroy"] },
