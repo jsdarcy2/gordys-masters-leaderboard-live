@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 
 // Masters tournament data types
 export type GolferScore = {
@@ -39,10 +40,11 @@ export type TournamentData = {
   year?: string;
 }
 
-export type NavTab = {
+export interface NavTab {
   id: string;
   label: string;
   href: string;
+  icon?: ReactNode;
 }
 
 export type GreenRobeWinner = {

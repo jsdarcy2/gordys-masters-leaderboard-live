@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Eye, Star } from "lucide-react";
+import { Menu, X, Eye, Star, Tv } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
@@ -10,7 +10,7 @@ import Image from "@/components/ui/image";
 const NAV_TABS: NavTab[] = [
   { id: "standings", label: "Pool Standings", href: "/" },
   { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
-  { id: "watch-live", label: "Watch Live", href: "/watch-live" },
+  { id: "watch-live", label: "Watch Live", href: "/watch-live", icon: <Tv size={14} className="text-masters-yellow" /> },
   { id: "selections", label: "Player Selections", href: "/selections" },
   { id: "archive", label: "Green Robe Winners", href: "/archive" },
   { id: "masters-champions", label: "Masters Champions", href: "/masters-champions" },
@@ -72,12 +72,13 @@ const Header = () => {
                 <li key={tab.id}>
                   <Link
                     to={tab.href}
-                    className={`font-serif text-sm transition-all duration-200 py-1 ${
+                    className={`font-serif text-sm transition-all duration-200 py-1 flex items-center ${
                       location.pathname === tab.href
                         ? "text-masters-yellow border-b-2 border-masters-yellow"
                         : "text-white/90 hover:text-masters-yellow hover:border-b border-masters-yellow/30"
                     }`}
                   >
+                    {tab.icon && <span className="mr-1">{tab.icon}</span>}
                     {tab.label}
                   </Link>
                 </li>
@@ -94,13 +95,14 @@ const Header = () => {
                 <li key={tab.id} className="border-b border-white/10 last:border-b-0">
                   <Link
                     to={tab.href}
-                    className={`block py-3 px-4 font-serif text-sm ${
+                    className={`block py-3 px-4 font-serif text-sm flex items-center ${
                       location.pathname === tab.href
                         ? "text-masters-yellow bg-masters-dark/70"
                         : "text-white hover:bg-masters-dark/50"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
+                    {tab.icon && <span className="mr-1.5">{tab.icon}</span>}
                     {tab.label}
                   </Link>
                 </li>
