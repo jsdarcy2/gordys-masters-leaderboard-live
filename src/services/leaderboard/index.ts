@@ -1,5 +1,7 @@
-import { GolferScore, TournamentRound } from "@/types";
+
+import { DataSource, GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound } from "../tournament";
+import { scrapeMastersWebsite } from "./scraper";
 
 // Get the current year for API requests
 const getCurrentYear = (): string => {
@@ -42,7 +44,7 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
 
 /**
  * Fetch current tournament leaderboard data
- * Only fetches real-time data with no historical fallbacks
+ * Uses multiple sources with fallbacks
  */
 export const fetchLeaderboardData = async () => {
   try {
@@ -124,8 +126,8 @@ export const fetchLeaderboardData = async () => {
       
       return leaderboardData;
     }
-  } catch (error) {
-    console.error('Error fetching from ESPN API:', error);
+  } catch (espnError) {
+    console.error('Error fetching from ESPN API:', espnError);
     
     // Fallback to Sports Data API if available
     try {
@@ -165,17 +167,47 @@ export const fetchLeaderboardData = async () => {
       localStorage.setItem('leaderboardYear', leaderboardData.year);
       
       return leaderboardData;
-    } catch (fallbackError) {
-      console.error('All API requests failed:', fallbackError);
+    } catch (sportsDataError) {
+      console.error('Sports Data API failed:', sportsDataError);
       
-      // NEVER use historical data. Return an empty leaderboard with error
-      return {
-        leaderboard: [],
-        lastUpdated: new Date().toISOString(),
-        currentRound: getCurrentRound(),
-        source: "no-data",
-        year: TOURNAMENT_YEAR
-      };
+      // Final fallback: Try scraping Masters.com website
+      try {
+        console.log("All APIs failed. Attempting to scrape Masters.com website...");
+        const scrapedLeaderboard = await scrapeMastersWebsite();
+        
+        if (scrapedLeaderboard && scrapedLeaderboard.length > 0) {
+          console.log(`Successfully scraped ${scrapedLeaderboard.length} players from Masters.com`);
+          
+          const leaderboardData = {
+            leaderboard: scrapedLeaderboard,
+            lastUpdated: new Date().toISOString(),
+            currentRound: getCurrentRound(),
+            source: "masters-scraper" as DataSource,
+            year: TOURNAMENT_YEAR
+          };
+          
+          // Cache the scraped data
+          localStorage.setItem('leaderboardData', JSON.stringify(leaderboardData.leaderboard));
+          localStorage.setItem('leaderboardLastUpdated', leaderboardData.lastUpdated);
+          localStorage.setItem('leaderboardSource', leaderboardData.source);
+          localStorage.setItem('leaderboardYear', leaderboardData.year);
+          
+          return leaderboardData;
+        } else {
+          throw new Error("Masters.com scraping returned no data");
+        }
+      } catch (scrapeError) {
+        console.error('All data sources failed, including scraping:', scrapeError);
+        
+        // Return an empty leaderboard with error
+        return {
+          leaderboard: [],
+          lastUpdated: new Date().toISOString(),
+          currentRound: getCurrentRound(),
+          source: "no-data" as DataSource,
+          year: TOURNAMENT_YEAR
+        };
+      }
     }
   }
 };
@@ -292,7 +324,7 @@ const getEmptyLeaderboard = (year: string) => {
     leaderboard: [],
     lastUpdated: new Date().toISOString(),
     currentRound: getCurrentRound(),
-    source: "no-data",
+    source: "no-data" as DataSource,
     year: year
   };
 };

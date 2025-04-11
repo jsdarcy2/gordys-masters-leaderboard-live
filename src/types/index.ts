@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -32,11 +33,13 @@ export interface PoolParticipant {
 
 export type TournamentRound = 1 | 2 | 3 | 4;
 
+export type DataSource = 'espn-api' | 'sportsdata-api' | 'masters-scraper' | 'cached-data' | 'no-data';
+
 export type TournamentData = {
   lastUpdated: string;
   currentRound: TournamentRound;
   leaderboard: GolferScore[];
-  source?: string;
+  source?: DataSource;
   year?: string;
 }
 
