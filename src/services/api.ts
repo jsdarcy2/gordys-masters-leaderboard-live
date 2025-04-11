@@ -243,6 +243,44 @@ const getFallbackLeaderboardData = (): TournamentData => {
   };
 };
 
+// Helper function to generate random picks for participants
+const generateRandomPicks = (): string[] => {
+  const allPossibleGolfers = [
+    "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Brooks Koepka", "Xander Schauffele",
+    "Collin Morikawa", "Bryson DeChambeau", "Jordan Spieth", "Justin Thomas", "Dustin Johnson",
+    "Cameron Smith", "Viktor Hovland", "Hideki Matsuyama", "Adam Scott", "Patrick Cantlay",
+    "Tony Finau", "Shane Lowry", "Tommy Fleetwood", "Matt Fitzpatrick", "Justin Rose",
+    "Joaquin Niemann", "Tyrrell Hatton", "Corey Conners", "Cameron Young", "Min Woo Lee",
+    "Ludvig Åberg", "Brian Harman", "Tom Kim", "Jason Day", "Sahith Theegala",
+    "Sepp Straka", "Sungjae Im", "Will Zalatoris", "Phil Mickelson", "Sergio Garcia"
+  ];
+  
+  // Generate 5 random golfers without duplicates
+  const picks: string[] = [];
+  while (picks.length < 5) {
+    const randomIndex = Math.floor(Math.random() * allPossibleGolfers.length);
+    const pick = allPossibleGolfers[randomIndex];
+    if (!picks.includes(pick)) {
+      picks.push(pick);
+    }
+  }
+  
+  return picks;
+};
+
+// Helper function to generate random pick scores
+const generateRandomPickScores = (): { [golferName: string]: number } => {
+  const picks = generateRandomPicks();
+  const pickScores: { [golferName: string]: number } = {};
+  
+  picks.forEach(pick => {
+    // Generate scores between -4 and 5
+    pickScores[pick] = Math.floor(Math.random() * 10) - 4;
+  });
+  
+  return pickScores;
+};
+
 // Update the fetchPoolStandings to match the data in the image
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
@@ -255,7 +293,6 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     
     // Updated participant data based on the provided screenshot
     const participants: PoolParticipant[] = [
-      // Updated data from image
       { 
         position: 1, 
         name: "Charlotte Ramalingam", 
@@ -693,4 +730,6 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     return participants;
   } catch (error) {
     console.error("Error fetching pool standings:", error);
-    throw new Error("Failed
+    throw new Error("Failed to load pool standings data. Please try again later.");
+  }
+};
