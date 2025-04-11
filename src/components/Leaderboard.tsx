@@ -123,7 +123,7 @@ const Leaderboard = () => {
       if (showToast) {
         toast({
           title: "Leaderboard Updated",
-          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source === 'espn' ? 'ESPN' : 'Masters.org'}` : ''}`,
+          description: `Data refreshed at ${formatLastUpdated(data.lastUpdated)}${data.source ? ` from ${data.source}` : ''}`,
         });
       }
       
@@ -134,13 +134,13 @@ const Leaderboard = () => {
       }
     } catch (err: any) {
       console.error("Leaderboard data fetch error:", err);
-      setError("Failed to load leaderboard data from all sources");
+      setError("Failed to load leaderboard data. Please try again later.");
       setDataSourceError(`Error: ${err.message || "Unknown error"}`);
       
       if (showToast) {
         toast({
           title: "Update Failed",
-          description: "Could not refresh leaderboard data from any source. Please try again later.",
+          description: "Could not refresh leaderboard data. Please try again later.",
           variant: "destructive",
         });
       }
@@ -259,8 +259,6 @@ const Leaderboard = () => {
             </div>
           </div>
         )}
-        
-        <ApiKeyForm />
         
         {error && (
           <div className="text-center text-red-500 py-4 flex items-center justify-center">

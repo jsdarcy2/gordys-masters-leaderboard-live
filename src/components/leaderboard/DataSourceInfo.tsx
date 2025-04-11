@@ -34,17 +34,19 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     if (!dataSource) return "Unknown";
     
     switch (dataSource.toLowerCase()) {
-      case "espn":
-        return "ESPN";
-      case "masters.com":
-        return "Masters.org";
+      case "pga-tour":
+        return "PGA Tour";
+      case "historical-data":
+        return "Historical Data";
+      case "cached-data":
+        return "Cached Data";
       default:
         return dataSource;
     }
   };
   
   return (
-    <div className="flex items-center gap-2 text-sm text-masters-yellow">
+    <div className="flex items-center gap-2 text-sm text-white/80">
       <div className="flex items-center">
         {errorMessage ? (
           <TooltipProvider>
@@ -58,12 +60,12 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <Info size={14} className="mr-1" />
+          <Info size={14} className="mr-1 text-white/60" />
         )}
         <span>
-          Data: <span className={dataSource?.toLowerCase() === "masters.com" ? "text-white font-medium" : ""}>
+          <span className="text-white/60">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
-          </span> • Updated: {formatLastUpdated(lastUpdated)}
+          </span> • <span className="text-white/60">Updated:</span> {formatLastUpdated(lastUpdated)}
         </span>
       </div>
     </div>

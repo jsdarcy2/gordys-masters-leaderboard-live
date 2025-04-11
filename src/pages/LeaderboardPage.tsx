@@ -24,10 +24,10 @@ const LeaderboardPage = () => {
       <div className="mb-6">
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-masters-green flex items-center">
           <BarChart3 size={24} className="mr-2 text-masters-yellow" />
-          Masters Tournament Leaderboard
+          Live Leaderboard
         </h2>
         <p className="text-gray-600 mt-2">
-          Live scoring updates from Augusta National Golf Club.
+          Real-time scoring updates from Augusta National Golf Club.
         </p>
         <Separator className="my-4 bg-masters-green/10" />
       </div>
