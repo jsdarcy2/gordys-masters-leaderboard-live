@@ -8,14 +8,15 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
   try {
     // Add cache-busting timestamp to prevent stale data
     const timestamp = new Date().getTime();
+    const currentYear = new Date().getFullYear();
     
-    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "") {
+    if (!RAPIDAPI_KEY) {
       console.warn("RapidAPI key not set. Falling back to fallback data.");
       return getFallbackLeaderboardData();
     }
     
-    // Use RapidAPI Golf leaderboard endpoint
-    const response = await fetch(`https://live-golf-data.p.rapidapi.com/leaderboard?t=${timestamp}`, {
+    // Use RapidAPI Golf leaderboard endpoint with year parameter
+    const response = await fetch(`https://live-golf-data.p.rapidapi.com/leaderboard?t=${timestamp}&year=${currentYear}`, {
       headers: {
         'X-RapidAPI-Host': 'live-golf-data.p.rapidapi.com',
         'X-RapidAPI-Key': RAPIDAPI_KEY,
@@ -41,7 +42,7 @@ export const fetchLeaderboardData = async (): Promise<TournamentData> => {
 // Function to fetch current tournament schedule
 export const fetchTournamentSchedule = async () => {
   try {
-    if (!RAPIDAPI_KEY || RAPIDAPI_KEY === "") {
+    if (!RAPIDAPI_KEY) {
       console.warn("RapidAPI key not set. Cannot fetch tournament schedule.");
       return null;
     }
@@ -67,6 +68,26 @@ export const fetchTournamentSchedule = async () => {
   } catch (error) {
     console.error("Error fetching tournament schedule:", error);
     return null;
+  }
+};
+
+// Check if the tournament is currently in progress
+export const isTournamentInProgress = async (): Promise<boolean> => {
+  try {
+    const tournamentInfo = await getCurrentTournament();
+    if (!tournamentInfo) return false;
+    
+    const now = new Date();
+    const startDate = new Date(tournamentInfo.startDate);
+    const endDate = new Date(tournamentInfo.endDate);
+    
+    // Add hours to account for timezone and end of play
+    endDate.setHours(23, 59, 59);
+    
+    return now >= startDate && now <= endDate;
+  } catch (error) {
+    console.error("Error checking if tournament is in progress:", error);
+    return false;
   }
 };
 
@@ -446,7 +467,7 @@ export const fetchPlayerSelections = async () => {
   }
 };
 
-// Function to fetch pool standings data
+// Function to fetch pool standings data based on golfer positions
 export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
   try {
     // Get the current leaderboard data to calculate positions
@@ -460,19 +481,20 @@ export const fetchPoolStandings = async (): Promise<PoolParticipant[]> => {
     Object.entries(teamSelections).forEach(([participantName, data]) => {
       const { picks, roundScores, tiebreakers } = data;
       
-      // Calculate total points based on players' positions
+      // Calculate total points based on players' positions in the leaderboard
       let totalPoints = 0;
       const pickScores: { [golferName: string]: number } = {};
       
-      // Go through each pick and find their score
-      picks.forEach((golferName, index) => {
+      // Go through each pick and find their current standing
+      picks.forEach((golferName) => {
         const golfer = leaderboardData.leaderboard.find(g => g.name === golferName);
         
         if (golfer) {
-          // If player made the cut or is active, use their position
+          // If player made the cut or is active, use their position for scoring
           if (!golfer.status || golfer.status === 'active') {
-            // Points are inverse of position (lower position = more points)
-            const points = 100 - golfer.position;
+            // Calculate points based on position (lower position = better score)
+            // Using 150 - position to make it more intuitive (higher number = better)
+            const points = 150 - golfer.position;
             totalPoints += points;
             pickScores[golferName] = points;
           } else {

@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { PoolParticipant } from "@/types";
-import { fetchPoolStandings } from "@/services/api";
+import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import PoolStandingsHeader from "@/components/pool/PoolStandingsHeader";
@@ -10,7 +10,7 @@ import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const POLLING_INTERVAL = 15000; // 15 seconds in milliseconds
+const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 15;
 
 const PoolStandings = () => {
@@ -20,6 +20,7 @@ const PoolStandings = () => {
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isTournamentActive, setIsTournamentActive] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,6 +54,33 @@ const PoolStandings = () => {
     }
   };
 
+  // Check tournament status effect
+  useEffect(() => {
+    const checkTournamentStatus = async () => {
+      const active = await isTournamentInProgress();
+      setIsTournamentActive(active);
+      console.log("Tournament active status:", active);
+      
+      // If tournament status changes to active, display a notification
+      if (active) {
+        toast({
+          title: "Tournament In Progress",
+          description: "Live data updates every minute during tournament play.",
+          duration: 5000,
+        });
+      }
+    };
+    
+    checkTournamentStatus();
+    
+    // Check tournament status every hour
+    const tournamentStatusInterval = setInterval(checkTournamentStatus, 3600000);
+    
+    return () => {
+      clearInterval(tournamentStatusInterval);
+    };
+  }, [toast]);
+
   useEffect(() => {
     // First check if we have cached data
     const cachedLastUpdated = localStorage.getItem('poolStandingsLastUpdated');
@@ -76,22 +104,39 @@ const PoolStandings = () => {
       loadStandingsData();
     }
     
-    // Clear any existing interval
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-    }
-    
-    // Set up polling every 15 seconds
-    pollingRef.current = setInterval(() => {
-      loadStandingsData();
-    }, POLLING_INTERVAL);
-    
     return () => {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
       }
     };
   }, []);
+
+  // Set up polling only when tournament is active
+  useEffect(() => {
+    // Clear any existing interval
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    
+    // Only set up polling if tournament is active
+    if (isTournamentActive) {
+      console.log("Setting up 1-minute polling for standings data");
+      
+      // Poll every minute during active tournament
+      pollingRef.current = setInterval(() => {
+        loadStandingsData();
+      }, POLLING_INTERVAL);
+    } else {
+      console.log("Tournament not active - polling disabled");
+    }
+    
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, [isTournamentActive]);
 
   // Filter standings based on search query
   const filteredStandings = searchQuery 
@@ -113,6 +158,7 @@ const PoolStandings = () => {
         lastUpdated={lastUpdated} 
         totalParticipants={totalParticipants} 
         loading={loading}
+        isTournamentActive={isTournamentActive}
       />
       
       <div className="p-4 bg-white">
