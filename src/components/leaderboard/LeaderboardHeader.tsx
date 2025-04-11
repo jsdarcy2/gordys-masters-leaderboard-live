@@ -33,9 +33,9 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
         </h2>
         <div className="flex items-center gap-2">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
-            className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
+            className={`border border-masters-green/20 text-masters-green hover:text-white hover:bg-masters-green/90 ${refreshing ? 'opacity-70 pointer-events-none' : ''}`}
             onClick={handleManualRefresh}
             disabled={refreshing}
           >
@@ -43,9 +43,9 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             <span className="sr-only md:not-sr-only">Refresh</span>
           </Button>
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="sm" 
-            className="text-masters-yellow hover:text-white hover:bg-masters-green/40"
+            className="border border-masters-green/20 text-masters-green hover:text-white hover:bg-masters-green/90"
             onClick={togglePotentialWinnings}
           >
             <DollarSign size={14} className="mr-1" />

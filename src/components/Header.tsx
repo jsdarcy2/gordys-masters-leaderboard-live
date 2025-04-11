@@ -2,8 +2,9 @@
 import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star, Tv } from "lucide-react";
+import { Menu, X, Eye, Star } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
 
 const NAV_TABS: NavTab[] = [
@@ -24,54 +25,57 @@ const Header = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   
   return (
-    <header className="relative bg-masters-green text-white shadow-md overflow-hidden">
-      {/* Iconic bridge image background */}
-      <div className="absolute inset-0 w-full h-full opacity-20">
+    <header className="relative bg-masters-green text-white border-b border-masters-yellow/20 shadow-sm">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 w-full h-full opacity-10">
         <Image 
           src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
-          alt="Augusta National Bridge" 
+          alt="Augusta National" 
           className="w-full h-full object-cover"
         />
       </div>
       
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark opacity-85"></div>
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-masters-green/90 to-masters-green/100"></div>
       
-      <div className="container mx-auto px-4 py-4 relative z-10">
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-sm relative">
-              Gordy's Masters Pool 2025
-              <div className="absolute -right-12 -top-2 transform rotate-12 flex items-center bg-masters-yellow text-masters-green px-2 py-0.5 rounded-md text-xs font-bold shadow-sm">
-                <Star size={12} className="mr-1" />
-                BETA
-              </div>
-            </h1>
-            <p className="text-masters-yellow font-serif text-sm md:text-base italic drop-shadow-sm">
-              A tradition unlike any other
-            </p>
+      <div className="container mx-auto relative z-10">
+        <div className="px-4 py-3 md:py-4 flex flex-col">
+          <div className="flex justify-between items-center">
+            {/* Logo area */}
+            <div className="flex flex-col">
+              <h1 className="text-xl md:text-2xl font-serif font-bold text-white tracking-tight">
+                Gordy's Masters Pool
+                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-masters-yellow/90 text-masters-dark">
+                  <Star size={10} className="mr-0.5" />
+                  2025
+                </span>
+              </h1>
+              <p className="text-masters-yellow/90 font-serif text-xs md:text-sm italic">
+                A tradition unlike any other
+              </p>
+            </div>
+            
+            {/* Mobile menu button */}
+            <button 
+              onClick={toggleMobileMenu}
+              className="block md:hidden text-white p-1 rounded-md hover:bg-masters-dark/40 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
           
-          {/* Mobile menu button */}
-          <button 
-            onClick={toggleMobileMenu}
-            className="block md:hidden text-white"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          
           {/* Desktop navigation */}
-          <nav className="hidden md:block">
-            <ul className="flex space-x-5">
+          <nav className="hidden md:block mt-3">
+            <ul className="flex space-x-6">
               {NAV_TABS.map((tab) => (
                 <li key={tab.id}>
                   <Link
                     to={tab.href}
-                    className={`font-serif text-sm transition-all duration-200 pb-1 ${
+                    className={`font-serif text-sm transition-all duration-200 py-1 ${
                       location.pathname === tab.href
                         ? "text-masters-yellow border-b-2 border-masters-yellow"
-                        : "text-white hover:text-masters-yellow hover:border-b-2 hover:border-masters-yellow/50 transition-colors"
+                        : "text-white/90 hover:text-masters-yellow hover:border-b border-masters-yellow/30"
                     }`}
                   >
                     {tab.label}
@@ -84,16 +88,16 @@ const Header = () => {
         
         {/* Mobile navigation */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-2">
-            <ul className="flex flex-col space-y-2 bg-masters-green/90 rounded-md p-2">
+          <nav className="md:hidden bg-masters-dark/95 backdrop-blur-sm border-t border-white/10 animate-fade-in">
+            <ul className="flex flex-col">
               {NAV_TABS.map((tab) => (
-                <li key={tab.id}>
+                <li key={tab.id} className="border-b border-white/10 last:border-b-0">
                   <Link
                     to={tab.href}
-                    className={`block py-2 px-3 font-serif rounded-md transition-colors ${
+                    className={`block py-3 px-4 font-serif text-sm ${
                       location.pathname === tab.href
-                        ? "text-masters-yellow bg-masters-dark/50"
-                        : "text-white hover:text-masters-yellow hover:bg-masters-dark/30 transition-colors"
+                        ? "text-masters-yellow bg-masters-dark/70"
+                        : "text-white hover:bg-masters-dark/50"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

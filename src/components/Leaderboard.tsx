@@ -151,6 +151,7 @@ const Leaderboard = () => {
   };
 
   const handleManualRefresh = () => {
+    console.log("Manual refresh requested");
     loadLeaderboardData(true);
   };
 
