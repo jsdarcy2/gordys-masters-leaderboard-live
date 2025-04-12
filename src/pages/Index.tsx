@@ -1,4 +1,3 @@
-
 import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
@@ -20,7 +19,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.06]"
+              className="w-full h-full object-cover opacity-[0.045]"
             />
           </div>
           
@@ -78,7 +77,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.06]"
+              className="w-full h-full object-cover opacity-[0.045]"
             />
           </div>
           
@@ -136,7 +135,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.06]"
+              className="w-full h-full object-cover opacity-[0.045]"
             />
           </div>
           

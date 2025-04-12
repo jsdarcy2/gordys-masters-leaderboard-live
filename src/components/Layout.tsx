@@ -10,17 +10,17 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-70">
       {/* Augusta-inspired subtle background pattern with hints of floral texture - more subtle now */}
-      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.005] pointer-events-none -z-10"></div>
+      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.0035] pointer-events-none -z-10"></div>
       
       {/* Extremely subtle floral accents - almost imperceptible but add depth */}
       <div className="fixed inset-0 pointer-events-none -z-5">
-        <div className="absolute top-0 right-0 w-1/4 h-1/4 opacity-[0.005]">
+        <div className="absolute top-0 right-0 w-1/4 h-1/4 opacity-[0.0035]">
           <svg viewBox="0 0 100 100" className="w-full h-full text-pink-200">
             {/* Abstracted azalea shape */}
             <path d="M50,20 Q65,5 80,20 Q95,35 80,50 Q65,65 50,50 Q35,65 20,50 Q5,35 20,20 Q35,5 50,20" fill="currentColor" />
           </svg>
         </div>
-        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 opacity-[0.005]">
+        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 opacity-[0.0035]">
           <svg viewBox="0 0 100 100" className="w-full h-full text-yellow-200">
             {/* Abstracted golden bell shape */}
             <path d="M40,80 Q50,60 60,80 L65,30 Q50,15 35,30 L40,80" fill="currentColor" />
