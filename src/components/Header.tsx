@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -10,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { CircleDot, Menu } from "lucide-react";
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 
 const Header = () => {
@@ -32,7 +33,11 @@ const Header = () => {
     { name: "Leaderboard", path: "/leaderboard" },
     { name: "Selections", path: "/selections" },
     { name: "Pool Standings", path: "/entry" },
-    { name: "Social", path: "/social" },
+    { 
+      name: "Social", 
+      path: "/social",
+      isNew: true // Mark this as new
+    },
     { name: "Archives", path: "/archive" },
     { name: "Rules", path: "/rules" },
   ];
@@ -65,6 +70,9 @@ const Header = () => {
               }`}
             >
               {page.name}
+              {page.isNew && (
+                <CircleDot size={10} className="inline-block ml-1 text-masters-yellow animate-pulse" />
+              )}
             </Link>
           ))}
         </nav>
@@ -101,6 +109,9 @@ const Header = () => {
                       onClick={closeMenu} // Close the menu when a link is clicked
                     >
                       {page.name}
+                      {page.isNew && (
+                        <CircleDot size={10} className="inline-block ml-1 text-masters-yellow animate-pulse" />
+                      )}
                     </Link>
                   </SheetClose>
                 ))}
