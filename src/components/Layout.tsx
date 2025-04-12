@@ -8,19 +8,19 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-40">
+    <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-70">
       {/* Augusta-inspired subtle background pattern */}
-      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.03] pointer-events-none -z-10"></div>
+      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.04] pointer-events-none -z-10"></div>
       
       <Header />
       
-      <main className="flex-grow container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+      <main className="flex-grow container mx-auto px-4 py-8 md:py-10 max-w-7xl">
         {children}
       </main>
       
-      <footer className="bg-masters-green text-white py-4 md:py-6 mt-10 border-t-4 border-masters-gold relative overflow-hidden">
+      <footer className="bg-masters-green text-white py-6 md:py-8 mt-12 border-t-4 border-masters-gold/60 relative overflow-hidden">
         {/* Subtle footer bridge image */}
-        <div className="absolute inset-0 opacity-15">
+        <div className="absolute inset-0 opacity-20">
           <img 
             src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
             alt="Augusta National Bridge" 

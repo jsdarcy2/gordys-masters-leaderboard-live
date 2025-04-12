@@ -3,12 +3,12 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
-import { Flag, Trophy, Clock } from "lucide-react";
+import { Flag, Trophy, Clock, Flower } from "lucide-react";
 
 const Index = () => {
   return (
     <Layout>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <Card icon={<Flag className="text-masters-yellow" />} 
               title="Tournament" 
               subtitle="Follow the live leaderboard" 
@@ -17,7 +17,8 @@ const Index = () => {
         <Card icon={<Trophy className="text-masters-yellow" />} 
               title="Pool Standings" 
               subtitle="See who's winning the pool" 
-              href="/selections" />
+              href="/selections"
+              highlight={true} />
               
         <Card icon={<Clock className="text-masters-yellow" />} 
               title="Past Champions" 
@@ -25,7 +26,7 @@ const Index = () => {
               href="/archive" />
       </div>
       
-      <div className="w-full">
+      <div className="w-full augusta-shadow">
         <PoolStandings />
       </div>
     </Layout>
@@ -48,11 +49,11 @@ const Card = ({
 }) => {
   return (
     <Link to={href} className="block">
-      <div className={`rounded-lg p-5 transition-all shadow-sm hover:shadow-md border ${
+      <div className={`rounded-lg p-6 transition-all shadow-sm hover:shadow-md border ${
         highlight 
-          ? "bg-masters-green border-masters-gold text-white" 
-          : "bg-white border-gray-200 hover:border-masters-green"
-      }`}>
+          ? "bg-masters-green/90 border-masters-gold/50 text-white" 
+          : "bg-white border-gray-200 hover:border-masters-green/40"
+      } augusta-shadow`}>
         <div className="flex items-center mb-3">
           {icon}
           <h3 className={`text-lg font-serif ml-2 ${highlight ? "text-masters-yellow" : "text-masters-green"}`}>
@@ -65,7 +66,7 @@ const Card = ({
         <Button 
           variant={highlight ? "secondary" : "outline"} 
           size="sm" 
-          className={`mt-3 w-full ${
+          className={`mt-4 w-full ${
             highlight 
               ? "text-masters-green bg-masters-yellow hover:bg-masters-yellow/90" 
               : "text-masters-green hover:bg-masters-light"

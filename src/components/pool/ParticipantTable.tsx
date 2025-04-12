@@ -31,7 +31,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
 
   return (
     <div className="overflow-x-auto mt-4">
-      <div className="text-sm text-gray-600 mb-2 flex items-center gap-1">
+      <div className="text-sm text-gray-600 mb-3 flex items-center gap-1 bg-masters-cream/30 p-3 rounded-md border border-masters-green/10">
         <Info size={16} className="text-masters-green" />
         <span>
           Scores are calculated using the <span className="font-medium">best 4 out of 5</span> golfer scores.
@@ -70,14 +70,14 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                 <tr
                   key={participant.name}
                   className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-stone-50"
+                    index % 2 === 0 ? "bg-white" : "bg-masters-light/30"
                   } ${
                     missedCut ? "bg-red-50" : ""
                   } ${
                     searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
                       ? "bg-masters-green/10"
                       : ""
-                  } hover:bg-stone-100 transition-colors`}
+                  } hover:bg-masters-cream/50 transition-colors border-b border-gray-100`}
                 >
                   <td className="px-2 py-3 font-medium">
                     <WinnerIcons position={participant.position} isPoolStandings={true} />
