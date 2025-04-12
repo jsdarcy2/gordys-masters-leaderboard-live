@@ -66,7 +66,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                   } hover:bg-stone-100 transition-colors`}
                 >
                   <td className="px-2 py-3 font-medium">
-                    <WinnerIcons position={participant.position} />
+                    <WinnerIcons position={participant.position} isPoolStandings={true} />
                   </td>
                   <td className="px-2 py-3 font-medium">
                     {participant.name}

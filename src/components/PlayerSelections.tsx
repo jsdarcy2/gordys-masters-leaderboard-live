@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,19 +24,17 @@ const PlayerSelections = () => {
   const [sortedGolfer, setSortedGolfer] = useState<string | null>(null);
   const { toast } = useToast();
   
-  const PREVIEW_COUNT = 50; // Increased from 20 to 50 to show more participants by default
+  const PREVIEW_COUNT = 50;
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         
-        // Load both selections and pool standings data
         const [standingsData] = await Promise.all([
           fetchPoolStandings()
         ]);
         
-        // Transform the pool standings data to match the selections format
         const transformedSelections: {[participant: string]: TeamSelection} = {};
         
         standingsData.forEach(participant => {
@@ -102,7 +99,6 @@ const PlayerSelections = () => {
     return score > 0 ? `+${score}` : score.toString();
   };
 
-  // Check if a team has missed the cut (total score > 200)
   const hasMissedCut = (roundScores: number[]) => {
     const totalScore = calculateTotalRoundScore(roundScores);
     return totalScore > 200;
@@ -237,7 +233,11 @@ const PlayerSelections = () => {
                             </div>
                           </td>
                           <td className={`px-2 py-3 text-center ${getScoreClass(totalRound1)}`}>
-                            {formatScore(totalRound1)}
+                            {missedCut ? (
+                              <span className="text-red-600 font-medium">MC</span>
+                            ) : (
+                              formatScore(totalRound1)
+                            )}
                           </td>
                           <td className="px-2 py-3 text-center">{data.tiebreakers[0]}</td>
                           <td className="px-2 py-3 text-center">{data.tiebreakers[1]}</td>
@@ -247,9 +247,7 @@ const PlayerSelections = () => {
                                 <span 
                                   key={i}
                                   className={`inline-block px-2 py-1 text-xs rounded-full ${
-                                    data.roundScores[i] > 200
-                                      ? "bg-red-100"
-                                      : data.roundScores[i] < 0
+                                    data.roundScores[i] < 0
                                       ? "bg-green-100"
                                       : data.roundScores[i] > 0
                                       ? "bg-red-100"
@@ -257,8 +255,8 @@ const PlayerSelections = () => {
                                   }`}
                                 >
                                   {pick} 
-                                  <span className={data.roundScores[i] > 200 ? "text-red-600 font-medium" : getScoreClass(data.roundScores[i])}>
-                                    {" "}({data.roundScores[i] > 200 ? "MC" : formatScore(data.roundScores[i])})
+                                  <span className={getScoreClass(data.roundScores[i])}>
+                                    {" "}({formatScore(data.roundScores[i])})
                                   </span>
                                 </span>
                               ))}
@@ -295,7 +293,11 @@ const PlayerSelections = () => {
                           </h3>
                         </div>
                         <div className={`text-lg ${getScoreClass(totalRound1)}`}>
-                          {formatScore(totalRound1)}
+                          {missedCut ? (
+                            <span className="text-red-600 font-medium">MC</span>
+                          ) : (
+                            formatScore(totalRound1)
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 mb-2">
@@ -303,9 +305,7 @@ const PlayerSelections = () => {
                           <span 
                             key={i} 
                             className={`inline-block px-3 py-1 rounded-full text-sm ${
-                              data.roundScores[i] > 200
-                                ? "bg-red-100"
-                                : data.roundScores[i] < 0
+                              data.roundScores[i] < 0
                                 ? "bg-green-100"
                                 : data.roundScores[i] > 0
                                 ? "bg-red-100"
@@ -313,8 +313,8 @@ const PlayerSelections = () => {
                             }`}
                           >
                             {pick}
-                            <span className={data.roundScores[i] > 200 ? "text-red-600 font-medium" : getScoreClass(data.roundScores[i])}>
-                              {" "}({data.roundScores[i] > 200 ? "MC" : formatScore(data.roundScores[i])})
+                            <span className={getScoreClass(data.roundScores[i])}>
+                              {" "}({formatScore(data.roundScores[i])})
                             </span>
                           </span>
                         ))}
