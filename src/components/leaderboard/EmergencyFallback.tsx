@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Tv, RefreshCw, AlertTriangle, FileSpreadsheet } from "lucide-react";
+import { Tv, RefreshCcw, AlertTriangle, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface EmergencyFallbackProps {
@@ -35,7 +34,7 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
           className="flex items-center gap-2 border-masters-green text-masters-green hover:bg-masters-green/10"
           onClick={onRetry}
         >
-          <RefreshCw size={16} />
+          <RefreshCcw size={16} />
           Refresh Data
         </Button>
         

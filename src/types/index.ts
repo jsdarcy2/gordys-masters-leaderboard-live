@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -37,8 +38,8 @@ export interface PoolParticipant {
 
 export type TournamentRound = 1 | 2 | 3 | 4;
 
-// Updated DataSource type to include mock-data
-export type DataSource = 'masters-scores-api' | 'cached-data' | 'no-data' | 'mock-data';
+// Updated DataSource type to include google-sheets
+export type DataSource = 'masters-scores-api' | 'cached-data' | 'no-data' | 'mock-data' | 'google-sheets';
 
 export type TournamentData = {
   lastUpdated: string;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
@@ -42,7 +41,6 @@ const PoolStandings = () => {
   const loadStandingsData = async () => {
     try {
       setLoading(true);
-      // Try to fetch from primary source first
       const data = await fetchPoolStandings();
       
       console.log("Fetched pool standings data:", data.length, "participants");
@@ -245,7 +243,7 @@ const PoolStandings = () => {
                 size="sm" 
                 className="ml-2 text-xs px-2 py-1 bg-white border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center"
               >
-                <RefreshCw size={12} className="mr-1" />
+                <RefreshCcw size={12} className="mr-1" />
                 Try Primary Source
               </Button>
             </AlertDescription>
@@ -290,7 +288,7 @@ const PoolStandings = () => {
                 size="sm" 
                 className="mt-2 bg-white"
               >
-                <RefreshCw size={14} className="mr-1" />
+                <RefreshCcw size={14} className="mr-1" />
                 Try Again
               </Button>
             </AlertDescription>
@@ -323,7 +321,7 @@ const PoolStandings = () => {
                 <p className="text-gray-500 text-sm mb-4">We're having trouble retrieving the current standings</p>
                 <div className="flex gap-3 justify-center">
                   <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
-                    <RefreshCw size={16} className="mr-2" />
+                    <RefreshCcw size={16} className="mr-2" />
                     Refresh Data
                   </Button>
                   <Button onClick={tryGoogleSheets} variant="outline" className="border-amber-500 text-amber-600">

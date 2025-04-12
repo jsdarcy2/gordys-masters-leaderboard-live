@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Trophy, Flag, CircleDot, FileSpreadsheet } from "lucide-react";
+import { RefreshCcw, Trophy, Flag, CircleDot, FileSpreadsheet } from "lucide-react";
 import Image from "@/components/ui/image";
 
 interface PoolStandingsFallbackProps {
@@ -22,14 +21,14 @@ const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-masters-green/20">
       <div className="bg-masters-green p-4 text-white flex items-center justify-between">
-        <h2 className="text-lg font-serif font-medium">Gordy's Masters Pool</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">Gordy's Masters Pool</h2>
         <Button 
           onClick={onRetry} 
           variant="outline" 
           size="sm" 
           className="bg-white/10 text-white hover:bg-white/20 border-white/20"
         >
-          <RefreshCw size={14} className="mr-2" />
+          <RefreshCcw size={14} className="mr-2" />
           Refresh Data
         </Button>
       </div>
@@ -83,7 +82,7 @@ const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
             size="sm"
             className="border-masters-green text-masters-green hover:bg-masters-green/10"
           >
-            <RefreshCw size={14} className="mr-2" />
+            <RefreshCcw size={14} className="mr-2" />
             Check Status
           </Button>
 
