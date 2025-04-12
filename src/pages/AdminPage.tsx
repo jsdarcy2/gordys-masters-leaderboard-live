@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import AdminPanel from "@/components/admin/AdminPanel";
 import { Card } from "@/components/ui/card";
-import { Settings, PieChart, Users, Golf } from "lucide-react";
+import { Settings, PieChart, Users, Trophy } from "lucide-react";
 import MockDataToggle from "@/components/admin/MockDataToggle";
 import { useToast } from "@/hooks/use-toast";
 
@@ -59,7 +59,7 @@ const AdminPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
           <Card className="p-4 flex items-center bg-green-50 border-green-200">
             <div className="h-12 w-12 rounded-full bg-masters-green/20 flex items-center justify-center mr-4">
-              <Golf className="h-6 w-6 text-masters-green" />
+              <Trophy className="h-6 w-6 text-masters-green" />
             </div>
             <div>
               <h3 className="text-lg font-medium">Masters Pool</h3>
