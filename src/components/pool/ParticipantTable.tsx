@@ -1,8 +1,7 @@
-
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
-import { Check, Ban } from "lucide-react";
+import { Check, Ban, CircleDollarSign } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -18,7 +17,20 @@ interface ParticipantTableProps {
   searchQuery: string;
 }
 
+const getEarningsForPosition = (position: number, totalParticipants: number): string => {
+  if (position === 1) return "$1,200";
+  if (position === 2) return "$500";
+  if (position === 3) return "$300";
+  return "";
+};
+
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
+  // Find ties in the displayStandings
+  const tiedPositions: Record<number, number> = {};
+  displayStandings.forEach(participant => {
+    tiedPositions[participant.position] = (tiedPositions[participant.position] || 0) + 1;
+  });
+
   return (
     <div className="overflow-x-auto mt-4">
       <div className="text-sm text-gray-600 mb-3 flex items-center gap-1 bg-masters-cream/30 p-3 rounded-md border border-masters-green/10">
@@ -55,6 +67,9 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
               const bestFourGolfers = participant.bestFourGolfers || [];
               const isPaid = participant.paid !== false;
               const missedCut = participant.totalScore > 200;
+              const isTied = tiedPositions[participant.position] > 1;
+              const showEarnings = participant.position <= 3;
+              const earningsAmount = getEarningsForPosition(participant.position, displayStandings.length);
               
               return (
                 <tr
@@ -70,7 +85,28 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                   } hover:bg-masters-cream/50 transition-colors border-b border-gray-100`}
                 >
                   <td className="px-2 py-3 font-medium">
-                    <WinnerIcons position={participant.position} isPoolStandings={true} />
+                    <div className="flex items-center">
+                      <WinnerIcons position={participant.position} isPoolStandings={true} />
+                      
+                      {showEarnings && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="ml-1.5 inline-flex items-center justify-center bg-masters-gold/90 text-white text-xs rounded-full w-5 h-5">
+                                <CircleDollarSign size={10} />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-masters-gold text-white border-masters-gold">
+                              <p>
+                                {isTied
+                                  ? `${earningsAmount} (tied, may be split)`
+                                  : `${earningsAmount} prize money`}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                   </td>
                   <td className="px-2 py-3 font-medium">
                     <div className="flex flex-wrap items-center gap-2">

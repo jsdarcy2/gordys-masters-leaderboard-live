@@ -1,5 +1,5 @@
 
-import { Clock, Users, Activity, Trophy, RefreshCcw } from "lucide-react";
+import { Clock, Users, Activity, Trophy, RefreshCcw, DollarSign } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PoolStandingsHeaderProps {
@@ -99,6 +99,12 @@ const PoolStandingsHeader = ({
                 )}
               </div>
             )}
+            {/* Prize money info */}
+            <div className="flex items-center text-masters-gold/90">
+              <DollarSign size={14} className="mr-1" />
+              <span className="hidden sm:inline">Prize: </span>
+              <span>1st: $1,200{isMobile ? "" : " • 2nd: $500 • 3rd: $300"}</span>
+            </div>
           </div>
         </div>
       </div>
