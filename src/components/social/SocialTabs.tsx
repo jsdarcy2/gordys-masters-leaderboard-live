@@ -7,22 +7,28 @@ import ChatFeed from "./ChatFeed";
 const SocialTabs = () => {
   return (
     <Tabs defaultValue="media" className="w-full">
-      <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-6">
-        <TabsTrigger value="media" className="flex items-center gap-2">
+      <TabsList className="w-full max-w-md mx-auto grid grid-cols-2 mb-6 bg-masters-light border border-masters-green/10">
+        <TabsTrigger 
+          value="media" 
+          className="flex items-center gap-2 data-[state=active]:bg-masters-green data-[state=active]:text-white"
+        >
           <Camera size={18} />
           <span>Photos & Videos</span>
         </TabsTrigger>
-        <TabsTrigger value="chat" className="flex items-center gap-2">
+        <TabsTrigger 
+          value="chat" 
+          className="flex items-center gap-2 data-[state=active]:bg-masters-green data-[state=active]:text-white"
+        >
           <MessageCircle size={18} />
           <span>Chat</span>
         </TabsTrigger>
       </TabsList>
       
-      <TabsContent value="media" className="mt-4">
+      <TabsContent value="media" className="mt-4 animate-fade-in">
         <MediaFeed />
       </TabsContent>
       
-      <TabsContent value="chat" className="mt-4">
+      <TabsContent value="chat" className="mt-4 animate-fade-in">
         <ChatFeed />
       </TabsContent>
     </Tabs>
