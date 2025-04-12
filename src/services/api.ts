@@ -1,4 +1,3 @@
-
 import { DataSource } from "@/types";
 
 // Re-export functions from modular service files
@@ -38,4 +37,23 @@ export const checkApiHealth = async (
 // Get the best data source (simplified)
 export const getBestDataSource = (): DataSource => {
   return 'masters-scores-api';
+};
+
+/**
+ * Force refresh pool data from Google Sheets
+ */
+export const forceRefreshPoolData = async (): Promise<void> => {
+  try {
+    // Clear caches first
+    clearLeaderboardCache();
+    
+    // Try to fetch fresh data from Google Sheets
+    const freshSheetData = await fetchLeaderboardFromGoogleSheets();
+    
+    console.log("Forced refresh from Google Sheets:", freshSheetData.length, "golfers");
+    return Promise.resolve();
+  } catch (error) {
+    console.error("Error forcing refresh from Google Sheets:", error);
+    return Promise.reject(error);
+  }
 };

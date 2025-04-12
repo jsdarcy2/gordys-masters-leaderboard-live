@@ -1,27 +1,53 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw, CircleX, CircleDollarSign } from "lucide-react";
+import { RefreshCw, CircleX, CircleDollarSign, InfoIcon } from "lucide-react";
 import WinnerIcons from "./leaderboard/WinnerIcons";
 import { 
   getScoreClass, 
   formatScore, 
   getMastersPurseAmount 
 } from "@/utils/leaderboardUtils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface LeaderboardTableProps {
   leaderboard: GolferScore[];
   refreshing: boolean;
   changedPositions: Record<string, 'up' | 'down' | null>;
+  dataSource?: string;
+  onRefresh?: () => void;
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   leaderboard,
   refreshing,
-  changedPositions
+  changedPositions,
+  dataSource,
+  onRefresh
 }) => {
   return (
     <>
+      {dataSource && dataSource !== "masters-scores-api" && (
+        <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
+          <InfoIcon className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800 text-sm flex justify-between items-center">
+            <span>
+              Using {dataSource === "mock-data" ? "simulated golf data" : "cached data"} instead of live tournament scores.
+              This may cause scoring discrepancies.
+            </span>
+            {onRefresh && (
+              <button 
+                onClick={onRefresh} 
+                className="ml-2 text-xs px-2 py-1 bg-white border border-amber-200 rounded hover:bg-amber-100 transition-colors flex items-center"
+              >
+                <RefreshCw size={12} className="mr-1" />
+                Refresh
+              </button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {refreshing && (
         <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
           <RefreshCw size={24} className="animate-spin text-masters-green" />
