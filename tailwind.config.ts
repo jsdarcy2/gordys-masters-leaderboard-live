@@ -106,7 +106,8 @@ export default {
 				'fade-in': 'fade-in 0.5s ease-out'
 			},
 			fontFamily: {
-				serif: ['Georgia', 'Times New Roman', 'serif'],
+				serif: ['EB Garamond', 'Georgia', 'Times New Roman', 'serif'],
+				sans: ['EB Garamond', 'system-ui', 'sans-serif'],
 			}
 		}
 	},

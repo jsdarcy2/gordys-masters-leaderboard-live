@@ -39,7 +39,7 @@ const Index = () => {
   );
 };
 
-// Updated card component for homepage links with subtle floral accents
+// Updated card component for homepage links with subtle floral accents and Garamond styling
 const Card = ({ 
   icon, 
   title, 
@@ -88,7 +88,7 @@ const Card = ({
         <Button 
           variant={highlight ? "secondary" : "outline"} 
           size="sm" 
-          className={`mt-4 w-full ${
+          className={`mt-4 w-full font-serif tracking-wide ${
             highlight 
               ? "text-masters-green bg-masters-yellow hover:bg-masters-yellow/90" 
               : "text-masters-green hover:bg-masters-light"
