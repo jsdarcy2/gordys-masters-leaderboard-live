@@ -42,7 +42,7 @@ const Index = () => {
   );
 };
 
-// Redesigned card component with subtle Masters imagery backgrounds
+// Redesigned card component with subtle Masters flag-like imagery
 const Card = ({ 
   icon, 
   title, 
@@ -87,14 +87,35 @@ const Card = ({
   return (
     <Link to={href} className="block">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group`}>
-        {/* Subtle Masters background image */}
+        {/* Flag-like background with subtle Masters imagery */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
+            {/* Flag-like stripes in the background */}
+            <div className="absolute inset-0 w-full h-full">
+              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.04] ${
+                highlight 
+                  ? "bg-masters-gold" 
+                  : variant === "gold" 
+                    ? "bg-masters-gold" 
+                    : "bg-masters-green"
+              }`}></div>
+              <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.05]"></div>
+              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.04] ${
+                highlight 
+                  ? "bg-masters-gold" 
+                  : variant === "gold" 
+                    ? "bg-masters-gold" 
+                    : "bg-masters-green"
+              }`}></div>
+            </div>
+            
+            {/* Masters image overlay on the flag pattern */}
             <Image 
               src={backgroundImage} 
               alt=""
-              className="w-full h-full object-cover opacity-[0.04]"
+              className="w-full h-full object-cover opacity-[0.05]"
             />
+            
             {/* Gradient overlay to ensure text readability */}
             <div className={`absolute inset-0 ${
               highlight 
@@ -106,13 +127,18 @@ const Card = ({
           </div>
         )}
         
-        {/* Subtle decorative accent */}
-        <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04] pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <path d="M50,20 Q60,5 70,20 T90,20 Q100,30 90,40 T90,60 Q80,70 70,60 T50,60 Q40,70 30,60 T10,60 Q0,50 10,40 T10,20 Q20,10 30,20 T50,20" 
-                  fill="currentColor" 
-                  className={highlight ? "text-masters-darkgreen" : variant === "gold" ? "text-masters-gold" : "text-masters-green"} />
-          </svg>
+        {/* Flag emblem in the top right corner */}
+        <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
+          <Flag 
+            size={24} 
+            className={`${
+              highlight 
+                ? "text-masters-darkgreen" 
+                : variant === "gold" 
+                  ? "text-masters-gold" 
+                  : "text-masters-green"
+            }`} 
+          />
         </div>
         
         <div className="flex items-center mb-3 relative z-10">
