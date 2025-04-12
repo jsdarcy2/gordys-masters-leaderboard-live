@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -203,7 +204,7 @@ const PlayerSelections = () => {
                     <tr className="text-left border-b-2 border-masters-green">
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tl-md">Pos</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium">Name</th>
-                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">Rd 1</th>
+                      <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">Score</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB1</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium text-center">TB2</th>
                       <th className="px-2 py-2 bg-masters-light text-masters-green font-medium rounded-tr-md">Selections (5)</th>
