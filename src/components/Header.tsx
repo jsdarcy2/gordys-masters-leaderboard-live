@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star, Tv, Trophy, Settings } from "lucide-react";
+import { Menu, X, Star, Tv, Trophy, Settings, MessageSquare } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
@@ -12,6 +12,7 @@ const NAV_TABS: NavTab[] = [
   { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
   { id: "watch-live", label: "Watch Live", href: "/watch-live", icon: <Tv size={14} className="text-masters-yellow" /> },
   { id: "selections", label: "Player Selections", href: "/selections" },
+  { id: "social", label: "Social", href: "/social", icon: <MessageSquare size={14} className="text-masters-yellow" />, isNew: true },
   { id: "archive", label: "Green Robe Winners", href: "/archive" },
   { id: "masters-champions", label: "Masters Champions", href: "/masters-champions" },
   { id: "rules", label: "Pool Rules", href: "/rules" },

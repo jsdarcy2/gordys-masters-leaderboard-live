@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -53,7 +52,8 @@ export interface NavTab {
   id: string;
   label: string;
   href: string;
-  icon?: ReactNode;
+  icon?: React.ReactNode;
+  isNew?: boolean;
 }
 
 export type GreenRobeWinner = {
@@ -84,4 +84,3 @@ export interface CardProps {
 }
 
 export const ADMIN_PASSWORD = "2025"; // Admin password for restricted features
-
