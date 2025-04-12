@@ -1,7 +1,8 @@
+
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 import { clearPoolStandingsCache } from "./pool";
-import { forceRefreshFromGoogleSheets } from "./googleSheetsApi";
+import { forceRefreshFromGoogleSheets, checkGoogleSheetsAvailability } from "./googleSheetsApi";
 
 // Re-export functions from modular service files
 export { isTournamentInProgress, getCurrentTournament } from './tournament';
@@ -65,25 +66,38 @@ export const getBestDataSource = async (): Promise<DataSource> => {
 
 /**
  * Force refresh pool data from Google Sheets
+ * Returns a boolean indicating if refresh was successful
  */
-export const forceRefreshPoolData = async (): Promise<void> => {
+export const forceRefreshPoolData = async (): Promise<boolean> => {
   try {
+    console.log("Starting force refresh of pool data...");
+    
     // Clear caches first
     clearLeaderboardCache();
     clearPoolStandingsCache();
+    console.log("Caches cleared");
     
-    // Force refresh from Google Sheets
-    const sheetsAvailable = await forceRefreshFromGoogleSheets();
+    // Check if Google Sheets is available before attempting refresh
+    const sheetsAvailable = await checkGoogleSheetsAvailability();
     
     if (!sheetsAvailable) {
       console.warn("Google Sheets is not available for refresh");
+      return false;
     }
     
-    console.log("Forced refresh of pool data completed");
-    return Promise.resolve();
+    // Force refresh from Google Sheets
+    const refreshSuccessful = await forceRefreshFromGoogleSheets();
+    
+    if (!refreshSuccessful) {
+      console.warn("Google Sheets refresh was not successful");
+      return false;
+    }
+    
+    console.log("Forced refresh of pool data completed successfully");
+    return true;
   } catch (error) {
     console.error("Error forcing refresh:", error);
-    return Promise.reject(error);
+    return false;
   }
 };
 
@@ -95,6 +109,14 @@ export const fetchDataFromGoogleSheets = async (dataType: 'leaderboard' | 'pool'
   const { fetchLeaderboardFromGoogleSheets, fetchPoolStandingsFromGoogleSheets } = await import('./googleSheetsApi');
   
   try {
+    // First check if Google Sheets is available
+    const sheetsAvailable = await checkGoogleSheetsAvailability();
+    
+    if (!sheetsAvailable) {
+      console.warn(`Google Sheets is not available for fetching ${dataType}`);
+      throw new Error("Google Sheets API is not available");
+    }
+    
     if (dataType === 'leaderboard') {
       return await fetchLeaderboardFromGoogleSheets();
     } else {

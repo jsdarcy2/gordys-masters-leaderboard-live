@@ -55,19 +55,48 @@ export async function checkPoolStandingsSync(): Promise<{
     const localData = await fetchPoolStandings();
     
     // Get Google Sheets data directly, bypassing any cached data
-    const sheetsData = await fetchPoolStandingsFromGoogleSheets();
+    let sheetsData: PoolParticipant[] = [];
+    try {
+      sheetsData = await fetchPoolStandingsFromGoogleSheets();
+      console.log(`Sync check: Successfully fetched ${sheetsData.length} participants from Google Sheets`);
+    } catch (error) {
+      console.error("Error fetching Google Sheets data for sync check:", error);
+      // Instead of failing completely, we'll continue with an empty sheets data array
+      // This will show all local participants as "out of sync" but at least we can show something
+    }
     
     console.log(`Sync check: Local data count: ${localData.length}, Sheets data count: ${sheetsData.length}`);
+    
+    // If Google Sheets returned no data, mark everything as out of sync
+    if (sheetsData.length === 0) {
+      console.warn("Google Sheets returned no data, showing all local data as out of sync");
+      const differences = localData.map(participant => ({
+        name: participant.name,
+        localScore: participant.totalScore,
+        sheetsScore: undefined
+      }));
+      
+      return {
+        inSync: false,
+        localCount: localData.length,
+        sheetsCount: 0,
+        differences
+      };
+    }
     
     // Create maps for easier comparison
     const localMap = new Map<string, number>();
     localData.forEach(participant => {
-      localMap.set(participant.name, participant.totalScore);
+      if (participant.name) {
+        localMap.set(participant.name, participant.totalScore);
+      }
     });
     
     const sheetsMap = new Map<string, number>();
     sheetsData.forEach(participant => {
-      sheetsMap.set(participant.name, participant.totalScore);
+      if (participant.name) {
+        sheetsMap.set(participant.name, participant.totalScore);
+      }
     });
     
     // Find differences
@@ -101,10 +130,12 @@ export async function checkPoolStandingsSync(): Promise<{
       }
     });
     
-    console.log(`Sync check complete. Found ${differences.length} differences`);
-    
+    // Log the full list of differences for debugging
     if (differences.length > 0) {
-      console.log("Sync differences:", differences);
+      console.log(`Sync check complete. Found ${differences.length} differences`);
+      console.log("First 10 sync differences:", differences.slice(0, 10));
+    } else {
+      console.log("Sync check complete. Data is in sync.");
     }
     
     return {

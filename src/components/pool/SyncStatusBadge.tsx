@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCcw, CheckCircle2, AlertCircle, XCircle, RefreshCcw } from "lucide-react";
+import { RotateCcw, CheckCircle2, AlertCircle, XCircle, RefreshCcw, DatabaseOff } from "lucide-react";
 import { checkPoolStandingsSync } from "@/services/pool";
 import { Button } from "@/components/ui/button";
+import { forceRefreshPoolData } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface SyncStatusBadgeProps {
   className?: string;
@@ -22,6 +24,8 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
     differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const { toast } = useToast();
   
   const checkSync = async () => {
     setLoading(true);
@@ -33,6 +37,39 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
       console.error("Error checking sync status:", error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const handleForceRefresh = async () => {
+    setRefreshing(true);
+    toast({
+      title: "Refreshing Data",
+      description: "Forcing refresh from Google Sheets..."
+    });
+    
+    try {
+      await forceRefreshPoolData();
+      toast({
+        title: "Refresh Complete",
+        description: "Data has been refreshed from Google Sheets"
+      });
+      
+      // After refresh, check sync status again
+      await checkSync();
+      
+      // Call the parent's onRefresh if provided
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error("Error during force refresh:", error);
+      toast({
+        title: "Refresh Failed",
+        description: "Could not refresh data from Google Sheets",
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshing(false);
     }
   };
   
@@ -66,6 +103,39 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
         <AlertCircle size={14} className="mr-1" />
         Sync Status Unknown
       </Badge>
+    );
+  }
+  
+  // If Google Sheets is not available (count = 0), show a special badge
+  if (syncStatus.sheetsCount === 0) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="outline" className={`bg-amber-50 text-amber-600 ${className}`}>
+              <DatabaseOff size={14} className="mr-1" />
+              Google Sheets Unavailable
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent className="w-80 p-3">
+            <div>
+              <p className="font-medium mb-2">Google Sheets Connection Issue</p>
+              <p className="text-sm mb-2">Cannot verify sync status because Google Sheets data is unavailable.</p>
+              <p className="text-sm mb-2">Local data: {syncStatus.localCount} participants</p>
+              
+              <Button 
+                size="sm" 
+                onClick={handleForceRefresh}
+                disabled={refreshing}
+                className="w-full mt-3 text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded hover:bg-amber-100 transition-colors flex items-center justify-center"
+              >
+                <RefreshCcw size={12} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Force Refresh from Sheets'}
+              </Button>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
   
@@ -103,26 +173,41 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
             <p className="text-sm mb-2">Sheets: {syncStatus.sheetsCount} participants</p>
             {syncStatus.differences.length > 0 && (
               <div className="mt-2 text-xs">
-                <p className="font-medium">Differences found:</p>
+                <p className="font-medium">First 5 differences found (of {syncStatus.differences.length}):</p>
                 <ul className="list-disc pl-4 mt-1">
-                  {syncStatus.differences.map((diff, index) => (
+                  {syncStatus.differences.slice(0, 5).map((diff, index) => (
                     <li key={index}>
-                      {diff.name}: 
-                      {diff.localScore !== undefined ? diff.localScore : 'missing'} vs 
+                      {diff.name}: {' '}
+                      {diff.localScore !== undefined ? diff.localScore : 'missing'} vs{' '}
                       {diff.sheetsScore !== undefined ? diff.sheetsScore : 'missing'}
                     </li>
                   ))}
                 </ul>
+                {syncStatus.differences.length > 5 && (
+                  <p className="text-amber-600 mt-1">...and {syncStatus.differences.length - 5} more</p>
+                )}
               </div>
             )}
-            <Button 
-              size="sm" 
-              onClick={handleRefresh}
-              className="w-full mt-3 text-xs px-2 py-1 bg-white border border-red-200 rounded hover:bg-red-50 transition-colors flex items-center justify-center"
-            >
-              <RefreshCcw size={12} className="mr-1" />
-              Refresh Sync Status
-            </Button>
+            <div className="flex flex-col gap-2 mt-3">
+              <Button 
+                size="sm" 
+                onClick={handleRefresh}
+                className="text-xs px-2 py-1 bg-white border border-red-200 rounded hover:bg-red-50 transition-colors flex items-center justify-center"
+              >
+                <RefreshCcw size={12} className="mr-1" />
+                Check Sync Status Again
+              </Button>
+              
+              <Button 
+                size="sm" 
+                onClick={handleForceRefresh}
+                disabled={refreshing}
+                className="text-xs px-2 py-1 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors flex items-center justify-center"
+              >
+                <RefreshCcw size={12} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Force Refresh from Sheets'}
+              </Button>
+            </div>
           </div>
         </TooltipContent>
       </Tooltip>
