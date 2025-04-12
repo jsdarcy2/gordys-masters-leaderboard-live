@@ -2,6 +2,7 @@
 import React from "react";
 import { Info, ExternalLink, Calendar, FileSpreadsheet, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
 interface DataSourceInfoProps {
   dataSource?: string;

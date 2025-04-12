@@ -29,7 +29,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           <RefreshCw size={24} className="animate-spin text-masters-green" />
         </div>
       )}
-      <div className="overflow-x-auto relative">
+      <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="text-left border-b-2 border-masters-green">

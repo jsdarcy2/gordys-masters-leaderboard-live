@@ -1,11 +1,10 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getScoreClass } from "@/utils/leaderboardUtils";
 
 const LoadingState = () => {
   return (
-    <div className="overflow-x-auto relative">
+    <div className="overflow-x-auto">
       <table className="w-full">
         <thead>
           <tr className="text-left border-b-2 border-masters-green">
