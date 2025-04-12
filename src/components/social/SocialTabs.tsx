@@ -20,7 +20,7 @@ const SocialTabs = () => {
           className={`flex-1 py-3 text-base font-serif ${
             activeTab === "media" 
               ? "bg-masters-green text-white" 
-              : "hover:bg-masters-green/10"
+              : "text-masters-dark hover:bg-masters-green/10"
           }`}
         >
           Photo & Video
@@ -30,7 +30,7 @@ const SocialTabs = () => {
           className={`flex-1 py-3 text-base font-serif ${
             activeTab === "chat" 
               ? "bg-masters-green text-white" 
-              : "hover:bg-masters-green/10"
+              : "text-masters-dark hover:bg-masters-green/10"
           }`}
         >
           Chat
