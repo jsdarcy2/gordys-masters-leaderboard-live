@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import LeaderboardTable from "./LeaderboardTable";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
+import EmergencyFallback from "./leaderboard/EmergencyFallback";
 import { GolferScore } from "@/types";
 import { fetchLeaderboardData } from "@/services/leaderboard";
 import { buildGolferScoreMap } from "@/utils/scoringUtils";
@@ -20,6 +21,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
   const [refreshing, setRefreshing] = useState(false);
   const [tournamentActive, setTournamentActive] = useState(false);
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
+  const [criticalError, setCriticalError] = useState<boolean>(forceCriticalOutage);
   
   // Extract these from existing hooks or add them if not present
   const [dataSource, setDataSource] = useState<string>("loading");
@@ -27,33 +29,70 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
   
   const refreshData = useCallback(async () => {
     setRefreshing(true);
+    setCriticalError(false); // Reset critical error on refresh
     try {
       // Use the existing fetchLeaderboardData function or whatever you're using
       const result = await fetchLeaderboardData();
-      setLeaderboard(result.leaderboard);
-      setLastUpdated(result.lastUpdated);
-      setDataSource(result.source);
-      // Reset any other state as needed
-      setError(null);
+      
+      if (result.leaderboard.length === 0) {
+        setCriticalError(true);
+        setError("Could not retrieve leaderboard data from any source");
+        toast({
+          title: "Data Error",
+          description: "Could not retrieve leaderboard data from any source",
+          variant: "destructive"
+        });
+      } else {
+        setLeaderboard(result.leaderboard);
+        setLastUpdated(result.lastUpdated);
+        setDataSource(result.source);
+        // Reset any other state as needed
+        setError(null);
+        
+        if (result.source === "google-sheets") {
+          toast({
+            title: "Using Google Sheets Data",
+            description: "Primary data source is unavailable, using backup Google Sheets data",
+            variant: "default"
+          });
+        }
+      }
     } catch (error) {
       console.error("Error refreshing leaderboard:", error);
+      setCriticalError(true);
       setError("Failed to refresh data. Please try again.");
+      toast({
+        title: "Refresh Error",
+        description: "Failed to refresh leaderboard data. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setRefreshing(false);
     }
-  }, []);
+  }, [toast]);
   
   useEffect(() => {
     const loadLeaderboardData = async () => {
       setLoading(true);
       try {
         const result = await fetchLeaderboardData();
-        setLeaderboard(result.leaderboard);
-        setLastUpdated(result.lastUpdated);
-        setDataSource(result.source);
-        setError(null);
+        
+        if (result.leaderboard.length === 0) {
+          setCriticalError(true);
+          setError("Could not retrieve leaderboard data from any source");
+        } else {
+          setLeaderboard(result.leaderboard);
+          setLastUpdated(result.lastUpdated);
+          setDataSource(result.source);
+          setError(null);
+          
+          if (result.source === "google-sheets") {
+            setError("Using Google Sheets backup data. Primary source unavailable.");
+          }
+        }
       } catch (error) {
         console.error("Error fetching leaderboard data:", error);
+        setCriticalError(true);
         setError("Failed to load leaderboard data.");
       } finally {
         setLoading(false);
@@ -79,7 +118,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
   useEffect(() => {
     const updatePositions = (oldLeaderboard: GolferScore[], newLeaderboard: GolferScore[]) => {
       const oldPositions: Record<string, number> = {};
-      oldLeaderboard.forEach((golfer, index) => {
+      oldLeaderboard.forEach((golfer) => {
         oldPositions[golfer.name] = golfer.position;
       });
 
@@ -111,6 +150,62 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
     }
   }, [leaderboard]);
 
+  // Force a Google Sheets refresh
+  const tryGoogleSheets = useCallback(async () => {
+    setRefreshing(true);
+    setCriticalError(false);
+    toast({
+      title: "Trying Google Sheets",
+      description: "Attempting to fetch data from Google Sheets backup",
+    });
+    
+    try {
+      // The fetchLeaderboardData function should handle Google Sheets fallback
+      const result = await fetchLeaderboardData();
+      
+      setLeaderboard(result.leaderboard);
+      setLastUpdated(result.lastUpdated);
+      setDataSource(result.source);
+      setError(null);
+      
+      toast({
+        title: `Data Source: ${result.source}`,
+        description: `Retrieved data from ${result.source}`,
+        variant: "default"
+      });
+    } catch (error) {
+      console.error("Error fetching from Google Sheets:", error);
+      setCriticalError(true);
+      setError("Failed to retrieve data from any source");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [toast]);
+
+  if (criticalError) {
+    return (
+      <div className="masters-card">
+        <LeaderboardHeader 
+          lastUpdated={lastUpdated} 
+          loading={loading} 
+          refreshing={refreshing}
+          tournamentActive={tournamentActive}
+          onRefresh={refreshData}
+          handleManualRefresh={refreshData}
+          dataSource={dataSource}
+          criticalOutage={true}
+        />
+        
+        <EmergencyFallback 
+          onRetry={refreshData}
+          tryGoogleSheets={tryGoogleSheets}
+          severity="critical"
+          message="We're having trouble connecting to the data source. You can try refreshing or using our Google Sheets backup."
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="masters-card">
       <LeaderboardHeader 
@@ -121,10 +216,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
         onRefresh={refreshData}
         handleManualRefresh={refreshData}
         dataSource={dataSource}
+        errorMessage={error || undefined}
       />
       
       <div className="p-4 relative">
-        {error && (
+        {error && dataSource !== "google-sheets" && (
           <div className="text-red-500 mb-4">
             {error}
           </div>

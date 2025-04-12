@@ -1,6 +1,7 @@
 
 import { GolferScore } from "@/types";
 import { API_ENDPOINTS } from "@/services/api";
+import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
 
 // Cache for leaderboard data
 let leaderboardCache: GolferScore[] | null = null;
@@ -90,7 +91,32 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
 }
 
 /**
- * Fetch leaderboard data with caching
+ * Fetch leaderboard data from Google Sheets as fallback
+ */
+async function fetchGoogleSheetsLeaderboard(): Promise<GolferScore[]> {
+  try {
+    console.log("Attempting to fetch data from Google Sheets...");
+    // Check if Google Sheets API is available first
+    const isAvailable = await checkGoogleSheetsAvailability();
+    
+    if (!isAvailable) {
+      console.error("Google Sheets API not available");
+      throw new Error("Google Sheets API not available");
+    }
+    
+    // Fetch leaderboard data from Google Sheets
+    const sheetsData = await fetchLeaderboardFromGoogleSheets();
+    console.log(`Retrieved ${sheetsData.length} players from Google Sheets`);
+    
+    return sheetsData;
+  } catch (error) {
+    console.error("Error fetching from Google Sheets:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch leaderboard data with caching and fallback
  */
 export async function fetchLeaderboardData(): Promise<{
   leaderboard: GolferScore[];
@@ -127,21 +153,38 @@ export async function fetchLeaderboardData(): Promise<{
       };
     }
     
-    // If no data from API, return empty array
-    return {
-      leaderboard: [],
-      source: "no-data",
-      lastUpdated: new Date().toISOString()
-    };
+    // If masters API fails, try Google Sheets
+    console.log("Masters API returned no data, trying Google Sheets fallback");
+    throw new Error("Masters API returned no data");
   } catch (error) {
-    console.warn("Error fetching leaderboard data:", error);
+    console.warn("Error fetching from Masters API, trying Google Sheets fallback:", error);
+    
+    try {
+      // Try to get data from Google Sheets
+      const sheetsData = await fetchGoogleSheetsLeaderboard();
+      if (sheetsData && sheetsData.length > 0) {
+        console.log(`Successfully fetched ${sheetsData.length} players from Google Sheets`);
+        
+        // Update cache with Google Sheets data
+        leaderboardCache = sheetsData;
+        lastFetchTime = now;
+        
+        return {
+          leaderboard: sheetsData,
+          source: "google-sheets",
+          lastUpdated: new Date().toISOString()
+        };
+      }
+    } catch (sheetsError) {
+      console.error("Error fetching from Google Sheets fallback:", sheetsError);
+    }
     
     // If we have a cache, return it regardless of age in case of error
     if (leaderboardCache && leaderboardCache.length > 0) {
-      console.log("Error fetching leaderboard. Returning cached data.");
+      console.log("All data sources failed. Returning cached data.");
       return {
         leaderboard: leaderboardCache,
-        source: "masters-scores-api", // Use consistent source naming
+        source: "cached-data",
         lastUpdated: new Date(lastFetchTime).toISOString()
       };
     }

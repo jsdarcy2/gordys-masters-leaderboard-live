@@ -46,12 +46,17 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Masters Live Scores";
       case "mock-data":
         return "Masters Leaderboard";
+      case "google-sheets":
+        return "Google Sheets Data";
       default:
         return dataSource;
     }
   };
   
   const getDataSourceLink = () => {
+    if (dataSource?.toLowerCase() === "google-sheets") {
+      return "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
+    }
     return "https://www.masters.com/en_US/scores/index.html";
   };
   
@@ -95,6 +100,13 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             </span>
           )}
           
+          {dataSource?.toLowerCase() === "google-sheets" && (
+            <span className="ml-1.5 bg-yellow-500/20 text-white/95 text-xs px-1.5 py-0.5 rounded inline-flex items-center">
+              <FileSpreadsheet size={12} className="mr-0.5 text-yellow-300" />
+              BACKUP
+            </span>
+          )}
+          
           {tournamentYear && (
             <span className="ml-1.5 text-white/90">
               <Calendar size={12} className="inline mr-0.5" />
@@ -118,18 +130,20 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             </a>
           )}
           
-          {/* Google Sheets backup link */}
-          <a 
-            href={googleSheetLink} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="ml-3 text-white/95 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
-            title="Google Sheet Backup"
-            onClick={handleExternalClick}
-          >
-            <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
-            <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>
-          </a>
+          {/* Only show Google Sheets backup link if we're not already using Google Sheets */}
+          {dataSource?.toLowerCase() !== "google-sheets" && (
+            <a 
+              href={googleSheetLink} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="ml-3 text-white/95 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
+              title="Google Sheet Backup"
+              onClick={handleExternalClick}
+            >
+              <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
+              <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>
+            </a>
+          )}
         </span>
       </div>
     </div>

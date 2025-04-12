@@ -1,7 +1,7 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw, CircleX, CircleDollarSign, InfoIcon } from "lucide-react";
+import { RefreshCw, CircleX, CircleDollarSign, InfoIcon, FileSpreadsheet } from "lucide-react";
 import WinnerIcons from "./leaderboard/WinnerIcons";
 import { 
   getScoreClass, 
@@ -29,7 +29,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
 }) => {
   return (
     <>
-      {dataSource && dataSource !== "masters-scores-api" && (
+      {dataSource && dataSource !== "masters-scores-api" && dataSource !== "google-sheets" && (
         <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
           <InfoIcon className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-800 text-sm flex justify-between items-center">
@@ -44,6 +44,26 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               >
                 <RefreshCw size={12} className="mr-1" />
                 Refresh
+              </button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {dataSource === "google-sheets" && (
+        <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+          <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800 text-sm flex justify-between items-center">
+            <span>
+              Using Google Sheets backup data. Primary data source is currently unavailable.
+            </span>
+            {onRefresh && (
+              <button 
+                onClick={onRefresh} 
+                className="ml-2 text-xs px-2 py-1 bg-white border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center"
+              >
+                <RefreshCw size={12} className="mr-1" />
+                Try Primary Source
               </button>
             )}
           </AlertDescription>

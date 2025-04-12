@@ -1,18 +1,20 @@
 
 import React from "react";
-import { Tv, RefreshCw, AlertTriangle } from "lucide-react";
+import { Tv, RefreshCw, AlertTriangle, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface EmergencyFallbackProps {
   onRetry: () => void;
   message?: string;
   severity?: 'warning' | 'critical';
+  tryGoogleSheets?: () => void;
 }
 
 const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({ 
   onRetry,
   message = "We're experiencing technical difficulties with our live scoring. Please check back later.",
-  severity = 'warning'
+  severity = 'warning',
+  tryGoogleSheets
 }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -37,6 +39,17 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
           Refresh Data
         </Button>
         
+        {tryGoogleSheets && (
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 border-amber-500 text-amber-600 hover:bg-amber-500/10"
+            onClick={tryGoogleSheets}
+          >
+            <FileSpreadsheet size={16} />
+            Try Google Sheets Data
+          </Button>
+        )}
+        
         <a 
           href="https://www.masters.com/en_US/watch/index.html" 
           target="_blank" 
@@ -55,6 +68,16 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
         </h4>
         <p className="text-sm text-gray-600">
           You can watch the official Masters Tournament coverage on <a href="https://www.masters.com" target="_blank" rel="noopener noreferrer" className="text-masters-green underline">Masters.com</a> or through the official Masters app.
+        </p>
+      </div>
+      
+      <div className="mt-4 p-4 bg-amber-50 rounded-md max-w-2xl">
+        <h4 className="font-medium mb-2 text-masters-dark flex items-center">
+          <FileSpreadsheet size={18} className="inline-block mr-2 text-amber-500" />
+          Google Sheets Backup
+        </h4>
+        <p className="text-sm text-gray-600">
+          You can also view the data directly in our <a href="https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243" target="_blank" rel="noopener noreferrer" className="text-amber-600 underline">Google Sheets backup</a>.
         </p>
       </div>
     </div>
