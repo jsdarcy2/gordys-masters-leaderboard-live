@@ -2,7 +2,7 @@
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
-import { Check, Ban } from "lucide-react";
+import { Check, Ban, DollarSign } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -19,6 +19,16 @@ interface ParticipantTableProps {
 }
 
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
+  // Function to open Venmo with player's name
+  const openVenmo = (name: string) => {
+    const venmoUsername = "GordysPool"; // Replace with actual Venmo username
+    const paymentNote = `Masters Pool 2025 - ${name}`;
+    const amount = "50"; // Replace with actual amount
+    
+    // Open Venmo with prefilled information
+    window.open(`https://venmo.com/${venmoUsername}?txn=pay&note=${encodeURIComponent(paymentNote)}&amount=${amount}`, '_blank');
+  };
+
   return (
     <div className="overflow-x-auto mt-4">
       <div className="text-sm text-gray-600 mb-2 flex items-center gap-1">
@@ -76,7 +86,25 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                     <div className="flex flex-wrap items-center gap-2">
                       {participant.name}
                       {!isPaid && (
-                        <span className="text-xs text-red-500 font-normal">(unpaid)</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-red-500 font-normal">(unpaid)</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button 
+                                  onClick={() => openVenmo(participant.name)}
+                                  className="text-blue-500 hover:text-blue-600 transition-colors p-0.5 rounded-full hover:bg-blue-50"
+                                  aria-label="Pay via Venmo"
+                                >
+                                  <DollarSign size={12} />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent side="right" className="text-xs">
+                                Pay via Venmo
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       )}
                       {missedCut && (
                         <Badge variant="destructive" className="text-xs py-0 px-1.5 h-5 bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800">

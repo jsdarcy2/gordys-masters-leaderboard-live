@@ -2,16 +2,10 @@
 import { useState } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Eye, Star, Tv } from "lucide-react";
+import { Menu, X, Star, Tv } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
 
 const NAV_TABS: NavTab[] = [
   { id: "standings", label: "Pool Standings", href: "/" },
@@ -43,26 +37,6 @@ const Header = () => {
       
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-masters-green/90 to-masters-green/100"></div>
-      
-      {/* Breck logo in upper right corner */}
-      <div className="absolute top-2 right-4 md:right-6 z-20">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="opacity-30 hover:opacity-60 transition-opacity">
-                <img 
-                  src="/lovable-uploads/dfd18d78-1ed9-472a-9450-f542194c1727.png" 
-                  alt="Breck Logo" 
-                  className="w-8 h-8 md:w-10 md:h-10"
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="left">
-              <p className="text-xs">Honor God, Country</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
       
       <div className="container mx-auto relative z-10">
         <div className="px-4 py-3 md:py-4 flex flex-col">
