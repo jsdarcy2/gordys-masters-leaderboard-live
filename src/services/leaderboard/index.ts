@@ -1,4 +1,3 @@
-
 import { GolferScore } from "@/types";
 import { API_ENDPOINTS } from "@/services/api";
 import { generateMastersLeaderboard } from "./leaderboardData";
@@ -171,11 +170,11 @@ export function buildGolferScoreMap(leaderboard: GolferScore[]): Record<string, 
 }
 
 /**
- * Clear cache for testing purposes
+ * Manually clear leaderboard cache to force a fresh fetch
  */
-export function clearLeaderboardCache() {
+export function clearLeaderboardCache(): Promise<boolean> {
   leaderboardCache = null;
   lastFetchTime = 0;
   console.log("Leaderboard cache cleared");
-  return true; // Return success indicator
+  return Promise.resolve(true);
 }

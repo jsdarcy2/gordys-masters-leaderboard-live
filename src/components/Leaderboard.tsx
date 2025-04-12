@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -12,7 +11,6 @@ import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import EmergencyFallback from "./leaderboard/EmergencyFallback";
-import { DataSource } from "@/types";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 
@@ -331,28 +329,30 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
           </div>
         )}
         
-        {loading ? (
-          <LoadingState />
-        ) : leaderboard.length === 0 ? (
-          <div className="text-center py-8 text-gray-600">
-            <Info size={24} className="mx-auto mb-2 text-masters-green"/>
-            <p>Loading leaderboard data for {dataYear || TOURNAMENT_YEAR} Masters.</p>
-            <p className="mt-2 text-sm text-gray-500">Data will appear momentarily.</p>
-            <button 
-              onClick={handleManualRefresh}
-              className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"
-            >
-              Refresh Now
-            </button>
-          </div>
-        ) : (
-          <LeaderboardTable 
-            leaderboard={leaderboard}
-            refreshing={refreshing}
-            changedPositions={changedPositions}
-            showPotentialWinnings={false}
-          />
-        )}
+        <div className="overflow-auto">
+          {loading ? (
+            <LoadingState />
+          ) : leaderboard.length === 0 ? (
+            <div className="text-center py-8 text-gray-600">
+              <Info size={24} className="mx-auto mb-2 text-masters-green"/>
+              <p>Loading leaderboard data for {dataYear || TOURNAMENT_YEAR} Masters.</p>
+              <p className="mt-2 text-sm text-gray-500">Data will appear momentarily.</p>
+              <button 
+                onClick={handleManualRefresh}
+                className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"
+              >
+                Refresh Now
+              </button>
+            </div>
+          ) : (
+            <LeaderboardTable 
+              leaderboard={leaderboard}
+              refreshing={refreshing}
+              changedPositions={changedPositions}
+              showPotentialWinnings={false}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
