@@ -55,6 +55,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "PGA Tour";
       case "masters-scraper":
         return "Masters.com";
+      case "masters-api":
+        return "Masters.com API";
+      case "fixed-data":
+        return "Masters 2024";
       case "google-sheets":
         return "Live Tracker";
       default:
@@ -74,8 +78,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return `https://www.pgatour.com/leaderboard`;
       case "sportsdata-api":
       case "masters-scraper":
+      case "masters-api":
         return `https://www.masters.com/en_US/scores/index.html`;
       case "historical-data":
+      case "fixed-data":
         return `https://www.masters.com/en_US/scores/index.html`;
       case "google-sheets":
         return `https://www.masters.com/en_US/scores/index.html`;

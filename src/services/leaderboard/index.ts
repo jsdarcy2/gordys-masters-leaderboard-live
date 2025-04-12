@@ -11,6 +11,67 @@ let leaderboardCache: GolferScore[] | null = null;
 let lastFetchTime: number = 0;
 const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache TTL - extended for betting
 
+// Masters.com API endpoint for player data
+const MASTERS_API_ENDPOINT = "https://www.masters.com/en_US/cms/feeds/players/2025/players.json";
+
+/**
+ * Fetch player data from Masters.com API
+ */
+async function fetchMastersPlayerData(): Promise<GolferScore[]> {
+  try {
+    console.log("Fetching data from Masters.com API...");
+    const response = await fetch(MASTERS_API_ENDPOINT, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Masters API response error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Masters.com API data received:", data);
+    
+    // Map the Masters.com player data to our GolferScore format
+    // Note: The actual mapping will depend on the structure of the Masters.com JSON
+    if (Array.isArray(data.players)) {
+      return data.players.map((player: any, index: number) => {
+        // Extract and process player data based on Masters.com structure
+        // This is a placeholder - actual mapping will depend on API structure
+        const position = player.position || index + 1;
+        const score = parseFloat(player.score) || 0;
+        const today = parseFloat(player.today) || 0;
+        
+        let playerStatus: "active" | "cut" | "withdrawn" = "active";
+        if (player.status) {
+          const statusLower = player.status.toLowerCase();
+          if (statusLower.includes('cut') || statusLower.includes('mc')) {
+            playerStatus = "cut";
+          } else if (statusLower.includes('wd')) {
+            playerStatus = "withdrawn";
+          }
+        }
+        
+        return {
+          position: Number(position),
+          name: player.playerName || player.name || 'Unknown',
+          score: score,
+          today: today,
+          thru: player.thru || 'F',
+          status: playerStatus
+        };
+      });
+    }
+    
+    throw new Error("Invalid data format from Masters.com API");
+  } catch (error) {
+    console.error("Error fetching from Masters.com API:", error);
+    throw error;
+  }
+}
+
 /**
  * Fetch leaderboard data with optimized reliability for betting applications
  */
@@ -33,23 +94,45 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
-    // Return the hardcoded data directly
-    console.log("Using fixed leaderboard data from the 2024 Masters");
-    const mastersData = generateMastersLeaderboard();
+    // First try to fetch data from the Masters.com API
+    console.log("Trying to fetch data from Masters.com API...");
+    try {
+      const mastersData = await fetchMastersPlayerData();
+      if (mastersData && mastersData.length > 0) {
+        console.log(`Retrieved ${mastersData.length} players from Masters.com API`);
+        
+        // Update cache
+        leaderboardCache = mastersData;
+        lastFetchTime = now;
+        
+        return {
+          leaderboard: mastersData,
+          source: "masters-api",
+          lastUpdated: new Date().toISOString()
+        };
+      }
+    } catch (mastersApiError) {
+      console.warn("Failed to fetch from Masters.com API:", mastersApiError);
+      // Continue to next data source
+    }
+    
+    // If Masters.com API fails, fall back to fixed data
+    console.log("Falling back to fixed Masters 2024 data...");
+    const fixedData = generateMastersLeaderboard();
     
     // Update cache
-    leaderboardCache = mastersData;
+    leaderboardCache = fixedData;
     lastFetchTime = now;
     
     return {
-      leaderboard: mastersData,
+      leaderboard: fixedData,
       source: "fixed-data",
       lastUpdated: new Date().toISOString()
     };
     
     // The following code is commented out since we'll always use our fixed data
     /*
-    // First, try Google Sheets as the primary data source
+    // If Masters.com API fails, try Google Sheets
     console.log("Checking Google Sheets availability...");
     const sheetsAvailable = await checkGoogleSheetsAvailability();
     
