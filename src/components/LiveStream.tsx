@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Play, Tv, Film, Info, List, ExternalLink, Calendar } from "lucide-react";
+import { AlertTriangle, Play, Tv, Film, Info, Calendar, ExternalLink, Loader2 } from "lucide-react";
 import { useIsMobile, useDeviceType } from "@/hooks/use-mobile";
+import CookieNotice from "@/components/CookieNotice";
+import { useStreamStatus } from "@/hooks/use-stream-status";
 
 const LIVE_STREAMS = [
   {
@@ -80,6 +82,7 @@ const LiveStream: React.FC = () => {
   const isMobile = useIsMobile();
   const deviceType = useDeviceType();
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const { iframeStatus, setIframeStatus, needsStreamHelp } = useStreamStatus(activeStream.embedUrl);
 
   useEffect(() => {
     const handleOrientationChange = () => {
@@ -111,19 +114,40 @@ const LiveStream: React.FC = () => {
     return { paddingTop: "56.25%" };
   };
 
+  const handleOpenExternal = () => {
+    window.open(activeStream.embedUrl, "_blank");
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md mb-4 md:mb-8 overflow-hidden border border-gray-200">
       <div className="relative w-full" style={getPlayerStyle()}>
         <div className="absolute inset-0 bg-masters-dark flex items-center justify-center">
+          {iframeStatus === 'loading' && (
+            <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/30">
+              <Loader2 className="h-10 w-10 text-white animate-spin" />
+            </div>
+          )}
+          
           <iframe
             src={activeStream.embedUrl}
             className="absolute inset-0 w-full h-full border-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             title={`${activeStream.name} - The Masters Live Stream`}
+            onLoad={() => setIframeStatus('loaded')}
+            onError={() => setIframeStatus('error')}
           ></iframe>
         </div>
       </div>
+      
+      {needsStreamHelp && (
+        <div className="p-3 pt-4 border-t border-amber-200 bg-amber-50/50">
+          <CookieNotice 
+            showFullMessage={false}
+            onOpenExternal={handleOpenExternal}
+          />
+        </div>
+      )}
       
       <div className="p-3 md:p-4 lg:p-6">
         <div className="flex flex-col md:flex-row justify-between md:items-center mb-3 md:mb-4 lg:mb-6 gap-2 md:gap-4">
@@ -177,7 +201,7 @@ const LiveStream: React.FC = () => {
               variant="default" 
               size={isMobile ? "sm" : "default"}
               className="bg-masters-green hover:bg-masters-green/90 text-white h-8 md:h-9"
-              onClick={() => window.open("https://www.masters.com/en_US/watch/index.html", "_blank")}
+              onClick={handleOpenExternal}
             >
               <ExternalLink size={isMobile ? 14 : 16} className="mr-1" />
               Open in Masters.com
@@ -346,7 +370,7 @@ const LiveStream: React.FC = () => {
           <div className="flex items-start gap-2">
             <Info size={isMobile ? 14 : 16} className="text-masters-yellow mt-0.5 flex-shrink-0" />
             <p className="text-xs text-gray-500">
-              Live streaming coverage is provided by Masters.com. For the best experience on mobile, try rotating your device to landscape mode.
+              Live streaming coverage is provided by Masters.com. For the best experience on mobile, try rotating your device to landscape mode or enabling cookies if you encounter loading issues.
               <a 
                 href="https://www.masters.com/en_US/watch/index.html" 
                 target="_blank" 
