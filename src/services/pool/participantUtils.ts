@@ -26,7 +26,7 @@ export const generateParticipantName = (index: number): string => {
  * Uses the best 4 out of 5 golfers rule
  */
 export const calculatePoolStandings = (
-  selectionsData: {[participant: string]: { picks: string[], roundScores: number[], tiebreakers: [number, number] }},
+  selectionsData: Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }>,
   golferScores: Record<string, number>
 ): PoolParticipant[] => {
   const standings: PoolParticipant[] = [];

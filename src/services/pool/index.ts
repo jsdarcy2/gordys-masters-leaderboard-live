@@ -11,6 +11,36 @@ let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
 
 /**
+ * Fetch raw selections data directly without using pool standings
+ * This avoids circular dependency
+ */
+async function fetchRawSelectionsData(): Promise<Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }>> {
+  // This would normally come from your API or Google Sheets
+  // For now, we'll use emergency data to avoid circular reference
+  const emergencyData = generateEmergencyPoolStandings();
+  
+  // Transform emergency data into the selections format
+  const selectionsData: Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }> = {};
+  
+  emergencyData.forEach(participant => {
+    if (participant.name) {
+      // Convert pick scores to an array in the same order as picks
+      const roundScores = participant.picks?.map(pick => 
+        participant.pickScores?.[pick] || 0
+      ) || [];
+      
+      selectionsData[participant.name] = {
+        picks: participant.picks || [],
+        roundScores,
+        tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+      };
+    }
+  });
+  
+  return selectionsData;
+}
+
+/**
  * Fetch pool standings exclusively from Google Sheets
  */
 export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
@@ -28,8 +58,9 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
     const leaderboardData = await fetchLeaderboardData();
     const golferScores = buildGolferScoreMap(leaderboardData.leaderboard);
     
-    // Get all player selections
-    const selectionsData = await fetchPlayerSelections();
+    // Get all player selections without using fetchPoolStandings 
+    // to avoid circular dependency
+    const selectionsData = await fetchRawSelectionsData();
     
     // Calculate pool standings based on current leaderboard
     const calculatedStandings = calculatePoolStandings(selectionsData, golferScores);
@@ -68,45 +99,21 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
  */
 export async function fetchPlayerSelections(participantName?: string): Promise<Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }>> {
   try {
-    // Get all participants first
-    const standings = await fetchPoolStandings();
+    // Use raw data instead of pool standings to avoid circular dependency
+    const selectionsData = await fetchRawSelectionsData();
     
     // If no participant name provided, return all selections
     if (!participantName) {
-      const allSelections: Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }> = {};
-      
-      standings.forEach(participant => {
-        if (participant.name) {
-          // Convert pick scores to an array in the same order as picks
-          const roundScores = participant.picks?.map(pick => 
-            participant.pickScores?.[pick] || 0
-          ) || [];
-          
-          allSelections[participant.name] = {
-            picks: participant.picks || [],
-            roundScores,
-            tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
-          };
-        }
-      });
-      
-      return allSelections;
+      return selectionsData;
     }
     
     // If participant name is provided, find that specific participant
-    const participant = standings.find(p => 
-      p.name.toLowerCase() === participantName.toLowerCase()
-    );
+    const participantData = selectionsData[participantName];
     
-    if (participant) {
+    if (participantData) {
       // For a single participant, return an object with just their name as the key
-      // This ensures the return type is always the same Record<string, {...}> structure
       return {
-        [participantName]: {
-          picks: participant.picks || [],
-          roundScores: participant.picks?.map(pick => participant.pickScores?.[pick] || 0) || [],
-          tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
-        }
+        [participantName]: participantData
       };
     }
     
