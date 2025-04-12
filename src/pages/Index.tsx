@@ -32,8 +32,10 @@ const Index = () => {
           accentClass="accent-jasmine" />
       </div>
       
-      <div className="w-full augusta-shadow azalea-accent dogwood-accent">
-        <PoolStandings />
+      <div className="w-full augusta-shadow rounded-lg overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-sm border border-masters-green/20">
+          <PoolStandings />
+        </div>
       </div>
     </Layout>
   );
