@@ -7,7 +7,11 @@ import { buildGolferScoreMap } from "@/utils/scoringUtils";
 import { useToast } from "@/hooks/use-toast";
 import { isTournamentInProgress } from "@/services/api";
 
-const Leaderboard = () => {
+interface LeaderboardProps {
+  forceCriticalOutage?: boolean;
+}
+
+const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }) => {
   const [leaderboard, setLeaderboard] = useState<GolferScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +115,7 @@ const Leaderboard = () => {
       <LeaderboardHeader 
         lastUpdated={lastUpdated} 
         loading={loading} 
+        refreshing={refreshing}
         tournamentActive={tournamentActive}
         onRefresh={refreshData}
       />

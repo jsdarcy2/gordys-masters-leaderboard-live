@@ -10,8 +10,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface LeaderboardHeaderProps {
   lastUpdated: string;
   loading: boolean;
-  refreshing: boolean;
-  handleManualRefresh: () => void;
+  refreshing?: boolean;
+  handleManualRefresh?: () => void;
+  onRefresh?: () => void;
   dataSource?: string;
   errorMessage?: string;
   tournamentYear?: string;
@@ -22,19 +23,22 @@ interface LeaderboardHeaderProps {
     timestamp: string;
   };
   criticalOutage?: boolean;
+  tournamentActive?: boolean;
 }
 
 const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   lastUpdated,
   loading,
-  refreshing,
+  refreshing = false,
   handleManualRefresh,
+  onRefresh,
   dataSource,
   errorMessage,
   tournamentYear,
   hasLiveData = false,
   dataHealth,
-  criticalOutage = false
+  criticalOutage = false,
+  tournamentActive = false
 }) => {
   const isMobile = useIsMobile();
   const imageOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.010]";

@@ -1,10 +1,12 @@
+
 import { DataSource } from "@/types";
 
 // Re-export functions from modular service files
 export { isTournamentInProgress, getCurrentTournament } from './tournament';
-export { fetchLeaderboardData, buildGolferScoreMap } from './leaderboard';
+export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from './leaderboard';
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
+export { fetchLeaderboardFromGoogleSheets } from './googleSheetsApi';
 
 // Masters.com API endpoint - Updating to use our own hosted API
 export const API_ENDPOINTS = {
