@@ -56,6 +56,10 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   const sourceLink = getDataSourceLink();
   const googleSheetLink = "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
   
+  const handleGoogleSheetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+  
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
       <div className="flex items-center">
@@ -94,7 +98,8 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
               href={sourceLink} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="ml-2 text-white/80 hover:text-white inline-flex items-center"
+              className="ml-2 text-white/80 hover:text-white inline-flex items-center cursor-pointer"
+              onClick={handleGoogleSheetClick}
             >
               <ExternalLink size={12} className="ml-0.5" />
             </a>
@@ -105,9 +110,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             href={googleSheetLink} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="ml-3 text-white/90 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center"
+            className="ml-3 text-white/90 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
             title="Google Sheet Backup"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleGoogleSheetClick}
           >
             <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
             <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>
