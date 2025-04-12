@@ -2,7 +2,7 @@
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
-import { Check } from "lucide-react";
+import { Check, Ban } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 import WinnerIcons from "../leaderboard/WinnerIcons";
+import { Badge } from "@/components/ui/badge";
 
 interface ParticipantTableProps {
   displayStandings: PoolParticipant[];
@@ -53,12 +54,15 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.bestFourGolfers || [];
               const isPaid = participant.paid !== false;
+              const missedCut = participant.totalScore > 200;
               
               return (
                 <tr
                   key={participant.name}
                   className={`${
                     index % 2 === 0 ? "bg-white" : "bg-stone-50"
+                  } ${
+                    missedCut ? "bg-red-50" : ""
                   } ${
                     searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
                       ? "bg-masters-green/10"
@@ -69,17 +73,29 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                     <WinnerIcons position={participant.position} isPoolStandings={true} />
                   </td>
                   <td className="px-2 py-3 font-medium">
-                    {participant.name}
-                    {!isPaid && (
-                      <span className="ml-2 text-xs text-red-500 font-normal">(unpaid)</span>
-                    )}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {participant.name}
+                      {!isPaid && (
+                        <span className="text-xs text-red-500 font-normal">(unpaid)</span>
+                      )}
+                      {missedCut && (
+                        <Badge variant="destructive" className="text-xs py-0 px-1.5 h-5 bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800">
+                          <Ban size={12} className="mr-1" />
+                          Missed Cut
+                        </Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="px-2 py-3 text-right font-medium">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
                           <span className="border-b border-dotted border-gray-400">
-                            {participant.totalScore > 0 ? `+${participant.totalScore}` : participant.totalScore}
+                            {missedCut ? (
+                              <span className="text-red-600">MC</span>
+                            ) : (
+                              participant.totalScore > 0 ? `+${participant.totalScore}` : participant.totalScore
+                            )}
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>

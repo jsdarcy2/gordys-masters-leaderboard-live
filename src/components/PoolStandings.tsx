@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,8 +11,9 @@ import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Info } from "lucide-react";
+import { RefreshCcw, Info, Ban } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
@@ -144,6 +145,13 @@ const PoolStandings = () => {
     
   const totalParticipants = standings.length;
   const filteredCount = filteredStandings.length;
+  
+  // Calculate active vs missed cut counts
+  const missedCutCount = useMemo(() => {
+    return standings.filter(participant => participant.totalScore > 200).length;
+  }, [standings]);
+  
+  const activeParticipantCount = totalParticipants - missedCutCount;
 
   return (
     <div className="masters-card">
@@ -161,6 +169,23 @@ const PoolStandings = () => {
             <AlertTitle className="text-blue-800">Showing Final Masters Pool Standings</AlertTitle>
             <AlertDescription className="text-blue-700 text-sm">
               The leaderboard displays the final Masters Pool standings. Each participant's score is calculated using their best 4 out of 5 golfer picks.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {!loading && standings.length > 0 && (
+          <Alert variant="default" className="mb-4 bg-masters-green/10 border-masters-green/20">
+            <Info className="h-4 w-4 text-masters-green" />
+            <AlertDescription className="text-masters-dark flex flex-wrap items-center gap-x-4">
+              <div>
+                <span className="font-medium">{activeParticipantCount}</span> active participants
+              </div>
+              <div>
+                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1">
+                  <Ban size={12} />
+                  <span>{missedCutCount} missed cut</span>
+                </Badge>
+              </div>
             </AlertDescription>
           </Alert>
         )}

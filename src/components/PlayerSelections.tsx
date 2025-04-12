@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PoolParticipant } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 type TeamSelection = {
   picks: string[];
@@ -151,6 +153,15 @@ const PlayerSelections = () => {
     return roundScores.reduce((sum, score) => sum + score, 0);
   };
 
+  const missedCutCount = useMemo(() => {
+    return Object.values(selections).filter(data => {
+      const totalScore = calculateTotalRoundScore(data.roundScores);
+      return totalScore > 200;
+    }).length;
+  }, [selections]);
+
+  const activeParticipantCount = Object.keys(selections).length - missedCutCount;
+
   return (
     <div className="space-y-8">
       <div className="masters-card">
@@ -166,6 +177,18 @@ const PlayerSelections = () => {
         <div className="p-4 bg-white">
           {error && (
             <div className="text-center text-red-500 py-4">{error}</div>
+          )}
+          
+          {!loading && selections && Object.keys(selections).length > 0 && (
+            <Alert className="mb-4 bg-masters-green/10 border-masters-green/20">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-masters-green" />
+                <AlertDescription className="text-masters-dark">
+                  <span className="font-medium">{activeParticipantCount}</span> active participants, 
+                  <span className="font-medium text-red-600 ml-1">{missedCutCount}</span> missed cut
+                </AlertDescription>
+              </div>
+            </Alert>
           )}
           
           <div className="mb-6 relative">
