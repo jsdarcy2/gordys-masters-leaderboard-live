@@ -1,4 +1,3 @@
-
 /**
  * Get base sample teams data for consistency
  */
@@ -495,7 +494,6 @@ export const getBaseSampleTeams = () => {
       roundScores: [0, 0, 0, 0, 0],
       tiebreakers: [140, 276] as [number, number]
     },
-    // Adding all the new entries
     "Donny Schmitt": {
       picks: ["Rory McIlroy", "Tom Hoge", "Collin Morikawa", "Sepp Straka", "Justin Thomas"],
       roundScores: [0, 0, 0, 0, 0],
