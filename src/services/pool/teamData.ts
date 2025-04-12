@@ -1,3 +1,4 @@
+
 /**
  * Get base sample teams data for consistency
  */
@@ -491,4 +492,8 @@ export const getBaseSampleTeams = () => {
     },
     "Jackson Saunders": {
       picks: ["Scottie Scheffler", "Xander Schauffele", "Will Zalatoris", "Cameron Smith", "Viktor Hovland"],
-      roundScores: [0,
+      roundScores: [0, 0, 0, 0, 0],
+      tiebreakers: [140, 276] as [number, number]
+    }
+  };
+};
