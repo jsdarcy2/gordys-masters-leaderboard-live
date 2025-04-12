@@ -11,9 +11,10 @@ import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Info, Ban } from "lucide-react";
+import { RefreshCcw, Info, Ban, FileSpreadsheet } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
@@ -31,6 +32,8 @@ const PoolStandings = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isTournamentActive, setIsTournamentActive] = useState(false);
   const [usingEmergencyData, setUsingEmergencyData] = useState(false);
+  const [dataSource, setDataSource] = useState<string>("primary");
+  const [criticalError, setCriticalError] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -39,6 +42,7 @@ const PoolStandings = () => {
   const loadStandingsData = async () => {
     try {
       setLoading(true);
+      // Try to fetch from primary source first
       const data = await fetchPoolStandings();
       
       console.log("Fetched pool standings data:", data.length, "participants");
@@ -46,11 +50,17 @@ const PoolStandings = () => {
       if (data.length === 0) {
         errorCountRef.current++;
         setError("No data available. Please try again later.");
+        
+        if (errorCountRef.current >= ERROR_THRESHOLD) {
+          setCriticalError(true);
+        }
         return;
       }
       
       errorCountRef.current = 0;
+      setCriticalError(false);
       setStandings(data);
+      setDataSource("primary");
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
       setError(null);
@@ -65,6 +75,50 @@ const PoolStandings = () => {
       errorCountRef.current++;
       console.error("Error fetching pool standings:", err);
       setError("Having trouble connecting to the tournament data");
+      
+      if (errorCountRef.current >= ERROR_THRESHOLD) {
+        setCriticalError(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tryGoogleSheets = async () => {
+    try {
+      setLoading(true);
+      toast({
+        title: "Trying Google Sheets backup",
+        description: "Fetching data from Google Sheets..."
+      });
+      
+      const sheetsData = await fetchPoolStandingsFromGoogleSheets();
+      
+      if (sheetsData && sheetsData.length > 0) {
+        setStandings(sheetsData);
+        setDataSource("google-sheets");
+        setLastUpdated(new Date().toISOString());
+        setCriticalError(false);
+        setError(null);
+        
+        toast({
+          title: "Using Google Sheets data",
+          description: `Successfully retrieved ${sheetsData.length} participants from Google Sheets`,
+        });
+      } else {
+        toast({
+          title: "Google Sheets Error",
+          description: "Could not retrieve data from Google Sheets",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching from Google Sheets:", err);
+      toast({
+        title: "Google Sheets Error",
+        description: "Failed to fetch from Google Sheets backup",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
@@ -140,6 +194,31 @@ const PoolStandings = () => {
   const activeParticipantCount = ACTIVE_PARTICIPANTS; 
   const missedCutCount = MISSED_CUT_PARTICIPANTS;
 
+  if (criticalError) {
+    return (
+      <div className="masters-card">
+        <PoolStandingsHeader 
+          lastUpdated={lastUpdated} 
+          totalParticipants={totalParticipants} 
+          loading={loading}
+          isTournamentActive={isTournamentActive}
+          activeParticipants={activeParticipantCount}
+          missedCutCount={missedCutCount}
+          onRefresh={handleManualRefresh}
+        />
+        
+        <div className="p-4 bg-white">
+          <PoolStandingsFallback
+            message="We're having trouble connecting to the data source. You can try refreshing or using our Google Sheets backup."
+            onRetry={handleManualRefresh}
+            severity="critical"
+            tryGoogleSheets={tryGoogleSheets}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="masters-card">
       <PoolStandingsHeader 
@@ -153,6 +232,26 @@ const PoolStandings = () => {
       />
       
       <div className="p-4 bg-white">
+        {dataSource === "google-sheets" && (
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+            <FileSpreadsheet className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800 text-sm flex justify-between items-center">
+              <span>
+                Using Google Sheets backup data. Primary data source is currently unavailable.
+              </span>
+              <Button 
+                onClick={handleManualRefresh} 
+                variant="outline" 
+                size="sm" 
+                className="ml-2 text-xs px-2 py-1 bg-white border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center"
+              >
+                <RefreshCw size={12} className="mr-1" />
+                Try Primary Source
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+      
         {usingEmergencyData && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-600" />
@@ -180,7 +279,7 @@ const PoolStandings = () => {
           </Alert>
         )}
         
-        {error && (
+        {error && !criticalError && (
           <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTitle className="text-amber-800">Connection Issue</AlertTitle>
             <AlertDescription className="text-amber-700 text-sm">
@@ -191,7 +290,7 @@ const PoolStandings = () => {
                 size="sm" 
                 className="mt-2 bg-white"
               >
-                <RefreshCcw size={14} className="mr-1" />
+                <RefreshCw size={14} className="mr-1" />
                 Try Again
               </Button>
             </AlertDescription>
@@ -222,10 +321,16 @@ const PoolStandings = () => {
               <div className="text-center py-8">
                 <p className="text-gray-700 font-medium">No pool standings data available</p>
                 <p className="text-gray-500 text-sm mb-4">We're having trouble retrieving the current standings</p>
-                <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
-                  <RefreshCcw size={16} className="mr-2" />
-                  Refresh Data
-                </Button>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
+                    <RefreshCw size={16} className="mr-2" />
+                    Refresh Data
+                  </Button>
+                  <Button onClick={tryGoogleSheets} variant="outline" className="border-amber-500 text-amber-600">
+                    <FileSpreadsheet size={16} className="mr-2" />
+                    Try Google Sheets
+                  </Button>
+                </div>
               </div>
             ) : (
               <>

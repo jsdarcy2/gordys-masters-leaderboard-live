@@ -1,19 +1,21 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Trophy, Flag, CircleDot } from "lucide-react";
+import { RefreshCw, Trophy, Flag, CircleDot, FileSpreadsheet } from "lucide-react";
 import Image from "@/components/ui/image";
 
 interface PoolStandingsFallbackProps {
   message?: string;
   onRetry: () => void;
   severity?: 'normal' | 'critical';
+  tryGoogleSheets?: () => void;
 }
 
 const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
   message = "Pool standings data is refreshing. You can continue viewing the tournament while we update.",
   onRetry,
-  severity = 'normal'
+  severity = 'normal',
+  tryGoogleSheets
 }) => {
   console.log("Rendering PoolStandingsFallback component with message:", message);
   
@@ -74,7 +76,7 @@ const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
           </div>
         </div>
         
-        <div className="mt-4 text-center">
+        <div className="mt-4 text-center flex flex-col sm:flex-row gap-3 justify-center">
           <Button
             onClick={onRetry}
             variant="outline"
@@ -84,6 +86,18 @@ const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
             <RefreshCw size={14} className="mr-2" />
             Check Status
           </Button>
+
+          {tryGoogleSheets && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-amber-500 text-amber-600 hover:bg-amber-500/10"
+              onClick={tryGoogleSheets}
+            >
+              <FileSpreadsheet size={14} className="mr-2" />
+              Try Google Sheets Data
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -37,8 +37,29 @@ export const checkApiHealth = async (
 };
 
 // Get the best data source (simplified)
-export const getBestDataSource = (): DataSource => {
-  return 'masters-scores-api';
+export const getBestDataSource = async (): Promise<DataSource> => {
+  try {
+    // First check if our primary API is available
+    const primaryHealthy = await checkApiHealth(API_ENDPOINTS.MASTERS_SCORES);
+    
+    if (primaryHealthy) {
+      return 'masters-scores-api';
+    }
+    
+    // If primary is unavailable, check Google Sheets availability
+    const { checkGoogleSheetsAvailability } = await import('./googleSheetsApi');
+    const sheetsAvailable = await checkGoogleSheetsAvailability();
+    
+    if (sheetsAvailable) {
+      return 'google-sheets';
+    }
+    
+    // Fallback to mock data if both are unavailable
+    return 'mock-data';
+  } catch (error) {
+    console.error("Error determining best data source:", error);
+    return 'masters-scores-api'; // Default fallback
+  }
 };
 
 /**
@@ -54,5 +75,23 @@ export const forceRefreshPoolData = async (): Promise<void> => {
   } catch (error) {
     console.error("Error forcing refresh:", error);
     return Promise.reject(error);
+  }
+};
+
+/**
+ * Function to enable direct Google Sheets data retrieval
+ */
+export const fetchDataFromGoogleSheets = async (dataType: 'leaderboard' | 'pool'): Promise<any> => {
+  const { fetchLeaderboardFromGoogleSheets, fetchPoolStandingsFromGoogleSheets } = await import('./googleSheetsApi');
+  
+  try {
+    if (dataType === 'leaderboard') {
+      return await fetchLeaderboardFromGoogleSheets();
+    } else {
+      return await fetchPoolStandingsFromGoogleSheets();
+    }
+  } catch (error) {
+    console.error(`Error fetching ${dataType} from Google Sheets:`, error);
+    throw error;
   }
 };
