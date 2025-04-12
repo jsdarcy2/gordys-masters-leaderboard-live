@@ -11,8 +11,9 @@ const LoadingState = () => {
             <th className="masters-table-header rounded-tl-md">Pos</th>
             <th className="masters-table-header">Player</th>
             <th className="masters-table-header text-right">Score</th>
+            <th className="masters-table-header text-right">R1</th>
+            <th className="masters-table-header text-right">R2</th>
             <th className="masters-table-header text-right">Today</th>
-            <th className="masters-table-header text-right">Thru</th>
             <th className="masters-table-header text-right rounded-tr-md">Prize Money</th>
           </tr>
         </thead>
@@ -32,7 +33,10 @@ const LoadingState = () => {
                 <Skeleton className="h-6 w-10 ml-auto" />
               </td>
               <td className="px-2 py-3 text-right">
-                <Skeleton className="h-6 w-6 ml-auto" />
+                <Skeleton className="h-6 w-10 ml-auto" />
+              </td>
+              <td className="px-2 py-3 text-right">
+                <Skeleton className="h-6 w-10 ml-auto" />
               </td>
               <td className="px-2 py-3 text-right">
                 <Skeleton className="h-6 w-20 ml-auto" />

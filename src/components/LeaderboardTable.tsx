@@ -37,7 +37,6 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th className="masters-table-header text-right">R1</th>
               <th className="masters-table-header text-right">R2</th>
               <th className="masters-table-header text-right">Today</th>
-              <th className="masters-table-header text-right">Thru</th>
               <th className="masters-table-header text-right rounded-tr-md">
                 Prize Money
               </th>
@@ -46,7 +45,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           <tbody>
             {leaderboard.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center py-8 text-gray-500">
+                <td colSpan={7} className="text-center py-8 text-gray-500">
                   No leaderboard data available
                 </td>
               </tr>
@@ -97,7 +96,6 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   <td className={`px-2 py-3 text-right ${getScoreClass(golfer.today)}`}>
                     {formatScore(golfer.today)}
                   </td>
-                  <td className="px-2 py-3 text-right">{golfer.thru}</td>
                   <td className="px-2 py-3 text-right">
                     {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
                       <span className="inline-flex items-center font-medium text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded">

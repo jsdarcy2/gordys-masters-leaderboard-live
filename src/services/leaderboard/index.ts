@@ -41,11 +41,22 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
         const totalScore = player.topar === 'E' ? 0 : parseInt(player.topar, 10) || 0;
         const todayScore = player.today === 'E' ? 0 : parseInt(player.today, 10) || 0;
         
-        // Parse round scores
-        const round1Score = player.round1 === 'E' ? 0 : parseInt(player.round1, 10) || undefined;
-        const round2Score = player.round2 === 'E' ? 0 : parseInt(player.round2, 10) || undefined;
-        const round3Score = player.round3 === 'E' ? 0 : parseInt(player.round3, 10) || undefined;
-        const round4Score = player.round4 === 'E' ? 0 : parseInt(player.round4, 10) || undefined;
+        // Parse round scores - explicitly handle 'E' as 0
+        const round1Score = player.round1 === 'E' ? 0 : 
+                          player.round1 === '' ? undefined : 
+                          parseInt(player.round1, 10) || 0;
+                          
+        const round2Score = player.round2 === 'E' ? 0 : 
+                          player.round2 === '' ? undefined : 
+                          parseInt(player.round2, 10) || 0;
+                          
+        const round3Score = player.round3 === 'E' ? 0 : 
+                          player.round3 === '' ? undefined : 
+                          parseInt(player.round3, 10) || 0;
+                          
+        const round4Score = player.round4 === 'E' ? 0 : 
+                          player.round4 === '' ? undefined : 
+                          parseInt(player.round4, 10) || 0;
         
         // Determine player status
         let playerStatus: "active" | "cut" | "withdrawn" = "active";
@@ -63,7 +74,6 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
           name: player.name || player.playerName || 'Unknown',
           score: totalScore,
           today: todayScore,
-          thru: player.thru || player.teetime || 'F',
           status: playerStatus,
           round1: round1Score,
           round2: round2Score,
