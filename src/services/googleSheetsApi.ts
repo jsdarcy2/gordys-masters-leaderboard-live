@@ -1,3 +1,4 @@
+
 /**
  * Google Sheets API integration for Masters Pool data
  * 
@@ -132,12 +133,18 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
  */
 export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]> {
   try {
+    // Add at the start of the function
+    console.log("Fetching leaderboard data...");
+    
     const sheetName = "Leaderboard";
     const rowData = await fetchSheetData(sheetName);
     
     if (!rowData || rowData.length < 2) {
       throw new Error("Invalid or empty leaderboard data");
     }
+    
+    // After fetching the raw data
+    console.log(`Raw data rows: ${rowData.length}`);
     
     // Extract header row to identify column indices
     const headers = rowData[0].map(header => header.toLowerCase());
@@ -148,6 +155,13 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
     const thruIndex = headers.indexOf("thru");
     const statusIndex = headers.indexOf("status");
     const strokesIndex = headers.indexOf("strokes");
+    
+    // Log any rows that might be skipped due to invalid data
+    rowData.slice(1).forEach((row, index) => {
+      if (!row[nameIndex] || row[nameIndex].trim() === "") {
+        console.log(`Skipping row ${index + 1} due to missing name`);
+      }
+    });
     
     // Map row data to GolferScore objects
     const leaderboard: GolferScore[] = rowData.slice(1).map(row => {
@@ -161,6 +175,9 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
         strokes: row[strokesIndex] ? parseInt(row[strokesIndex], 10) : undefined
       };
     });
+    
+    // After processing but before sorting
+    console.log(`Processed leaderboard entries: ${leaderboard.length}`);
     
     // Sort by position
     return leaderboard.sort((a, b) => a.position - b.position);
