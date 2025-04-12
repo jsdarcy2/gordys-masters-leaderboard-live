@@ -139,7 +139,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       setDataSourceError(errorMessage);
     } else if (dataSource === 'no-data') {
       setDataSourceError("Data refresh in progress. Please wait a moment.");
-    } else if (dataSource === 'mock-data' as DataSource) {
+    } else if (dataSource === 'mock-data') {
       setDataSourceError("Estimated scores currently displayed. Live data refresh in progress.");
     } else {
       setDataSourceError(undefined);
@@ -250,10 +250,13 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       <div className="p-4 bg-white">
         <Alert variant="default" className="mb-4 bg-masters-green/10 border-masters-green/20">
           <Trophy className="h-4 w-4 text-masters-green" />
-          <AlertTitle className="text-masters-green font-serif">Final 2024 Masters Results</AlertTitle>
+          <AlertTitle className="text-masters-green font-serif">
+            Final {TOURNAMENT_YEAR} Masters Results
+          </AlertTitle>
           <AlertDescription className="text-masters-dark text-sm">
-            Showing the final results from the 2024 Masters Tournament. 
-            Justin Rose won his first green jacket with a score of -8.
+            Showing the final results from the {TOURNAMENT_YEAR} Masters Tournament. 
+            {TOURNAMENT_YEAR === "2025" && "Scottie Scheffler won his second green jacket with a dominant performance."}
+            {TOURNAMENT_YEAR === "2024" && "Scottie Scheffler won his second green jacket with a score of -11."}
           </AlertDescription>
         </Alert>
         
@@ -295,7 +298,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
           </Alert>
         )}
         
-        {dataSource === ('mock-data' as DataSource) && (
+        {dataSource === 'mock-data' && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertTitle className="text-blue-800">Estimated Standings</AlertTitle>

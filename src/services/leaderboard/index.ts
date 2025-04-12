@@ -6,7 +6,7 @@ import { generateMastersLeaderboard } from "./leaderboardData";
 // Cache for leaderboard data
 let leaderboardCache: GolferScore[] | null = null;
 let lastFetchTime: number = 0;
-const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache TTL
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL (reduced from 15 minutes)
 
 /**
  * Fetch scores data from Masters.com scores API
@@ -17,8 +17,11 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
     const response = await fetch(API_ENDPOINTS.MASTERS_SCORES, {
       headers: {
         'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
+      },
+      // Force a new request each time
+      cache: 'no-store'
     });
     
     if (!response.ok) {
@@ -106,9 +109,35 @@ export async function fetchLeaderboardData(): Promise<{
       };
     }
     
+    // If no data received from API, try to use mock data as fallback
+    const mockData = generateMastersLeaderboard();
+    if (mockData && mockData.length > 0) {
+      console.log("Using generated mock leaderboard data as fallback");
+      return {
+        leaderboard: mockData,
+        source: "mock-data",
+        lastUpdated: new Date().toISOString()
+      };
+    }
+    
     throw new Error("No data returned from Masters.com scores API");
   } catch (error) {
     console.warn("Error fetching leaderboard data:", error);
+    
+    // Try to generate mock data as first fallback
+    try {
+      const mockData = generateMastersLeaderboard();
+      if (mockData && mockData.length > 0) {
+        console.log("Using generated mock leaderboard data due to API error");
+        return {
+          leaderboard: mockData,
+          source: "mock-data",
+          lastUpdated: new Date().toISOString()
+        };
+      }
+    } catch (mockError) {
+      console.error("Error generating mock data:", mockError);
+    }
     
     // If we have a cache, return it regardless of age in case of error
     if (leaderboardCache && leaderboardCache.length > 0) {
