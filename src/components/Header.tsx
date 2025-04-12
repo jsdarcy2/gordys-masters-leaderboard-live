@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star, Tv, ChevronDown } from "lucide-react";
+import { Menu, X, Star, Tv, Trophy } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
@@ -35,13 +35,14 @@ const Header = () => {
   }, []);
   
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+    <header className={`sticky top-0 z-50 transition-all duration-500 ${
       scrolled 
-        ? "bg-gradient-to-r from-masters-darkgreen to-masters-green shadow-md" 
-        : "bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark"
-      } text-white border-b border-masters-gold/30`}>
-      {/* Improved background texture with reduced opacity */}
-      <div className="absolute inset-0 w-full h-full opacity-10">
+        ? "bg-masters-dark/95 shadow-md" 
+        : "bg-gradient-to-r from-masters-dark/90 via-masters-green/90 to-masters-dark/90"
+      } border-b border-masters-gold/20`}>
+      
+      {/* Augusta National backdrop - elegant and subtle */}
+      <div className="absolute inset-0 w-full h-full opacity-[0.07]">
         <Image 
           src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
           alt="Augusta National" 
@@ -49,77 +50,84 @@ const Header = () => {
         />
       </div>
       
-      {/* Enhanced overlay with glassmorphism effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/80 via-masters-green/70 to-masters-dark/80 backdrop-blur-sm"></div>
+      {/* Enhanced overlay with improved glassmorphism */}
+      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/90 via-masters-green/80 to-masters-dark/90 backdrop-blur-[2px]"></div>
       
-      {/* Subtle Nelson Bridge silhouette */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
+      {/* Amen Corner silhouette for visual identity */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none">
         <div className="container mx-auto h-full relative">
-          <div className="absolute bottom-0 right-0 w-1/3 h-1/2 opacity-10 hidden md:block">
-            <svg viewBox="0 0 400 200" className="w-full h-full fill-masters-yellow/5 stroke-masters-yellow/20" preserveAspectRatio="xMidYMax meet">
-              {/* Stone bridge arch */}
-              <path d="M0,200 C50,180 100,100 150,100 C200,100 250,150 300,150 C350,150 400,130 400,100 L400,200 L0,200 Z" strokeWidth="1" />
-              {/* Bridge railings */}
-              <path d="M100,200 L100,130 L300,130 L300,200" strokeWidth="1" fill="none" />
-              {/* Bridge posts */}
-              <path d="M125,130 L125,150 M150,130 L150,150 M175,130 L175,150 M200,130 L200,150 M225,130 L225,150 M250,130 L250,150 M275,130 L275,150" strokeWidth="1" strokeDasharray="2,3" fill="none" />
-              {/* Water reflection */}
-              <path d="M50,180 Q200,190 350,180" stroke="rgba(255,231,51,0.1)" strokeWidth="1" fill="none" />
-              {/* Subtle azaleas around the bridge */}
-              <circle cx="80" cy="150" r="5" className="fill-[#FFC0CB]/10 stroke-[#FFC0CB]/5" />
-              <circle cx="90" cy="160" r="4" className="fill-[#FFC0CB]/10 stroke-[#FFC0CB]/5" />
-              <circle cx="310" cy="150" r="5" className="fill-[#FFC0CB]/10 stroke-[#FFC0CB]/5" />
-              <circle cx="320" cy="160" r="4" className="fill-[#FFC0CB]/10 stroke-[#FFC0CB]/5" />
+          <div className="absolute right-0 bottom-0 w-1/2 h-1/2 opacity-8 hidden md:block">
+            <svg viewBox="0 0 800 200" className="w-full h-full fill-none" preserveAspectRatio="xMidYMax meet">
+              {/* Stylized Amen Corner outline */}
+              <path 
+                d="M0,200 C100,180 200,160 300,160 C400,160 450,140 500,140 C600,140 700,120 800,100 L800,200 L0,200 Z" 
+                className="fill-masters-gold/[0.03] stroke-masters-gold/[0.05]" 
+                strokeWidth="1" 
+              />
+              {/* Azalea hints around the corner */}
+              <circle cx="400" cy="150" r="5" className="fill-[#FFD6E0]/5" />
+              <circle cx="410" cy="145" r="4" className="fill-[#FFD6E0]/5" />
+              <circle cx="420" cy="155" r="3" className="fill-[#FFD6E0]/5" />
+              {/* Pine silhouette */}
+              <path 
+                d="M600,140 L600,110 M580,140 L580,100 M560,140 L560,105 M620,140 L620,115 M640,140 L640,90" 
+                className="stroke-masters-dustygreen/10" 
+                strokeWidth="1" 
+              />
             </svg>
           </div>
         </div>
       </div>
       
       <div className="container mx-auto relative z-10">
-        <div className="px-4 py-3 md:py-4 flex flex-col">
+        <div className="px-6 py-6 md:py-8 flex flex-col">
           <div className="flex justify-between items-center">
-            {/* Logo area with subtle glow effect */}
-            <div className="flex flex-col relative">
-              <div className="absolute -inset-1 bg-masters-gold/10 opacity-70 blur-sm rounded-full"></div>
-              <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight relative">
-                <span className="text-white">Gordy's</span> 
-                <span className="text-masters-gold animate-gentle-pulse">Masters</span> 
-                <span className="text-white">Pool</span>
-                <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-masters-yellow/90 text-masters-dark">
-                  <Star size={10} className="mr-0.5" />
-                  2025
-                </span>
-              </h1>
-              <p className="text-masters-yellow/90 font-serif text-xs md:text-sm italic">
-                A tradition unlike any other
-              </p>
+            {/* Logo area with refined styling */}
+            <div className="flex flex-col">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-masters-gold/5 blur-md rounded-full"></div>
+                <h1 className="font-serif tracking-wide relative">
+                  <span className="text-xl md:text-3xl font-semibold">
+                    <span className="text-white">Gordy's</span> 
+                    <span className="text-masters-gold ml-1">Masters</span> 
+                    <span className="text-white ml-1">Pool</span>
+                  </span>
+                  <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-masters-yellow/80 text-masters-dark">
+                    <Trophy size={10} className="mr-1" />
+                    2025
+                  </span>
+                </h1>
+                <p className="text-masters-yellow/80 font-serif text-sm italic mt-1">
+                  A tradition unlike any other since 2005
+                </p>
+              </div>
             </div>
             
-            {/* Mobile menu button with improved hover effect */}
+            {/* Mobile menu button with more elegant styling */}
             <button 
               onClick={toggleMobileMenu}
-              className="block md:hidden text-white p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              className="block md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
           
-          {/* Desktop navigation with refined styling */}
-          <nav className="hidden md:block mt-4">
+          {/* Desktop navigation - more elegant, inspired by Augusta */}
+          <nav className="hidden md:block mt-6">
             <div className="flex justify-center">
-              <ul className="flex space-x-1 bg-masters-dark/40 backdrop-blur-sm rounded-full px-2 py-1 shadow-inner border border-white/5">
+              <ul className="flex space-x-2 bg-masters-dark/40 backdrop-blur-md rounded-full px-4 py-2 shadow-sm border border-white/10">
                 {NAV_TABS.map((tab) => (
                   <li key={tab.id}>
                     <Link
                       to={tab.href}
-                      className={`font-serif text-sm transition-all duration-200 px-3 py-1.5 rounded-full flex items-center ${
+                      className={`font-serif text-sm transition-all duration-300 px-4 py-2 rounded-full flex items-center ${
                         location.pathname === tab.href
                           ? "bg-white/15 text-masters-yellow font-medium shadow-inner"
                           : "text-white/90 hover:bg-white/5 hover:text-masters-yellow"
                       }`}
                     >
-                      {tab.icon && <span className="mr-1">{tab.icon}</span>}
+                      {tab.icon && <span className="mr-1.5">{tab.icon}</span>}
                       {tab.label}
                     </Link>
                   </li>
@@ -131,20 +139,20 @@ const Header = () => {
         
         {/* Mobile navigation with improved styling */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden bg-masters-dark/90 backdrop-blur-md border-t border-white/10 animate-smooth-appear rounded-b-lg shadow-md">
-            <ul className="flex flex-col">
+          <nav className="md:hidden bg-masters-dark/95 backdrop-blur-md border-t border-white/10 animate-smooth-appear rounded-b-lg shadow-md">
+            <ul className="flex flex-col py-2">
               {NAV_TABS.map((tab) => (
-                <li key={tab.id} className="border-b border-white/10 last:border-b-0">
+                <li key={tab.id} className="border-b border-white/5 last:border-b-0">
                   <Link
                     to={tab.href}
-                    className={`block py-3 px-4 font-serif text-sm flex items-center ${
+                    className={`block py-3.5 px-6 font-serif text-sm flex items-center ${
                       location.pathname === tab.href
                         ? "text-masters-yellow bg-white/5"
                         : "text-white hover:bg-white/5"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {tab.icon && <span className="mr-1.5">{tab.icon}</span>}
+                    {tab.icon && <span className="mr-2">{tab.icon}</span>}
                     {tab.label}
                   </Link>
                 </li>
