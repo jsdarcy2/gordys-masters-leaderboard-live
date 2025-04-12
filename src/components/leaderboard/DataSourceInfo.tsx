@@ -57,6 +57,8 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Masters.com";
       case "masters-api":
         return "Masters.com API";
+      case "masters-scores-api":
+        return "Masters Live Scores";
       case "fixed-data":
         return "Masters 2024";
       case "google-sheets":
@@ -79,6 +81,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
       case "sportsdata-api":
       case "masters-scraper":
       case "masters-api":
+      case "masters-scores-api":
         return `https://www.masters.com/en_US/scores/index.html`;
       case "historical-data":
       case "fixed-data":
