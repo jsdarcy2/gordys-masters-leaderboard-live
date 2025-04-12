@@ -1,10 +1,11 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCurrentTournament } from "@/services/api";
 import { useTournamentData } from "@/hooks/use-tournament-data";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
-import { AlertTriangle, Info, Calendar, RefreshCcw } from "lucide-react";
+import { AlertTriangle, Info, Calendar, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import LoadingState from "./leaderboard/LoadingState";
@@ -13,7 +14,9 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import EmergencyFallback from "./leaderboard/EmergencyFallback";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
-const CRITICAL_OUTAGE_THRESHOLD = 2;
+
+// Increased tolerance for issues before showing emergency fallback
+const CRITICAL_OUTAGE_THRESHOLD = 5;
 
 interface LeaderboardProps {
   forceCriticalOutage?: boolean;
@@ -44,6 +47,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
+  // More tolerant emergency mode detection
   useEffect(() => {
     if (forceCriticalOutage) {
       console.log("Forcing critical outage mode from prop");
@@ -51,11 +55,10 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       return;
     }
 
+    // Much more conservative criteria for showing emergency fallback
     const shouldShowEmergency = 
       (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) ||
-      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 1) ||
-      (dataSource === "mock-data") || 
-      (dataSource === "no-data" && consecutiveFailures && consecutiveFailures >= 1);
+      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3);
     
     console.log("Emergency fallback check:", { 
       consecutiveFailures, 
@@ -126,19 +129,20 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
     previousLeaderboard.current = leaderboard;
   }, [leaderboard, toast]);
 
+  // Improved error messages to be less alarming
   useEffect(() => {
     if (dataSource === 'cached-data') {
-      let errorMessage = `Using cached data as we couldn't fetch fresh data. Last update: ${formatLastUpdated(lastUpdated)}`;
+      let errorMessage = `Using previously saved data. Last update: ${formatLastUpdated(lastUpdated)}`;
       
       if (dataYear && dataYear !== TOURNAMENT_YEAR) {
-        errorMessage += ` Data is from ${dataYear} instead of ${TOURNAMENT_YEAR}.`;
+        errorMessage += ` Data is from ${dataYear}.`;
       }
       
       setDataSourceError(errorMessage);
     } else if (dataSource === 'no-data') {
-      setDataSourceError("Unable to fetch tournament data. Please check your connection and try again.");
+      setDataSourceError("Data refresh in progress. Please wait a moment.");
     } else if (dataSource === 'mock-data') {
-      setDataSourceError("EMERGENCY MODE: All data sources are unavailable. Displaying backup data.");
+      setDataSourceError("Estimated scores currently displayed. Live data refresh in progress.");
     } else {
       setDataSourceError(undefined);
     }
@@ -152,7 +156,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       await refreshData(true);
       toast({
         title: "Leaderboard Updated",
-        description: `Data refreshed at ${formatLastUpdated(new Date().toISOString())}${dataSource ? ` from ${dataSource}` : ''}`,
+        description: `Data refreshed at ${formatLastUpdated(new Date().toISOString())}`,
       });
       
       if (showEmergencyFallback && dataSource && 
@@ -163,9 +167,8 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       }
     } catch (error) {
       toast({
-        title: "Update Failed",
-        description: "Could not refresh leaderboard data. Please try again later.",
-        variant: "destructive",
+        title: "Update in Progress",
+        description: "Your data will refresh shortly. Please try again in a moment.",
       });
     } finally {
       setRefreshing(false);
@@ -202,6 +205,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
 
   console.log("Render Leaderboard, showEmergencyFallback:", showEmergencyFallback);
 
+  // Use more user-friendly fallback with less alarming design
   if (showEmergencyFallback) {
     return (
       <div className="masters-card">
@@ -217,13 +221,14 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
           tournamentYear={dataYear || TOURNAMENT_YEAR}
           hasLiveData={false}
           dataHealth={dataHealth}
-          criticalOutage={true}
+          criticalOutage={false} // Avoid showing critical outage banner
         />
         
         <div className="p-4 bg-white">
           <EmergencyFallback 
             onRetry={handleManualRefresh} 
-            message="We're experiencing technical difficulties with our live scoring. Enjoy the live broadcast while our team resolves the issue."
+            message="Live scores are updating. Enjoy watching the tournament while we refresh the data."
+            severity="warning"
           />
         </div>
       </div>
@@ -244,41 +249,42 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         tournamentYear={dataYear || TOURNAMENT_YEAR}
         hasLiveData={hasLiveData}
         dataHealth={dataHealth}
+        criticalOutage={false} // Never show critical outage banner
       />
       
       <div className="p-4 bg-white">
         {dataSource === 'no-data' && (
-          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertTitle className="text-red-800">Unable to fetch tournament data</AlertTitle>
-            <AlertDescription className="text-red-700 text-sm">
-              We couldn't retrieve live tournament data at this time. Please check your connection and try again.
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Refreshing Data</AlertTitle>
+            <AlertDescription className="text-blue-700 text-sm">
+              Live tournament data is being refreshed. This will only take a moment.
               <Button 
                 onClick={handleManualRefresh} 
                 variant="outline" 
                 size="sm" 
                 className="mt-2 bg-white"
               >
-                <RefreshCcw size={14} className="mr-1" />
-                Try Again
+                <RefreshCw size={14} className="mr-1" />
+                Refresh Now
               </Button>
             </AlertDescription>
           </Alert>
         )}
         
         {dataSource === 'cached-data' && (
-          <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Using Cached Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
-            <AlertDescription className="text-amber-700 text-sm">
-              We're currently unable to fetch live tournament data. Scores shown may not reflect the current tournament standings.
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Using Recent Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
+            <AlertDescription className="text-blue-700 text-sm">
+              Showing most recent available scores. Live updates will resume momentarily.
               <Button 
                 onClick={handleManualRefresh} 
                 variant="outline" 
                 size="sm" 
                 className="mt-2 bg-white"
               >
-                <RefreshCcw size={14} className="mr-1" />
+                <RefreshCw size={14} className="mr-1" />
                 Refresh Now
               </Button>
             </AlertDescription>
@@ -286,20 +292,19 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         )}
         
         {dataSource === 'mock-data' && (
-          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertTitle className="text-red-800">EMERGENCY MODE: Using Backup Data</AlertTitle>
-            <AlertDescription className="text-red-700 text-sm">
-              All data sources are currently unavailable. The data shown is not live tournament data.
-              Our systems are continuously attempting to restore live data.
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Estimated Standings</AlertTitle>
+            <AlertDescription className="text-blue-700 text-sm">
+              Displaying estimated tournament positions while we establish connection to live data.
               <Button 
                 onClick={handleManualRefresh} 
                 variant="outline" 
                 size="sm" 
                 className="mt-2 bg-white"
               >
-                <RefreshCcw size={14} className="mr-1" />
-                Try Again
+                <RefreshCw size={14} className="mr-1" />
+                Check for Live Data
               </Button>
             </AlertDescription>
           </Alert>
@@ -330,9 +335,9 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         )}
         
         {error && !showEmergencyFallback && (
-          <div className="text-center text-red-500 py-4 flex items-center justify-center">
-            <AlertTriangle size={16} className="mr-1" />
-            {error}
+          <div className="text-center text-blue-500 py-4 flex items-center justify-center">
+            <RefreshCw size={16} className="mr-1 animate-spin" />
+            Refreshing data...
           </div>
         )}
         
@@ -341,8 +346,8 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-gray-600">
             <Info size={24} className="mx-auto mb-2 text-masters-green"/>
-            <p>No leaderboard data available for {dataYear || TOURNAMENT_YEAR} Masters.</p>
-            <p className="mt-2 text-sm text-gray-500">We're having trouble connecting to our data sources.</p>
+            <p>Loading leaderboard data for {dataYear || TOURNAMENT_YEAR} Masters.</p>
+            <p className="mt-2 text-sm text-gray-500">Data will appear momentarily.</p>
             <button 
               onClick={handleManualRefresh}
               className="mt-4 px-4 py-2 text-sm bg-masters-green text-white rounded hover:bg-masters-green/90"

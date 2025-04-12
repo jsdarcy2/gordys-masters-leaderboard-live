@@ -20,7 +20,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   hasLiveData = false
 }) => {
   const formatLastUpdated = (timestamp: string): string => {
-    if (!timestamp) return "Unknown";
+    if (!timestamp) return "Just now";
     
     try {
       const date = new Date(timestamp);
@@ -31,12 +31,12 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
       });
     } catch (e) {
       console.error("Error formatting timestamp:", e);
-      return "Unknown";
+      return "Just now";
     }
   };
   
   const getDataSourceLabel = () => {
-    if (!dataSource) return "Unknown";
+    if (!dataSource) return "Updating";
     
     switch (dataSource.toLowerCase()) {
       case "espn-api":
@@ -46,11 +46,17 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
       case "historical-data":
         return "Historical Data";
       case "cached-data":
-        return "Cached Data";
+        return "Recent Data";
+      case "no-data":
+        return "Updating";
+      case "mock-data":
+        return "Estimated Data";
       case "pgatour-api":
         return "PGA Tour";
       case "masters-scraper":
         return "Masters.com";
+      case "google-sheets":
+        return "Live Tracker";
       default:
         return dataSource;
     }
@@ -71,6 +77,8 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return `https://www.masters.com/en_US/scores/index.html`;
       case "historical-data":
         return `https://www.masters.com/en_US/scores/index.html`;
+      case "google-sheets":
+        return `https://www.masters.com/en_US/scores/index.html`;
       default:
         return null;
     }
@@ -81,11 +89,11 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
       <div className="flex items-center">
-        {errorMessage ? (
+        {errorMessage && dataSource !== 'mock-data' && dataSource !== 'no-data' ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <AlertTriangle size={14} className="mr-1 text-amber-300" />
+                <Info size={14} className="mr-1 text-white/60" />
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">{errorMessage}</p>

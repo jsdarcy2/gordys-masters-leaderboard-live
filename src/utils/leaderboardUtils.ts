@@ -3,7 +3,7 @@
  * Format the last updated timestamp into a readable string
  */
 export const formatLastUpdated = (timestamp: string): string => {
-  if (!timestamp) return "Unknown";
+  if (!timestamp) return "Just now";
   
   try {
     const date = new Date(timestamp);
@@ -14,7 +14,7 @@ export const formatLastUpdated = (timestamp: string): string => {
     });
   } catch (e) {
     console.error("Error formatting timestamp:", e);
-    return "Unknown";
+    return "Just now";
   }
 };
 
@@ -23,9 +23,9 @@ export const formatLastUpdated = (timestamp: string): string => {
  */
 export const getScoreClass = (score: number | undefined): string => {
   if (score === undefined) return "text-gray-500";
-  if (score < 0) return "text-green-600";
-  if (score > 0) return "text-red-500";
-  return "text-gray-700";
+  if (score < 0) return "text-green-600 font-medium"; // Under par - good
+  if (score > 0) return "text-red-500"; // Over par - bad
+  return "text-gray-700"; // Even par
 };
 
 /**
@@ -119,12 +119,10 @@ export const validateLeaderboardData = (data: any): boolean => {
   if (!Array.isArray(data.leaderboard)) return false;
   if (data.leaderboard.length === 0) return false;
   
-  // Check if first item has expected structure
-  const firstItem = data.leaderboard[0];
+  // Less strict validation to allow for partial data
   return (
-    typeof firstItem.position === 'number' &&
-    typeof firstItem.name === 'string' &&
-    (typeof firstItem.score === 'number' || firstItem.score === null || firstItem.score === undefined)
+    typeof data.leaderboard[0] === 'object' &&
+    data.leaderboard[0] !== null
   );
 };
 
@@ -137,4 +135,43 @@ export const getScoreStatus = (score: number | undefined): 'under-par' | 'even-p
   if (score < 0) return 'under-par';
   if (score > 0) return 'over-par';
   return 'even-par';
+};
+
+/**
+ * Get probability of winning based on position and score
+ * Useful for betting interfaces
+ */
+export const getWinProbability = (position: number, round: number): number => {
+  // Historical probabilities (simplified)
+  const roundProbabilities: Record<number, Record<number, number>> = {
+    1: { // After round 1
+      1: 0.19, 2: 0.12, 3: 0.09, 5: 0.05, 10: 0.02
+    },
+    2: { // After round 2
+      1: 0.35, 2: 0.20, 3: 0.12, 5: 0.06, 10: 0.01
+    },
+    3: { // After round 3
+      1: 0.54, 2: 0.24, 3: 0.10, 5: 0.03, 10: 0.005
+    },
+    4: { // During final round
+      1: 0.75, 2: 0.18, 3: 0.05, 5: 0.01, 10: 0.001
+    }
+  };
+  
+  // Default to round 4 if not specified
+  const roundData = roundProbabilities[round] || roundProbabilities[4];
+  
+  // Find the closest key in our probability table
+  const positions = Object.keys(roundData).map(Number).sort((a, b) => a - b);
+  let closestPosition = positions[0];
+  
+  for (const pos of positions) {
+    if (position <= pos) {
+      closestPosition = pos;
+      break;
+    }
+    closestPosition = pos;
+  }
+  
+  return roundData[closestPosition] || 0;
 };

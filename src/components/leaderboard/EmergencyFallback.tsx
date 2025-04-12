@@ -6,20 +6,22 @@ import { Button } from "@/components/ui/button";
 interface EmergencyFallbackProps {
   onRetry: () => void;
   message?: string;
+  severity?: 'warning' | 'critical';
 }
 
 const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({ 
   onRetry,
-  message = "We're experiencing technical difficulties with our live scoring. Please check back later."
+  message = "We're experiencing technical difficulties with our live scoring. Please check back later.",
+  severity = 'warning'
 }) => {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
-      <div className="bg-red-100 p-4 rounded-full mb-4">
-        <AlertTriangle size={32} className="text-red-600" />
+      <div className={`${severity === 'critical' ? 'bg-red-100' : 'bg-amber-100'} p-4 rounded-full mb-4`}>
+        <AlertTriangle size={32} className={severity === 'critical' ? "text-red-600" : "text-amber-600"} />
       </div>
       
       <h3 className="text-xl font-bold text-masters-dark mb-2">
-        System Status: Outage
+        {severity === 'critical' ? 'Data Temporarily Unavailable' : 'Live Data Loading'}
       </h3>
       <p className="text-gray-600 mb-6 max-w-md">
         {message}
@@ -31,8 +33,8 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
           className="flex items-center gap-2 border-masters-green text-masters-green hover:bg-masters-green/10"
           onClick={onRetry}
         >
-          <RefreshCw size={16} className="animate-spin" />
-          Check Again
+          <RefreshCw size={16} />
+          Refresh Data
         </Button>
         
         <a 
@@ -42,7 +44,7 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
           className="flex items-center gap-2 bg-masters-green hover:bg-masters-green/90 text-white px-4 py-2 rounded transition-colors"
         >
           <Tv size={16} />
-          Watch Official Coverage
+          Watch Live Coverage
         </a>
       </div>
       

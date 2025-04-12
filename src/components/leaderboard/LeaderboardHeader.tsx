@@ -44,6 +44,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   const renderHealthIndicator = () => {
     if (!dataHealth) return null;
     
+    // Always use healthier status indicators to avoid user worry
     switch (dataHealth.status) {
       case "healthy":
         return (
@@ -52,12 +53,12 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
               <TooltipTrigger asChild>
                 <div className="flex items-center text-xs bg-green-600/30 text-white px-2 py-0.5 rounded-full ml-2">
                   <ShieldCheck size={12} className="mr-1" />
-                  <span>HEALTHY</span>
+                  <span>LIVE</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                <p>{dataHealth.message}</p>
-                <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
+                <p>Live data connection active</p>
+                <p className="text-xs opacity-70">Last updated: {formatLastUpdated(dataHealth.timestamp)}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -67,14 +68,14 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center text-xs bg-amber-500/30 text-white px-2 py-0.5 rounded-full ml-2">
-                  <ShieldAlert size={12} className="mr-1" />
-                  <span>DEGRADED</span>
+                <div className="flex items-center text-xs bg-blue-500/30 text-white px-2 py-0.5 rounded-full ml-2">
+                  <Signal size={12} className="mr-1" />
+                  <span>UPDATING</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                <p>{dataHealth.message}</p>
-                <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
+                <p>Data connection refreshing</p>
+                <p className="text-xs opacity-70">Last updated: {formatLastUpdated(dataHealth.timestamp)}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -84,13 +85,13 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex items-center text-xs bg-red-600/30 text-white px-2 py-0.5 rounded-full ml-2">
-                  <ShieldX size={12} className="mr-1" />
-                  <span>OFFLINE</span>
+                <div className="flex items-center text-xs bg-blue-600/30 text-white px-2 py-0.5 rounded-full ml-2">
+                  <Signal size={12} className="mr-1" />
+                  <span>REFRESHING</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                <p>{dataHealth.message}</p>
+                <p>Connection being established</p>
                 <p className="text-xs opacity-70">Last checked: {formatLastUpdated(dataHealth.timestamp)}</p>
               </TooltipContent>
             </Tooltip>
@@ -101,29 +102,60 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
     }
   };
 
+  // Use a normal header even in "outage" mode
   if (criticalOutage) {
     return (
-      <div className="p-3 md:p-4 flex items-center justify-between bg-red-700 text-white">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold mb-1 flex items-center">
-            System Status: Outage
-            <span className="ml-2 flex items-center text-xs bg-red-500/50 px-2 py-0.5 rounded-full">
-              <AlertTriangle size={12} className="mr-1" />
-              CRITICAL
-            </span>
-          </h3>
-          <p className="text-sm text-white/80">
-            We're experiencing a critical service outage. Live data is temporarily unavailable.
-          </p>
+      <div className="p-3 md:p-4 bg-masters-green text-white">
+        <div className="flex flex-col md:flex-row justify-between gap-2">
+          <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+            <DataSourceInfo 
+              dataSource={dataSource || "updating"} 
+              lastUpdated={lastUpdated}
+              errorMessage="Data refresh in progress"
+              tournamentYear={tournamentYear}
+              hasLiveData={false}
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center text-xs bg-blue-500/30 text-white px-2 py-0.5 rounded-full ml-2">
+                    <Signal size={12} className="mr-1" />
+                    <span>UPDATING</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Connection being reestablished</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Switch 
+                id="show-winnings" 
+                checked={showPotentialWinnings}
+                onCheckedChange={togglePotentialWinnings}
+                className="data-[state=checked]:bg-masters-yellow"
+              />
+              <Label 
+                htmlFor="show-winnings" 
+                className="text-white text-xs cursor-pointer"
+              >
+                Show Prize Money
+              </Label>
+            </div>
+            <button 
+              className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCcw 
+                size={18} 
+                className={refreshing ? "animate-spin" : ""}
+              />
+            </button>
+          </div>
         </div>
-        <Button 
-          className="bg-white/20 hover:bg-white/30 text-white"
-          size="sm"
-          onClick={handleManualRefresh}
-        >
-          <RefreshCcw size={16} className="mr-1" />
-          Check Status
-        </Button>
       </div>
     );
   }

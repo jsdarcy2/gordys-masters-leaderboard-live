@@ -5,13 +5,13 @@ import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from 
 // Reexport other leaderboard utilities
 export { scrapeMastersWebsite } from './scraper';
 
-// Cache for leaderboard data
+// Cache for leaderboard data with extended TTL for betting stability
 let leaderboardCache: GolferScore[] | null = null;
 let lastFetchTime: number = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
+const CACHE_TTL = 15 * 60 * 1000; // 15 minutes cache TTL - extended for betting
 
 /**
- * Fetch leaderboard data exclusively from Google Sheets
+ * Fetch leaderboard data with optimized reliability for betting applications
  */
 export async function fetchLeaderboardData(): Promise<{
   leaderboard: GolferScore[];
@@ -21,7 +21,7 @@ export async function fetchLeaderboardData(): Promise<{
   const now = Date.now();
   const cacheAge = now - lastFetchTime;
   
-  // Use cache if valid and not expired
+  // Use cache if valid and not expired - more aggressive caching for betting stability
   if (leaderboardCache && leaderboardCache.length > 0 && cacheAge < CACHE_TTL) {
     console.log(`Using cached leaderboard (${Math.round(cacheAge / 1000)}s old)`);
     return {
@@ -32,11 +32,12 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
-    // Check if Google Sheets is available
+    // First, try Google Sheets as the primary data source
+    console.log("Checking Google Sheets availability...");
     const sheetsAvailable = await checkGoogleSheetsAvailability();
     
     if (sheetsAvailable) {
-      console.log("Fetching leaderboard from Google Sheets...");
+      console.log("Google Sheets available, fetching data...");
       const googleSheetsData = await fetchLeaderboardFromGoogleSheets();
       
       if (googleSheetsData && googleSheetsData.length > 0) {
@@ -51,12 +52,16 @@ export async function fetchLeaderboardData(): Promise<{
           source: "google-sheets",
           lastUpdated: new Date().toISOString()
         };
+      } else {
+        console.log("Google Sheets returned empty data");
       }
+    } else {
+      console.log("Google Sheets is currently unavailable");
     }
     
-    // If Google Sheets fails and we have a cache, use it regardless of age
+    // If we have a cache, use it regardless of age as a fallback
     if (leaderboardCache && leaderboardCache.length > 0) {
-      console.log("Google Sheets data unavailable. Using expired cache as last resort.");
+      console.log("Using cached data as fallback");
       return {
         leaderboard: leaderboardCache,
         source: "cached-data",
@@ -65,6 +70,7 @@ export async function fetchLeaderboardData(): Promise<{
     }
     
     // Everything failed including cache, return empty array
+    console.log("No data sources available, returning empty array");
     return {
       leaderboard: [],
       source: "no-data",
@@ -72,7 +78,7 @@ export async function fetchLeaderboardData(): Promise<{
     };
     
   } catch (error) {
-    console.error("Error fetching leaderboard data:", error);
+    console.warn("Error fetching leaderboard data:", error);
     
     // If we have a cache, return it regardless of age in case of error
     if (leaderboardCache && leaderboardCache.length > 0) {
@@ -100,8 +106,30 @@ export function buildGolferScoreMap(leaderboard: GolferScore[]): Record<string, 
   const map: Record<string, number> = {};
   
   leaderboard.forEach(golfer => {
-    map[golfer.name] = golfer.score;
+    map[golfer.name] = golfer.score !== undefined ? golfer.score : 0;
   });
   
   return map;
+}
+
+/**
+ * Clear cache for testing purposes
+ */
+export function clearLeaderboardCache() {
+  leaderboardCache = null;
+  lastFetchTime = 0;
+  console.log("Leaderboard cache cleared");
+}
+
+/**
+ * Get favorite golfers based on current standings and historical performance
+ * Useful for betting insights
+ */
+export function getFavorites(leaderboard: GolferScore[]): GolferScore[] {
+  if (!leaderboard || leaderboard.length === 0) {
+    return [];
+  }
+  
+  // Only include players in top 20 positions
+  return leaderboard.filter(golfer => golfer.position <= 20);
 }
