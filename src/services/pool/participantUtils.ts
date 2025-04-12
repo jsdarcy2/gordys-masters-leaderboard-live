@@ -36,7 +36,7 @@ export const calculatePoolStandings = (
     // Calculate pick scores
     const pickScores: {[golferName: string]: number} = {};
     data.picks.forEach((golfer, index) => {
-      // Use the actual golfer score if available, otherwise use the provided round score
+      // Use the actual golfer score from the leaderboard if available, otherwise use the provided round score
       pickScores[golfer] = golferScores[golfer] !== undefined ? 
         golferScores[golfer] : 
         (data.roundScores[index] || 0);

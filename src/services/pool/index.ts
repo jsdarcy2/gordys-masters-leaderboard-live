@@ -1,7 +1,9 @@
 
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
-import { generateEmergencyPoolStandings } from "./participantUtils";
+import { generateEmergencyPoolStandings, calculatePoolStandings } from "./participantUtils";
+import { fetchLeaderboardData } from "@/services/leaderboard";
+import { buildGolferScoreMap } from "@/utils/scoringUtils";
 
 // Cache for pool standings data
 let poolStandingsCache: PoolParticipant[] | null = null;
@@ -22,28 +24,29 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
   }
   
   try {
-    // Since the live data isn't working, let's use our emergency data directly
+    // First, get the leaderboard data to calculate scores
+    const leaderboardData = await fetchLeaderboardData();
+    const golferScores = buildGolferScoreMap(leaderboardData.leaderboard);
+    
+    // Get all player selections
+    const selectionsData = await fetchPlayerSelections();
+    
+    // Calculate pool standings based on current leaderboard
+    const calculatedStandings = calculatePoolStandings(selectionsData, golferScores);
+    
+    if (calculatedStandings && calculatedStandings.length > 0) {
+      console.log(`Calculated ${calculatedStandings.length} pool standings from leaderboard data`);
+      poolStandingsCache = calculatedStandings;
+      lastFetchTime = now;
+      return calculatedStandings;
+    }
+    
+    // If calculation fails, fall back to emergency data
     console.log("Using emergency pool standings data");
     const emergencyData = generateEmergencyPoolStandings();
     poolStandingsCache = emergencyData;
     lastFetchTime = now;
     return emergencyData;
-    
-    // Commented out the Google Sheets API call since it's not working
-    /*
-    console.log("Fetching pool standings from Google Sheets...");
-    const googleSheetsData = await fetchPoolStandingsFromGoogleSheets();
-    
-    if (googleSheetsData && googleSheetsData.length > 0) {
-      console.log(`Fetched ${googleSheetsData.length} participants from Google Sheets`);
-      
-      // Update cache
-      poolStandingsCache = googleSheetsData;
-      lastFetchTime = now;
-      
-      return googleSheetsData;
-    }
-    */
   } catch (error) {
     console.error("Error fetching pool standings:", error);
     
