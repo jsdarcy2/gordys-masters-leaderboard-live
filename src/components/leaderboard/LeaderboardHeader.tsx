@@ -1,4 +1,3 @@
-
 import React from "react";
 import { RefreshCcw, Clock, Save, Signal, ShieldAlert, ShieldCheck, ShieldX, AlertTriangle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -7,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import DataSourceInfo from "./DataSourceInfo";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeaderboardHeaderProps {
   lastUpdated: string;
@@ -41,6 +41,9 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   dataHealth,
   criticalOutage = false
 }) => {
+  const isMobile = useIsMobile();
+  const imageOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
+
   const renderHealthIndicator = () => {
     if (!dataHealth) return null;
     
@@ -107,7 +110,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
     return (
       <div className="p-3 md:p-4 relative overflow-hidden">
         {/* Masters celebration image as subtle background */}
-        <div className="absolute inset-0 opacity-[0.015]">
+        <div className={`absolute inset-0 ${imageOpacity}`}>
           <img 
             src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
             alt="" 
@@ -177,7 +180,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   return (
     <div className="p-3 md:p-4 relative overflow-hidden">
       {/* Masters celebration image as subtle background */}
-      <div className="absolute inset-0 opacity-[0.015]">
+      <div className={`absolute inset-0 ${imageOpacity}`}>
         <img 
           src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
           alt="" 

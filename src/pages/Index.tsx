@@ -2,12 +2,13 @@ import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
 import { Flag, Trophy, Clock } from "lucide-react";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+  const cardImageOpacity = isMobile ? "opacity-[0.035]" : "opacity-[0.045]";
+  
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -19,7 +20,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.045]"
+              className={`w-full h-full object-cover ${cardImageOpacity}`}
             />
           </div>
           
@@ -77,7 +78,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.045]"
+              className={`w-full h-full object-cover ${cardImageOpacity}`}
             />
           </div>
           
@@ -135,7 +136,7 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.045]"
+              className={`w-full h-full object-cover ${cardImageOpacity}`}
             />
           </div>
           

@@ -1,5 +1,6 @@
 
 import { Clock, Users, Activity, Trophy } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PoolStandingsHeaderProps {
   lastUpdated: string;
@@ -24,12 +25,16 @@ const PoolStandingsHeader = ({
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const isMobile = useIsMobile();
+  const imageOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
+  const textureOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
+
   return (
     <div className="relative overflow-hidden rounded-t-lg shadow-subtle">
       {/* Elegant background with softer gradient and Masters celebration image */}
       <div className="absolute inset-0">
         {/* Masters image as very subtle background */}
-        <div className="absolute inset-0 opacity-[0.015]">
+        <div className={`absolute inset-0 ${imageOpacity}`}>
           <img 
             src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
             alt="" 
@@ -40,7 +45,7 @@ const PoolStandingsHeader = ({
         <div className="absolute inset-0 bg-gradient-to-r from-masters-darkgreen/95 via-masters-green/90 to-masters-darkgreen/95"></div>
 
         {/* Subtle texture overlay */}
-        <div className="absolute inset-0 opacity-[0.015]">
+        <div className={`absolute inset-0 ${textureOpacity}`}>
           <div className="w-full h-full" style={{ 
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
           }}></div>
