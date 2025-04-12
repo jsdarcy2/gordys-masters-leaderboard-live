@@ -19,16 +19,6 @@ interface ParticipantTableProps {
 }
 
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
-  // Function to open Venmo with player's name
-  const openVenmo = (name: string) => {
-    const venmoUsername = "GordysPool"; // Replace with actual Venmo username
-    const paymentNote = `Masters Pool 2025 - ${name}`;
-    const amount = "50"; // Replace with actual amount
-    
-    // Open Venmo with prefilled information
-    window.open(`https://venmo.com/${venmoUsername}?txn=pay&note=${encodeURIComponent(paymentNote)}&amount=${amount}`, '_blank');
-  };
-
   return (
     <div className="overflow-x-auto mt-4">
       <div className="text-sm text-gray-600 mb-3 flex items-center gap-1 bg-masters-cream/30 p-3 rounded-md border border-masters-green/10">
@@ -86,25 +76,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                     <div className="flex flex-wrap items-center gap-2">
                       {participant.name}
                       {!isPaid && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-red-500 font-normal">(unpaid)</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button 
-                                  onClick={() => openVenmo(participant.name)}
-                                  className="text-blue-500 hover:text-blue-600 transition-colors px-1 py-0.5 rounded-full hover:bg-blue-50 text-xs"
-                                  aria-label="Pay via Venmo"
-                                >
-                                  Pay
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent side="right" className="text-xs">
-                                Pay via Venmo
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
+                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded font-normal">unpaid</span>
                       )}
                       {missedCut && (
                         <Badge variant="destructive" className="text-xs py-0 px-1.5 h-5 bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800">

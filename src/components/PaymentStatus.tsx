@@ -160,14 +160,6 @@ const PaymentStatus = () => {
   const paidCount = participants.filter(p => p.paid).length;
   const unpaidCount = participants.filter(p => !p.paid).length;
   
-  const openVenmo = (name: string) => {
-    const venmoUsername = "GordysPool";
-    const paymentNote = `Masters Pool 2024 - ${name}`;
-    const amount = "50";
-    
-    window.open(`https://venmo.com/${venmoUsername}?txn=pay&note=${encodeURIComponent(paymentNote)}&amount=${amount}`, '_blank');
-  };
-  
   return (
     <div className="masters-card">
       <div className="masters-header">
@@ -179,7 +171,7 @@ const PaymentStatus = () => {
         <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="text-sm text-gray-600">
             <span className="font-medium">{paidCount}</span> paid, 
-            <span className="font-medium text-red-600 ml-1">{unpaidCount}</span> unpaid
+            <span className="font-medium text-gray-600 ml-1">{unpaidCount}</span> unpaid
           </div>
           <Input
             type="search"
@@ -218,27 +210,9 @@ const PaymentStatus = () => {
                           <Check size={16} className="text-masters-green" />
                         </span>
                       ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100">
-                            <X size={16} className="text-red-600" />
-                          </span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => openVenmo(participant.name)}
-                                  className="text-blue-500 hover:text-blue-600 px-1.5 py-0.5 rounded-full hover:bg-blue-50 transition-colors"
-                                  aria-label={`Pay via Venmo for ${participant.name}`}
-                                >
-                                  <span className="text-xs font-medium">Pay</span>
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Pay via Venmo</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100">
+                          <X size={16} className="text-gray-500" />
+                        </span>
                       )}
                     </TableCell>
                   </TableRow>
