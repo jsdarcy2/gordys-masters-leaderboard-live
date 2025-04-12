@@ -58,7 +58,7 @@ const PoolStandingsHeader: React.FC<PoolStandingsHeaderProps> = ({
               </>
             )}
             <span className="mx-1.5 text-white/40">•</span>
-            <SyncStatusBadge />
+            <SyncStatusBadge onRefresh={onRefresh} />
           </div>
         </div>
       </div>

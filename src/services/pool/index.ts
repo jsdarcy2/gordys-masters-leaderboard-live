@@ -1,3 +1,4 @@
+
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
 import { generateEmergencyPoolStandings, calculatePoolStandings } from "./participantUtils";
@@ -53,8 +54,10 @@ export async function checkPoolStandingsSync(): Promise<{
     // Get local data
     const localData = await fetchPoolStandings();
     
-    // Get Google Sheets data
+    // Get Google Sheets data directly, bypassing any cached data
     const sheetsData = await fetchPoolStandingsFromGoogleSheets();
+    
+    console.log(`Sync check: Local data count: ${localData.length}, Sheets data count: ${sheetsData.length}`);
     
     // Create maps for easier comparison
     const localMap = new Map<string, number>();
@@ -70,25 +73,39 @@ export async function checkPoolStandingsSync(): Promise<{
     // Find differences
     const differences: Array<{ name: string, localScore?: number, sheetsScore?: number }> = [];
     
-    // Check local participants missing from sheets
+    // Log full comparison data for debugging
+    console.log("Beginning detailed sync comparison");
+    
+    // Check local participants against sheets
     localMap.forEach((score, name) => {
+      const sheetsScore = sheetsMap.get(name);
+      
       if (!sheetsMap.has(name)) {
+        console.log(`Participant ${name} exists locally but not in sheets`);
         differences.push({ name, localScore: score });
-      } else if (sheetsMap.get(name) !== score) {
+      } else if (sheetsScore !== score) {
+        console.log(`Score mismatch for ${name}: local=${score}, sheets=${sheetsScore}`);
         differences.push({ 
           name, 
           localScore: score, 
-          sheetsScore: sheetsMap.get(name) 
+          sheetsScore 
         });
       }
     });
     
-    // Check sheets participants missing from local
+    // Check sheets participants against local
     sheetsMap.forEach((score, name) => {
       if (!localMap.has(name)) {
+        console.log(`Participant ${name} exists in sheets but not locally`);
         differences.push({ name, sheetsScore: score });
       }
     });
+    
+    console.log(`Sync check complete. Found ${differences.length} differences`);
+    
+    if (differences.length > 0) {
+      console.log("Sync differences:", differences);
+    }
     
     return {
       inSync: differences.length === 0,

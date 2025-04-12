@@ -21,10 +21,22 @@ async function fetchSheetData(sheetName: string): Promise<any[][]> {
     // Using the sheets.spreadsheets.values.get API endpoint
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
     console.log(`Fetching Google Sheets data from: ${sheetName}`);
-    const response = await fetch(url);
+    
+    // Add query parameters to avoid caching
+    const requestUrl = `${url}&_nocache=${new Date().getTime()}`;
+    
+    const response = await fetch(requestUrl, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch sheet data: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Google Sheets API error: ${response.status} ${errorText}`);
+      throw new Error(`Failed to fetch sheet data: ${response.status} ${errorText ? errorText : ''}`);
     }
     
     const data = await response.json();
@@ -33,6 +45,10 @@ async function fetchSheetData(sheetName: string): Promise<any[][]> {
       console.warn(`No data found in sheet: ${sheetName}`);
       return [];
     }
+    
+    // Log a small sample of the data for debugging
+    console.log(`Retrieved ${data.values.length} rows from ${sheetName}. Sample:`, 
+      data.values.slice(0, 2));
     
     return data.values;
   } catch (error) {
@@ -201,11 +217,56 @@ export async function checkGoogleSheetsAvailability(): Promise<boolean> {
   try {
     // Try to fetch a small amount of data to check availability
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/A1:A1?key=${API_KEY}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json'
+      }
+    });
     
-    return response.ok;
+    if (!response.ok) {
+      console.error(`Google Sheets API check failed: ${response.status} ${response.statusText}`);
+      return false;
+    }
+    
+    const data = await response.json();
+    console.log("Google Sheets API is available:", data);
+    return true;
   } catch (error) {
     console.error("Google Sheets API not available:", error);
     return false;
   }
 }
+
+// Function to force refresh from Google Sheets
+export async function forceRefreshFromGoogleSheets(): Promise<boolean> {
+  try {
+    // Clear any cached data
+    localStorage.removeItem('googleSheetsCache');
+    
+    // Test if we can access the API
+    return await checkGoogleSheetsAvailability();
+  } catch (error) {
+    console.error("Force refresh from Google Sheets failed:", error);
+    return false;
+  }
+}
+
+// Export a test function that can be called from the console for debugging
+(window as any).testGoogleSheetsConnection = async () => {
+  try {
+    const available = await checkGoogleSheetsAvailability();
+    console.log("Google Sheets available:", available);
+    
+    if (available) {
+      const sheetName = "Pool Standings";
+      const data = await fetchSheetData(sheetName);
+      console.log(`Test data from ${sheetName}:`, data.slice(0, 5));
+    }
+    
+    return available;
+  } catch (error) {
+    console.error("Test connection failed:", error);
+    return false;
+  }
+};

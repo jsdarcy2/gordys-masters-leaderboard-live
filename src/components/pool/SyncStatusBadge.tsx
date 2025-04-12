@@ -2,14 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCw, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import { RotateCcw, CheckCircle2, AlertCircle, XCircle, RefreshCcw } from "lucide-react";
 import { checkPoolStandingsSync } from "@/services/pool";
+import { Button } from "@/components/ui/button";
 
 interface SyncStatusBadgeProps {
   className?: string;
+  onRefresh?: () => void;
 }
 
-const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ className = "" }) => {
+const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ 
+  className = "",
+  onRefresh
+}) => {
   const [syncStatus, setSyncStatus] = useState<{
     inSync: boolean;
     localCount: number;
@@ -23,6 +28,7 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ className = "" }) => 
     try {
       const status = await checkPoolStandingsSync();
       setSyncStatus(status);
+      console.log("Sync status checked:", status);
     } catch (error) {
       console.error("Error checking sync status:", error);
     } finally {
@@ -30,14 +36,25 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ className = "" }) => 
     }
   };
   
+  const handleRefresh = () => {
+    checkSync();
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+  
   useEffect(() => {
     checkSync();
+    
+    // Check every 5 minutes
+    const interval = setInterval(checkSync, 5 * 60 * 1000);
+    return () => clearInterval(interval);
   }, []);
   
   if (loading) {
     return (
       <Badge variant="outline" className={`bg-blue-50 text-blue-600 ${className}`}>
-        <RotateCw size={14} className="mr-1 animate-spin" />
+        <RotateCcw size={14} className="mr-1 animate-spin" />
         Checking Sync Status...
       </Badge>
     );
@@ -74,7 +91,7 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ className = "" }) => 
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant="outline" className={`bg-red-50 text-red-600 ${className}`}>
+          <Badge variant="outline" className={`bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer ${className}`} onClick={handleRefresh}>
             <XCircle size={14} className="mr-1" />
             Out of Sync ({syncStatus.differences.length} differences)
           </Badge>
@@ -86,17 +103,26 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ className = "" }) => 
             <p className="text-sm mb-2">Sheets: {syncStatus.sheetsCount} participants</p>
             {syncStatus.differences.length > 0 && (
               <div className="mt-2 text-xs">
-                <p className="font-medium">Sample differences:</p>
+                <p className="font-medium">Differences found:</p>
                 <ul className="list-disc pl-4 mt-1">
-                  {syncStatus.differences.slice(0, 3).map((diff, index) => (
-                    <li key={index}>{diff.name}: {diff.localScore !== undefined ? diff.localScore : 'missing'} vs {diff.sheetsScore !== undefined ? diff.sheetsScore : 'missing'}</li>
+                  {syncStatus.differences.map((diff, index) => (
+                    <li key={index}>
+                      {diff.name}: 
+                      {diff.localScore !== undefined ? diff.localScore : 'missing'} vs 
+                      {diff.sheetsScore !== undefined ? diff.sheetsScore : 'missing'}
+                    </li>
                   ))}
-                  {syncStatus.differences.length > 3 && (
-                    <li>...and {syncStatus.differences.length - 3} more</li>
-                  )}
                 </ul>
               </div>
             )}
+            <Button 
+              size="sm" 
+              onClick={handleRefresh}
+              className="w-full mt-3 text-xs px-2 py-1 bg-white border border-red-200 rounded hover:bg-red-50 transition-colors flex items-center justify-center"
+            >
+              <RefreshCcw size={12} className="mr-1" />
+              Refresh Sync Status
+            </Button>
           </div>
         </TooltipContent>
       </Tooltip>

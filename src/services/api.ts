@@ -1,5 +1,8 @@
+
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
+import { clearPoolStandingsCache } from "./pool";
+import { forceRefreshFromGoogleSheets } from "./googleSheetsApi";
 
 // Re-export functions from modular service files
 export { isTournamentInProgress, getCurrentTournament } from './tournament';
@@ -68,8 +71,16 @@ export const forceRefreshPoolData = async (): Promise<void> => {
   try {
     // Clear caches first
     clearLeaderboardCache();
+    clearPoolStandingsCache();
     
-    console.log("Forced refresh of leaderboard data");
+    // Force refresh from Google Sheets
+    const sheetsAvailable = await forceRefreshFromGoogleSheets();
+    
+    if (!sheetsAvailable) {
+      console.warn("Google Sheets is not available for refresh");
+    }
+    
+    console.log("Forced refresh of pool data completed");
     return Promise.resolve();
   } catch (error) {
     console.error("Error forcing refresh:", error);
