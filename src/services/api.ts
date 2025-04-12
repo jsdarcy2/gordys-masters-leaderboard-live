@@ -10,9 +10,9 @@ export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// Masters API endpoint - Using a mock JSON file as fallback
+// Masters API endpoint - Using a mock JSON file
 export const API_ENDPOINTS = {
-  MASTERS_SCORES: "https://api.npoint.io/a2ac70e55a7a87b33976"
+  MASTERS_SCORES: "https://run.mocky.io/v3/cc5b7d16-7b22-401e-800a-3e92c6d2f2bb"
 };
 
 // Simple API health check function
@@ -90,6 +90,7 @@ export const forceRefreshPoolData = async (): Promise<void> => {
 
 /**
  * Function to enable direct Google Sheets data retrieval
+ * This now supports fallback to mock data when API is unavailable
  */
 export const fetchDataFromGoogleSheets = async (dataType: 'leaderboard' | 'pool'): Promise<any> => {
   const { fetchLeaderboardFromGoogleSheets, fetchPoolStandingsFromGoogleSheets } = await import('./googleSheetsApi');

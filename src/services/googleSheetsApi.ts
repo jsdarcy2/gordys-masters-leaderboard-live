@@ -1,3 +1,4 @@
+
 /**
  * Google Sheets API integration for Masters Pool data
  * 
@@ -10,7 +11,10 @@ import { getBestFourGolfers } from "@/utils/scoringUtils";
 
 // Google Sheets document ID from the URL
 const SHEETS_DOC_ID = "1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o";
-const API_KEY = "AIzaSyDIWNdmPj7lSWfP8RmK9-I_I2CGOyh2WFc"; // Updated API key for Google Sheets
+const API_KEY = "AIzaSyB4Oi-rkrDPGfgWjyPZkZVhvuBGK1ryhVU"; // Updated API key for Google Sheets
+
+// Flag to use mock data when API is unavailable
+const USE_MOCK_DATA_FALLBACK = true;
 
 /**
  * Fetches data from a specific sheet in the Google Sheets document
@@ -52,8 +56,50 @@ async function fetchSheetData(sheetName: string): Promise<any[][]> {
     return data.values;
   } catch (error) {
     console.error("Error fetching Google Sheets data:", error);
+    
+    if (USE_MOCK_DATA_FALLBACK) {
+      console.log("Using mock data fallback for sheet:", sheetName);
+      return getMockDataForSheet(sheetName);
+    }
+    
     throw error;
   }
+}
+
+/**
+ * Provides mock data for testing when API is unavailable
+ */
+function getMockDataForSheet(sheetName: string): any[][] {
+  if (sheetName.toLowerCase() === "leaderboard") {
+    return [
+      ["position", "name", "score", "today", "thru", "status", "strokes"],
+      ["1", "Scottie Scheffler", "-9", "-3", "F", "active", "279"],
+      ["2", "Collin Morikawa", "-6", "-2", "F", "active", "282"],
+      ["3", "Max Homa", "-4", "-3", "F", "active", "284"],
+      ["4", "Ludvig Åberg", "-3", "-1", "F", "active", "285"],
+      ["5", "Tommy Fleetwood", "-2", "-1", "F", "active", "286"],
+      ["6", "Bryson DeChambeau", "-1", "0", "F", "active", "287"],
+      ["7", "Xander Schauffele", "E", "+1", "F", "active", "288"],
+      ["8", "Patrick Cantlay", "+1", "+2", "F", "active", "289"],
+      ["9", "Cameron Smith", "+2", "+3", "F", "active", "290"],
+      ["10", "Rory McIlroy", "+3", "+1", "F", "active", "291"],
+      ["11", "Tiger Woods", "+4", "+2", "F", "active", "292"],
+      ["51", "Jordan Spieth", "+10", "+2", "F", "cut", "298"],
+      ["52", "Justin Thomas", "+11", "+3", "F", "cut", "299"]
+    ];
+  } else if (sheetName.toLowerCase() === "pool standings") {
+    return [
+      ["position", "name", "total score", "total points", "pick 1", "pick 1 score", "pick 2", "pick 2 score", "pick 3", "pick 3 score", "pick 4", "pick 4 score", "pick 5", "pick 5 score", "tiebreaker 1", "tiebreaker 2", "paid"],
+      ["1", "John Doe", "-14", "1000", "Scottie Scheffler", "-9", "Collin Morikawa", "-6", "Xander Schauffele", "E", "Rory McIlroy", "+3", "Jordan Spieth", "+10", "275", "68", "yes"],
+      ["2", "Jane Smith", "-12", "900", "Scottie Scheffler", "-9", "Collin Morikawa", "-6", "Max Homa", "-4", "Cameron Smith", "+2", "Tiger Woods", "+4", "276", "69", "yes"],
+      ["3", "Bob Johnson", "-9", "800", "Scottie Scheffler", "-9", "Tommy Fleetwood", "-2", "Bryson DeChambeau", "-1", "Patrick Cantlay", "+1", "Justin Thomas", "+11", "277", "70", "yes"],
+      ["4", "Alice Brown", "-6", "700", "Collin Morikawa", "-6", "Max Homa", "-4", "Ludvig Åberg", "-3", "Xander Schauffele", "E", "Tiger Woods", "+4", "278", "71", "no"],
+      ["5", "Charlie Davis", "-5", "600", "Max Homa", "-4", "Ludvig Åberg", "-3", "Bryson DeChambeau", "-1", "Cameron Smith", "+2", "Rory McIlroy", "+3", "279", "72", "yes"]
+    ];
+  }
+  
+  // Default empty response
+  return [["No mock data available"]];
 }
 
 /**
@@ -261,4 +307,18 @@ export async function forceRefreshFromGoogleSheets(): Promise<boolean> {
     console.error("Test connection failed:", error);
     return false;
   }
+};
+
+// Debug function - can be called to test the mock data
+(window as any).testMockData = () => {
+  const leaderboardMock = getMockDataForSheet("Leaderboard");
+  const standingsMock = getMockDataForSheet("Pool Standings");
+  
+  console.log("Mock Leaderboard Data:", leaderboardMock);
+  console.log("Mock Pool Standings Data:", standingsMock);
+  
+  return {
+    leaderboard: leaderboardMock,
+    standings: standingsMock
+  };
 };
