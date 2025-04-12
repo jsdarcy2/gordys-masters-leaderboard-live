@@ -42,11 +42,11 @@ const Header = () => {
         : "bg-gradient-to-r from-masters-dark/90 via-masters-green/90 to-masters-dark/90"
       } border-b border-masters-gold/20`}>
       
-      {/* Masters celebration image background - subtle overlay */}
+      {/* Augusta National 12th hole with Hogan Bridge background - subtle overlay */}
       <div className="absolute inset-0 w-full h-full opacity-[0.15]">
         <img 
-          src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
-          alt="Masters Celebration" 
+          src="/lovable-uploads/7266d407-6b13-45d7-9b85-897bbd3c9f92.png" 
+          alt="Augusta National 12th Hole" 
           className="w-full h-full object-cover"
         />
       </div>
