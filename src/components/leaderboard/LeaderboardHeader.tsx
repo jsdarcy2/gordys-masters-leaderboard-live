@@ -1,7 +1,6 @@
+
 import React from "react";
 import { RefreshCcw, Clock, Save, Signal, ShieldAlert, ShieldCheck, ShieldX, AlertTriangle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import DataSourceInfo from "./DataSourceInfo";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
@@ -13,8 +12,6 @@ interface LeaderboardHeaderProps {
   loading: boolean;
   refreshing: boolean;
   handleManualRefresh: () => void;
-  showPotentialWinnings: boolean;
-  togglePotentialWinnings: () => void;
   dataSource?: string;
   errorMessage?: string;
   tournamentYear?: string;
@@ -32,8 +29,6 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   loading,
   refreshing,
   handleManualRefresh,
-  showPotentialWinnings,
-  togglePotentialWinnings,
   dataSource,
   errorMessage,
   tournamentYear,
@@ -42,7 +37,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   criticalOutage = false
 }) => {
   const isMobile = useIsMobile();
-  const imageOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
+  const imageOpacity = isMobile ? "opacity-[0.008]" : "opacity-[0.015]";
 
   const renderHealthIndicator = () => {
     if (!dataHealth) return null;
@@ -145,21 +140,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Switch 
-                  id="show-winnings" 
-                  checked={showPotentialWinnings}
-                  onCheckedChange={togglePotentialWinnings}
-                  className="data-[state=checked]:bg-masters-yellow"
-                />
-                <Label 
-                  htmlFor="show-winnings" 
-                  className="text-white text-xs cursor-pointer"
-                >
-                  Show Prize Money
-                </Label>
-              </div>
+            <div className="flex items-center">
               <button 
                 className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
                 onClick={handleManualRefresh}
@@ -203,21 +184,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             />
             {renderHealthIndicator()}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Switch 
-                id="show-winnings" 
-                checked={showPotentialWinnings}
-                onCheckedChange={togglePotentialWinnings}
-                className="data-[state=checked]:bg-masters-yellow"
-              />
-              <Label 
-                htmlFor="show-winnings" 
-                className="text-white text-xs cursor-pointer"
-              >
-                Show Prize Money
-              </Label>
-            </div>
+          <div className="flex items-center">
             <button 
               className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white cursor-pointer"
               onClick={handleManualRefresh}

@@ -39,7 +39,6 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
   
   const [refreshing, setRefreshing] = useState(false);
   const [changedPositions, setChangedPositions] = useState<Record<string, 'up' | 'down' | null>>({});
-  const [showPotentialWinnings, setShowPotentialWinnings] = useState<boolean>(true);
   const [currentTournament, setCurrentTournament] = useState<any>(null);
   const [tournamentLoading, setTournamentLoading] = useState<boolean>(true);
   const [dataSourceError, setDataSourceError] = useState<string | undefined>(undefined);
@@ -173,18 +172,6 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
     }
   };
 
-  const togglePotentialWinnings = () => {
-    setShowPotentialWinnings(!showPotentialWinnings);
-    localStorage.setItem('showPotentialWinnings', (!showPotentialWinnings).toString());
-  };
-
-  useEffect(() => {
-    const showWinnings = localStorage.getItem('showPotentialWinnings');
-    if (showWinnings !== null) {
-      setShowPotentialWinnings(showWinnings === 'true');
-    }
-  }, []);
-
   useEffect(() => {
     document.title = "Masters Leaderboard - Live Tournament Standings";
     
@@ -209,8 +196,6 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
           loading={loading}
           refreshing={refreshing}
           handleManualRefresh={handleManualRefresh}
-          showPotentialWinnings={showPotentialWinnings}
-          togglePotentialWinnings={togglePotentialWinnings}
           dataSource={dataSource}
           errorMessage={dataSourceError}
           tournamentYear={dataYear || TOURNAMENT_YEAR}
@@ -237,8 +222,6 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         loading={loading}
         refreshing={refreshing}
         handleManualRefresh={handleManualRefresh}
-        showPotentialWinnings={showPotentialWinnings}
-        togglePotentialWinnings={togglePotentialWinnings}
         dataSource={dataSource}
         errorMessage={dataSourceError}
         tournamentYear={dataYear || TOURNAMENT_YEAR}
@@ -349,7 +332,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         )}
         
         {loading ? (
-          <LoadingState showPotentialWinnings={showPotentialWinnings} />
+          <LoadingState />
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-gray-600">
             <Info size={24} className="mx-auto mb-2 text-masters-green"/>
@@ -367,7 +350,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
             leaderboard={leaderboard}
             refreshing={refreshing}
             changedPositions={changedPositions}
-            showPotentialWinnings={showPotentialWinnings}
+            showPotentialWinnings={false}
           />
         )}
       </div>

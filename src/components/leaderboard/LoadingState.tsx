@@ -1,26 +1,47 @@
 
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getScoreClass } from "@/utils/leaderboardUtils";
 
-interface LoadingStateProps {
-  showPotentialWinnings: boolean;
-}
-
-const LoadingState: React.FC<LoadingStateProps> = ({ showPotentialWinnings }) => {
+const LoadingState = () => {
   return (
-    <div className="space-y-2">
-      {[...Array(10)].map((_, i) => (
-        <div key={i} className="flex items-center space-x-4">
-          <Skeleton className="h-6 w-10" />
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-6 w-10" />
-          <Skeleton className="h-6 w-10" />
-          {showPotentialWinnings && (
-            <Skeleton className="h-6 w-20" />
-          )}
-          <Skeleton className="h-6 w-10" />
-        </div>
-      ))}
+    <div className="overflow-x-auto relative">
+      <table className="w-full">
+        <thead>
+          <tr className="text-left border-b-2 border-masters-green">
+            <th className="masters-table-header rounded-tl-md">Pos</th>
+            <th className="masters-table-header">Player</th>
+            <th className="masters-table-header text-right">Score</th>
+            <th className="masters-table-header text-right">Today</th>
+            <th className="masters-table-header text-right">Thru</th>
+            <th className="masters-table-header text-right rounded-tr-md">Masters Prize</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...Array(10)].map((_, index) => (
+            <tr key={index} className={index % 2 === 0 ? "masters-table-row-even" : "masters-table-row-odd"}>
+              <td className="px-2 py-3">
+                <Skeleton className="h-6 w-5" />
+              </td>
+              <td className="px-2 py-3">
+                <Skeleton className="h-6 w-36" />
+              </td>
+              <td className="px-2 py-3 text-right">
+                <Skeleton className="h-6 w-12 ml-auto" />
+              </td>
+              <td className="px-2 py-3 text-right">
+                <Skeleton className="h-6 w-10 ml-auto" />
+              </td>
+              <td className="px-2 py-3 text-right">
+                <Skeleton className="h-6 w-6 ml-auto" />
+              </td>
+              <td className="px-2 py-3 text-right">
+                <Skeleton className="h-6 w-20 ml-auto" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
