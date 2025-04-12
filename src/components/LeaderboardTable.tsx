@@ -69,7 +69,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                       {changedPositions[golfer.name] === 'down' && (
                         <span className="text-red-500 mr-1">▼</span>
                       )}
-                      <WinnerIcons position={golfer.position} />
+                      <WinnerIcons position={golfer.position} isPoolStandings={false} />
                     </div>
                   </td>
                   <td className="px-2 py-3 font-medium">

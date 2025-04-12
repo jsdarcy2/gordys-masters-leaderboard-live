@@ -109,7 +109,7 @@ export const calculatePoolStandings = (
 export const generateEmergencyPoolStandings = (count: number = 134): PoolParticipant[] => {
   // Use the provided data for the standings
   const rawStandingsData = [
-    { name: "Matt Rogers", score: -21, position: 1 },
+    { name: "Matt Rogers", score: -22, position: 1 },
     { name: "James Carlson", score: -20, position: 2 },
     { name: "Tilly Duff", score: -20, position: 2 },
     { name: "Nash Nibbe", score: -20, position: 2 },
