@@ -2,7 +2,7 @@
 import React from "react";
 import LiveStream from "@/components/LiveStream";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Flag, Martini } from "lucide-react";
+import { RefreshCw, Flag, Martini, Award } from "lucide-react";
 import Image from "@/components/ui/image";
 
 interface EmergencyFallbackProps {
@@ -63,12 +63,30 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
               Our team is working diligently to restore the leaderboard. In the meantime, enjoy the live coverage from Augusta National.
             </p>
             <div className="mt-4 pt-3 border-t border-masters-green/10">
-              <div className="text-xs text-masters-dark/60 flex items-center justify-center sm:justify-start">
-                <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
-                System recovery in progress...
+              <div className="flex justify-center sm:justify-start text-xs text-masters-dark/60 gap-3">
+                <div className="flex items-center">
+                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1 animate-pulse"></span>
+                  System recovery in progress...
+                </div>
+                <div className="flex items-center">
+                  <Award size={12} className="mr-1 text-masters-yellow" />
+                  86th Masters Tournament
+                </div>
               </div>
             </div>
           </div>
+        </div>
+        
+        <div className="mt-4 text-center">
+          <Button
+            onClick={onRetry}
+            variant="outline"
+            size="sm"
+            className="border-masters-green text-masters-green hover:bg-masters-green/10"
+          >
+            <RefreshCw size={14} className="mr-2" />
+            Check Leaderboard Status
+          </Button>
         </div>
       </div>
     </div>

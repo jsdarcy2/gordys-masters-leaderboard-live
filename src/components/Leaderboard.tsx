@@ -13,7 +13,7 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import EmergencyFallback from "./leaderboard/EmergencyFallback";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
-const CRITICAL_OUTAGE_THRESHOLD = 3;
+const CRITICAL_OUTAGE_THRESHOLD = 2;
 
 interface LeaderboardProps {
   forceCriticalOutage?: boolean;
@@ -53,9 +53,9 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
 
     const shouldShowEmergency = 
       (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) ||
-      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 2) ||
+      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 1) ||
       (dataSource === "mock-data") || 
-      (dataSource === "no-data" && consecutiveFailures && consecutiveFailures >= 2);
+      (dataSource === "no-data" && consecutiveFailures && consecutiveFailures >= 1);
     
     console.log("Emergency fallback check:", { 
       consecutiveFailures, 
@@ -155,7 +155,10 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         description: `Data refreshed at ${formatLastUpdated(new Date().toISOString())}${dataSource ? ` from ${dataSource}` : ''}`,
       });
       
-      if (showEmergencyFallback && dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
+      if (showEmergencyFallback && dataSource && 
+          dataSource !== "mock-data" && 
+          dataSource !== "no-data" && 
+          dataSource !== "cached-data") {
         setShowEmergencyFallback(false);
       }
     } catch (error) {

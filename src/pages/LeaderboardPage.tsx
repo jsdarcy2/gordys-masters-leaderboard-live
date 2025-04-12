@@ -12,12 +12,12 @@ const LeaderboardPage = () => {
   const { dataHealth, consecutiveFailures } = useTournamentData();
   const [isCriticalOutage, setIsCriticalOutage] = useState(false);
   
-  // Ensure the outage state is set correctly based on API failures
+  // Adjusted outage detection with more sensitivity to API failures
   useEffect(() => {
-    // Check for critical outage conditions
+    // Check for critical outage conditions with lower threshold
     const hasOutage = 
-      (consecutiveFailures && consecutiveFailures >= 3) || 
-      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 2);
+      (consecutiveFailures && consecutiveFailures >= 2) || 
+      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 1);
     
     setIsCriticalOutage(hasOutage);
     
