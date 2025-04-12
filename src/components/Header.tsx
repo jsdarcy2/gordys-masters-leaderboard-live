@@ -53,17 +53,6 @@ const Header = () => {
       {/* Enhanced overlay with improved glassmorphism - adjusted to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/85 via-masters-green/75 to-masters-dark/85 backdrop-blur-[2px]"></div>
       
-      {/* Masters logo silhouette - subtle accent */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none">
-        <div className="container mx-auto h-full relative">
-          <div className="absolute right-4 top-4 w-16 h-16 opacity-10 hidden md:block">
-            <svg viewBox="0 0 512 512" className="w-full h-full fill-masters-gold stroke-masters-gold" preserveAspectRatio="xMidYMid meet">
-              <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 400h-32l-38.4-51.2c-6.4 6.4-16 9.6-22.4 12.8l25.6 38.4h-44.8l-19.2-32c-16 3.2-32 3.2-51.2 3.2v28.8h-38.4v-28.8c-19.2 0-35.2 0-51.2-3.2l-19.2 32H96l25.6-38.4c-9.6-3.2-16-6.4-22.4-12.8L60.8 408H28.8v-32h19.2c0-9.6 3.2-16 6.4-25.6l-25.6-19.2v-38.4l25.6 19.2c6.4-9.6 16-19.2 25.6-25.6l-19.2-25.6h38.4l12.8 25.6c9.6-3.2 19.2-6.4 32-6.4l-6.4-32h38.4l-6.4 32c12.8 0 22.4 3.2 32 6.4l12.8-25.6h38.4l-19.2 25.6c9.6 6.4 19.2 16 25.6 25.6l25.6-19.2V292l-25.6 19.2c3.2 9.6 6.4 16 6.4 25.6h19.2c3.2 6.4 0 38.4 0 38.4z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      
       <div className="container mx-auto relative z-10">
         <div className="px-6 py-6 md:py-8 flex flex-col">
           <div className="flex justify-between items-center">
