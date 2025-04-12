@@ -17,33 +17,36 @@ const Index = () => {
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <FeatureCard 
-          icon={<Flag className="text-masters-darkgreen" />} 
-          title="Tournament" 
-          subtitle="Follow the live leaderboard" 
-          href="/leaderboard"
-          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
-          variant="green" 
-        />
+        <Link to="/leaderboard" className="block h-full no-underline group" draggable="false">
+          <FeatureCard 
+            icon={<Flag className="text-masters-darkgreen" />} 
+            title="Tournament" 
+            subtitle="Follow the live leaderboard" 
+            backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
+            variant="green" 
+          />
+        </Link>
               
-        <FeatureCard 
-          icon={<Trophy className="text-masters-gold" />} 
-          title="Pool Standings" 
-          subtitle="See who's winning the pool" 
-          href="/selections"
-          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
-          highlight={true}
-          variant="gold" 
-        />
+        <Link to="/selections" className="block h-full no-underline group" draggable="false">
+          <FeatureCard 
+            icon={<Trophy className="text-masters-gold" />} 
+            title="Pool Standings" 
+            subtitle="See who's winning the pool" 
+            backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
+            highlight={true}
+            variant="gold" 
+          />
+        </Link>
               
-        <FeatureCard 
-          icon={<Clock className="text-masters-darkgreen" />} 
-          title="Past Champions" 
-          subtitle="Celebrating 20 years" 
-          href="/archive"
-          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
-          variant="green" 
-        />
+        <Link to="/archive" className="block h-full no-underline group" draggable="false">
+          <FeatureCard 
+            icon={<Clock className="text-masters-darkgreen" />} 
+            title="Past Champions" 
+            subtitle="Celebrating 20 years" 
+            backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
+            variant="green" 
+          />
+        </Link>
       </div>
       
       <div className="w-full rounded-lg overflow-hidden shadow-card border border-masters-green/10">
@@ -58,7 +61,6 @@ const FeatureCard = ({
   icon, 
   title, 
   subtitle, 
-  href,
   backgroundImage,
   highlight = false,
   variant = "green"
@@ -66,7 +68,6 @@ const FeatureCard = ({
   icon: React.ReactNode; 
   title: string; 
   subtitle: string; 
-  href: string;
   backgroundImage?: string;
   highlight?: boolean;
   variant?: "green" | "gold";
@@ -112,69 +113,63 @@ const FeatureCard = ({
       : "bg-gradient-to-br from-masters-green/10 to-white/70";
 
   return (
-    <Link 
-      to={href} 
-      className="block h-full no-underline group"
-      draggable="false"
-    >
-      <Card className={`h-full relative overflow-hidden border bg-gradient-to-br shadow-card hover:shadow-elegant transition-all duration-300 ${cardBaseClasses}`}>
-        {/* Background image and decorative elements - all with pointer-events-none */}
-        {backgroundImage && (
-          <>
-            {/* Background image with reduced opacity */}
-            <div className="absolute inset-0 pointer-events-none">
-              <img 
-                src={backgroundImage} 
-                alt=""
-                className="w-full h-full object-cover opacity-[0.08]"
-              />
-            </div>
-            
-            {/* Decorative stripes */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none">
-              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${stripeColorClass}`}></div>
-              <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
-              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${stripeColorClass}`}></div>
-            </div>
-            
-            {/* Gradient overlay */}
-            <div className={`absolute inset-0 pointer-events-none ${gradientOverlayClass}`}></div>
-          </>
-        )}
-        
-        {/* Decorative icon in top right corner */}
-        <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
-          <Flag 
-            size={24} 
-            className={highlight ? "text-masters-darkgreen" : variant === "gold" ? "text-masters-gold" : "text-masters-green"}
-          />
-        </div>
-        
-        {/* Card Content */}
-        <div className="relative z-10 p-6">
-          <div className="flex items-center mb-3">
-            <div className={`p-2.5 rounded-full ${iconContainerClasses}`}>
-              {icon}
-            </div>
-            <h3 className={`text-xl font-serif ml-3 ${titleColorClass}`}>
-              {title}
-            </h3>
-          </div>
-          
-          <p className="text-gray-700 mb-4 font-medium">
-            {subtitle}
-          </p>
-          
-          <div className={`mt-3 flex items-center justify-between ${footerLinkColorClass} text-sm font-medium`}>
-            <span className="font-serif">View details</span>
-            <ChevronRight 
-              size={18} 
-              className="transform transition-transform duration-300 group-hover:translate-x-1" 
+    <Card className={`h-full relative overflow-hidden border bg-gradient-to-br shadow-card hover:shadow-elegant transition-all duration-300 ${cardBaseClasses}`}>
+      {/* Background image and decorative elements - all with pointer-events-none */}
+      {backgroundImage && (
+        <>
+          {/* Background image with reduced opacity */}
+          <div className="absolute inset-0 pointer-events-none">
+            <img 
+              src={backgroundImage} 
+              alt=""
+              className="w-full h-full object-cover opacity-[0.08]"
             />
           </div>
+          
+          {/* Decorative stripes */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none">
+            <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${stripeColorClass}`}></div>
+            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
+            <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${stripeColorClass}`}></div>
+          </div>
+          
+          {/* Gradient overlay */}
+          <div className={`absolute inset-0 pointer-events-none ${gradientOverlayClass}`}></div>
+        </>
+      )}
+      
+      {/* Decorative icon in top right corner */}
+      <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
+        <Flag 
+          size={24} 
+          className={highlight ? "text-masters-darkgreen" : variant === "gold" ? "text-masters-gold" : "text-masters-green"}
+        />
+      </div>
+      
+      {/* Card Content */}
+      <div className="relative z-10 p-6">
+        <div className="flex items-center mb-3">
+          <div className={`p-2.5 rounded-full ${iconContainerClasses}`}>
+            {icon}
+          </div>
+          <h3 className={`text-xl font-serif ml-3 ${titleColorClass}`}>
+            {title}
+          </h3>
         </div>
-      </Card>
-    </Link>
+        
+        <p className="text-gray-700 mb-4 font-medium">
+          {subtitle}
+        </p>
+        
+        <div className={`mt-3 flex items-center justify-between ${footerLinkColorClass} text-sm font-medium`}>
+          <span className="font-serif">View details</span>
+          <ChevronRight 
+            size={18} 
+            className="transform transition-transform duration-300 group-hover:translate-x-1" 
+          />
+        </div>
+      </div>
+    </Card>
   );
 };
 

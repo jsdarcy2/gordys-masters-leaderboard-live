@@ -107,6 +107,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             rel="noopener noreferrer" 
             className="ml-3 text-white/90 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center"
             title="Google Sheet Backup"
+            onClick={(e) => e.stopPropagation()}
           >
             <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
             <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>

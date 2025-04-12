@@ -216,9 +216,10 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
               </Label>
             </div>
             <button 
-              className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
+              className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white cursor-pointer"
               onClick={handleManualRefresh}
               disabled={refreshing}
+              aria-label="Refresh data"
             >
               <RefreshCcw 
                 size={18} 
