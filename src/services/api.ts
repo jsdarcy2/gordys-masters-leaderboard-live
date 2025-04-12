@@ -1,5 +1,6 @@
 
 import { DataSource } from "@/types";
+import { clearLeaderboardCache } from "./leaderboard";
 
 // Re-export functions from modular service files
 export { isTournamentInProgress, getCurrentTournament } from './tournament';

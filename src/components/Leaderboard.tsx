@@ -141,6 +141,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
               refreshing={refreshing}
               changedPositions={changedPositions}
               showPotentialWinnings={true}
+              dataSource={dataSource}
+              onRefresh={refreshData}
             />
             
             <div className="mt-4 text-gray-500 text-sm">
