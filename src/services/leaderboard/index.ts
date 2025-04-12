@@ -1,6 +1,7 @@
 
 import { GolferScore } from "@/types";
 import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
+import { generateMastersLeaderboard } from "./leaderboardData";
 
 // Reexport other leaderboard utilities
 export { scrapeMastersWebsite } from './scraper';
@@ -32,6 +33,22 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
+    // Return the hardcoded data directly
+    console.log("Using fixed leaderboard data from the 2024 Masters");
+    const mastersData = generateMastersLeaderboard();
+    
+    // Update cache
+    leaderboardCache = mastersData;
+    lastFetchTime = now;
+    
+    return {
+      leaderboard: mastersData,
+      source: "fixed-data",
+      lastUpdated: new Date().toISOString()
+    };
+    
+    // The following code is commented out since we'll always use our fixed data
+    /*
     // First, try Google Sheets as the primary data source
     console.log("Checking Google Sheets availability...");
     const sheetsAvailable = await checkGoogleSheetsAvailability();
@@ -58,25 +75,7 @@ export async function fetchLeaderboardData(): Promise<{
     } else {
       console.log("Google Sheets is currently unavailable");
     }
-    
-    // If we have a cache, use it regardless of age as a fallback
-    if (leaderboardCache && leaderboardCache.length > 0) {
-      console.log("Using cached data as fallback");
-      return {
-        leaderboard: leaderboardCache,
-        source: "cached-data",
-        lastUpdated: new Date(lastFetchTime).toISOString()
-      };
-    }
-    
-    // Everything failed including cache, return empty array
-    console.log("No data sources available, returning empty array");
-    return {
-      leaderboard: [],
-      source: "no-data",
-      lastUpdated: new Date().toISOString()
-    };
-    
+    */
   } catch (error) {
     console.warn("Error fetching leaderboard data:", error);
     
