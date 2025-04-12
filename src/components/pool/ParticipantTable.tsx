@@ -2,7 +2,7 @@
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
-import { Check, Ban, CircleDollarSign, Info } from "lucide-react";
+import { Check, Ban, CircleDollarSign, ExternalLink } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -34,7 +34,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
   return (
     <div className="overflow-x-auto mt-4">
       <div className="text-sm text-gray-600 mb-3 flex items-center gap-1 bg-masters-cream/30 p-3 rounded-md border border-masters-green/10">
-        <Info size={16} className="text-masters-green" />
+        <CircleDollarSign size={16} className="text-masters-green" />
         <span>
           Scores are calculated using the <span className="font-medium">best 4 out of 5</span> golfer scores.
         </span>
@@ -112,7 +112,24 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                     <div className="flex flex-wrap items-center gap-2">
                       {participant.name}
                       {!isPaid && (
-                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded font-normal">unpaid</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <a 
+                                href="https://venmo.com/gfstofer" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded font-normal hover:bg-blue-200 transition-colors flex items-center gap-1"
+                              >
+                                <span>unpaid</span>
+                                <ExternalLink size={10} />
+                              </a>
+                            </TooltipTrigger>
+                            <TooltipContent className="bg-blue-600 text-white border-blue-700">
+                              <p className="text-xs">Pay with Venmo @gfstofer</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
                       {missedCut && (
                         <Badge variant="destructive" className="text-xs py-0 px-1.5 h-5 bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800">
