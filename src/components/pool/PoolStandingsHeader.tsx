@@ -6,9 +6,18 @@ interface PoolStandingsHeaderProps {
   totalParticipants: number;
   loading: boolean;
   isTournamentActive?: boolean;
+  activeParticipants?: number;
+  missedCutCount?: number;
 }
 
-const PoolStandingsHeader = ({ lastUpdated, totalParticipants, loading, isTournamentActive = false }: PoolStandingsHeaderProps) => {
+const PoolStandingsHeader = ({ 
+  lastUpdated, 
+  totalParticipants, 
+  loading, 
+  isTournamentActive = false,
+  activeParticipants,
+  missedCutCount
+}: PoolStandingsHeaderProps) => {
   const formatLastUpdated = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -31,7 +40,13 @@ const PoolStandingsHeader = ({ lastUpdated, totalParticipants, loading, isTourna
               <span>Live</span>
             </div>
           )}
-          {!loading && totalParticipants > 0 && (
+          {!loading && activeParticipants !== undefined && missedCutCount !== undefined && (
+            <div className="flex items-center text-sm text-masters-yellow">
+              <Users size={14} className="mr-1" />
+              <span>{activeParticipants} Active / {missedCutCount} Cut</span>
+            </div>
+          )}
+          {!loading && activeParticipants === undefined && totalParticipants > 0 && (
             <div className="flex items-center text-sm text-masters-yellow">
               <Users size={14} className="mr-1" />
               <span>{totalParticipants} Participants</span>

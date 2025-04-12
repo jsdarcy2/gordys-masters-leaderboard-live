@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
@@ -18,6 +17,9 @@ import { Badge } from "@/components/ui/badge";
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
 const ERROR_THRESHOLD = 3; // Only show fallback after 3 consecutive errors
+
+const ACTIVE_PARTICIPANTS = 94;
+const MISSED_CUT_PARTICIPANTS = 43;
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -46,15 +48,12 @@ const PoolStandings = () => {
         return;
       }
       
-      // Reset error state on success
       errorCountRef.current = 0;
       setStandings(data);
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
       setError(null);
       
-      // Check if we're using emergency data
-      // This is a heuristic - if the first participant is Matt Rogers, we're using emergency data
       if (data[0]?.name === "Matt Rogers" && data[0]?.position === 1 && data[0]?.totalScore === -21) {
         setUsingEmergencyData(true);
       } else {
@@ -78,7 +77,6 @@ const PoolStandings = () => {
     });
   };
 
-  // Check tournament status effect
   useEffect(() => {
     const checkTournamentStatus = async () => {
       const active = await isTournamentInProgress();
@@ -88,7 +86,6 @@ const PoolStandings = () => {
     
     checkTournamentStatus();
     
-    // Check tournament status every hour
     const tournamentStatusInterval = setInterval(checkTournamentStatus, 3600000);
     
     return () => {
@@ -96,7 +93,6 @@ const PoolStandings = () => {
     };
   }, [toast]);
 
-  // Initial data loading
   useEffect(() => {
     loadStandingsData();
     
@@ -107,19 +103,15 @@ const PoolStandings = () => {
     };
   }, []);
 
-  // Set up polling only when tournament is active
   useEffect(() => {
-    // Clear any existing interval
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
       pollingRef.current = null;
     }
     
-    // Only set up polling if tournament is active
     if (isTournamentActive) {
       console.log("Setting up 1-minute polling for standings data");
       
-      // Poll every minute during active tournament
       pollingRef.current = setInterval(() => {
         loadStandingsData();
       }, POLLING_INTERVAL);
@@ -132,13 +124,11 @@ const PoolStandings = () => {
     };
   }, [isTournamentActive]);
 
-  // Filter standings based on search query
   const filteredStandings = searchQuery 
     ? standings.filter(participant => 
         participant.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : standings;
 
-  // Display either all standings or just the preview based on showAll state
   const displayStandings = showAll 
     ? filteredStandings 
     : filteredStandings.slice(0, PREVIEW_COUNT);
@@ -146,12 +136,8 @@ const PoolStandings = () => {
   const totalParticipants = standings.length;
   const filteredCount = filteredStandings.length;
   
-  // Calculate active vs missed cut counts
-  const missedCutCount = useMemo(() => {
-    return standings.filter(participant => participant.totalScore > 200).length;
-  }, [standings]);
-  
-  const activeParticipantCount = totalParticipants - missedCutCount;
+  const activeParticipantCount = ACTIVE_PARTICIPANTS; 
+  const missedCutCount = MISSED_CUT_PARTICIPANTS;
 
   return (
     <div className="masters-card">
@@ -160,6 +146,8 @@ const PoolStandings = () => {
         totalParticipants={totalParticipants} 
         loading={loading}
         isTournamentActive={isTournamentActive}
+        activeParticipants={activeParticipantCount}
+        missedCutCount={missedCutCount}
       />
       
       <div className="p-4 bg-white">
@@ -208,7 +196,6 @@ const PoolStandings = () => {
           </Alert>
         )}
         
-        {/* Search bar */}
         {!loading && standings.length > 0 && (
           <SearchBar 
             searchQuery={searchQuery}
