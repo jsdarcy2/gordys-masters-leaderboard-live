@@ -23,9 +23,9 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   showPotentialWinnings
 }) => {
   return (
-    <>
+    <div className="overflow-x-auto">
       {refreshing && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-30 pointer-events-none">
           <RefreshCw size={24} className="animate-spin text-masters-green" />
         </div>
       )}
@@ -106,7 +106,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           )}
         </tbody>
       </table>
-    </>
+    </div>
   );
 };
 

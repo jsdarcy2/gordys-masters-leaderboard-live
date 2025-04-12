@@ -31,16 +31,25 @@ const LeaderboardPage = () => {
   }, []);
 
   const handleRefreshClick = async () => {
-    // Clear the cache first to force a new fetch
-    await clearLeaderboardCache();
-    
-    // Then refresh the data
-    refreshData(true);
-    
-    toast({
-      title: "Refreshing data",
-      description: "Fetching the latest data from Masters.com"
-    });
+    try {
+      // Clear the cache first to force a new fetch
+      await clearLeaderboardCache();
+      
+      // Then refresh the data
+      await refreshData(true);
+      
+      toast({
+        title: "Refreshing data",
+        description: "Fetching the latest data from Masters.com"
+      });
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast({
+        title: "Error refreshing data",
+        description: "Please try again in a moment",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -50,18 +59,12 @@ const LeaderboardPage = () => {
           <h2 className={`${isMobile ? 'text-xl' : 'text-2xl md:text-3xl'} font-serif font-bold text-masters-green flex items-center flex-wrap`}>
             <BarChart3 size={isMobile ? 20 : 24} className="mr-2 text-masters-yellow" />
             Live Tournament Leaderboard
-            <div className="flex items-center mt-1 md:mt-0">
-              <span className="ml-0 md:ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-masters-green/20 text-masters-dark">
-                <Flag size={12} className="mr-1 text-masters-green" />
-                Augusta National
+            {hasLiveData && (
+              <span className="ml-2 sm:ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-800">
+                <Activity size={12} className="mr-1 text-green-600 animate-pulse" />
+                Live Scores
               </span>
-              {hasLiveData && (
-                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-800">
-                  <Activity size={12} className="mr-1 text-green-600 animate-pulse" />
-                  Live Scores
-                </span>
-              )}
-            </div>
+            )}
           </h2>
           <Button 
             variant="outline"
@@ -73,9 +76,15 @@ const LeaderboardPage = () => {
             Refresh Data
           </Button>
         </div>
-        <p className="text-sm md:text-base text-gray-600 mt-1 md:mt-2">
-          Live scoring updates from The Masters Tournament at Augusta National
-        </p>
+        <div className="flex items-center flex-wrap mt-1">
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-masters-green/20 text-masters-dark mr-2">
+            <Flag size={12} className="mr-1 text-masters-green" />
+            Augusta National
+          </span>
+          <p className="text-sm md:text-base text-gray-600">
+            Live scoring updates from The Masters Tournament at Augusta National
+          </p>
+        </div>
         {!scrolled && <Separator className="my-3 md:my-4 bg-masters-green/10" />}
       </div>
       

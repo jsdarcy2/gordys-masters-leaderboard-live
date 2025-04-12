@@ -172,9 +172,14 @@ export function buildGolferScoreMap(leaderboard: GolferScore[]): Record<string, 
 /**
  * Manually clear leaderboard cache to force a fresh fetch
  */
-export function clearLeaderboardCache(): Promise<boolean> {
-  leaderboardCache = null;
-  lastFetchTime = 0;
-  console.log("Leaderboard cache cleared");
-  return Promise.resolve(true);
-}
+export const clearLeaderboardCache = async (): Promise<void> => {
+  try {
+    localStorage.removeItem('masters_leaderboard');
+    localStorage.removeItem('masters_leaderboard_timestamp');
+    console.log('Leaderboard cache cleared successfully');
+    return Promise.resolve();
+  } catch (error) {
+    console.error('Error clearing leaderboard cache:', error);
+    return Promise.reject(error);
+  }
+};

@@ -43,7 +43,7 @@ const Header = () => {
       
       {/* Masters celebration image background - subtle overlay */}
       <div className="absolute inset-0 w-full h-full opacity-[0.15]">
-        <Image 
+        <img 
           src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
           alt="Masters Celebration" 
           className="w-full h-full object-cover"
