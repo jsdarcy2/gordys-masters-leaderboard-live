@@ -7,6 +7,7 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   overlay?: React.ReactNode;
   overlayClassName?: string;
   overlayOpacity?: number;
+  imageOpacity?: number;
 }
 
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
@@ -17,6 +18,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
     overlay, 
     overlayClassName, 
     overlayOpacity = 40,
+    imageOpacity = 100,
     ...props 
   }, ref) => {
     const [src, setSrc] = React.useState<string | undefined>(props.src);
@@ -51,7 +53,7 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
           onLoad={handleLoad}
           className={cn(
             "object-cover w-full h-full transition-opacity duration-300",
-            loaded ? "opacity-100" : "opacity-0"
+            loaded ? `opacity-${imageOpacity || 100}` : "opacity-0"
           )}
         />
         {!loaded && (
