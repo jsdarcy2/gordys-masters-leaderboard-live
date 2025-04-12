@@ -1,12 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-// This would normally come from an API
-// For now we'll hardcode the payment data
+// Updated payment data based on the provided information
 const paymentData = [
   { name: "Kyle Flippen", paid: true },
   { name: "Jim Jones", paid: true },
@@ -15,7 +13,7 @@ const paymentData = [
   { name: "Chris Crawford", paid: true },
   { name: "Ava Rose Darcy", paid: true },
   { name: "Mike Baker", paid: true },
-  { name: "Chuck Corbett Sr", paid: false },
+  { name: "Chuck Corbett Sr", paid: true },
   { name: "Jay Despard", paid: true },
   { name: "Pete Drago", paid: false },
   { name: "Alexa Drago", paid: false },
@@ -49,10 +47,10 @@ const paymentData = [
   { name: "Avery Sturgis", paid: true },
   { name: "Scott Tande", paid: true },
   { name: "Elia Ayaz", paid: true },
-  { name: "Ted Beckman", paid: false },
+  { name: "Ted Beckman", paid: true },
   { name: "James Carlson", paid: true },
   { name: "Hadley Carlson", paid: true },
-  { name: "Ed Corbett", paid: false },
+  { name: "Ed Corbett", paid: true },
   { name: "Holland Darcy", paid: false },
   { name: "Audrey Darcy", paid: false },
   { name: "Charlie Drago", paid: false },
@@ -65,7 +63,7 @@ const paymentData = [
   { name: "Elle McClintock", paid: true },
   { name: "Rich McClintock", paid: true },
   { name: "Charles Meech Jr", paid: true },
-  { name: "Chad Murphy", paid: false },
+  { name: "Chad Murphy", paid: true },
   { name: "Nash Nibbe", paid: true },
   { name: "Julie Nibbe", paid: true },
   { name: "James Petrikas Jr.", paid: true },
@@ -86,7 +84,7 @@ const paymentData = [
   { name: "Chris Willette", paid: true },
   { name: "Peter Bassett", paid: true },
   { name: "John Gustafson", paid: true },
-  { name: "Brack Herfurth", paid: false },
+  { name: "Brack Herfurth", paid: true },
   { name: "Davis Jones", paid: false },
   { name: "Peter Kepic Jr.", paid: true },
   { name: "Greg Kevane", paid: true },
@@ -102,11 +100,11 @@ const paymentData = [
   { name: "Winfield Stephens", paid: false },
   { name: "Eileen Stofer", paid: true },
   { name: "Jon Sturgis", paid: true },
-  { name: "Hilary Beckman", paid: false },
+  { name: "Hilary Beckman", paid: true },
   { name: "Justin Darcy", paid: false },
   { name: "Lily Gustafson", paid: true },
-  { name: "Darby Herfurth", paid: false },
-  { name: "Henry Herfurth", paid: false },
+  { name: "Darby Herfurth", paid: true },
+  { name: "Henry Herfurth", paid: true },
   { name: "Rachel Herfurth", paid: true },
   { name: "Jenny McClintock", paid: true },
   { name: "Kevin McClintock", paid: true },
@@ -118,13 +116,13 @@ const paymentData = [
   { name: "Teddy Stofer", paid: true },
   { name: "Ben Applebaum", paid: true },
   { name: "Ross Baker", paid: true },
-  { name: "Oliver Beckman", paid: false },
+  { name: "Oliver Beckman", paid: true },
   { name: "Peter Beugg", paid: true },
   { name: "Quinn Carlson", paid: true },
-  { name: "Tilly Duff", paid: false },
-  { name: "Gretchen Duff", paid: false },
+  { name: "Tilly Duff", paid: true },
+  { name: "Gretchen Duff", paid: true },
   { name: "Eric Fox", paid: true },
-  { name: "Jess Herfurth", paid: false },
+  { name: "Jess Herfurth", paid: true },
   { name: "Decker Herfurth", paid: true },
   { name: "Amy Jones", paid: false },
   { name: "Carter Jones", paid: false },
@@ -132,7 +130,7 @@ const paymentData = [
   { name: "Sarah Kepic", paid: true },
   { name: "Andy Koch", paid: true },
   { name: "Chad Kollar", paid: true },
-  { name: "Jack Lenmark", paid: false },
+  { name: "Jack Lenmark", paid: true },
   { name: "C.J. Nibbe", paid: true },
   { name: "Ravi Ramalingam", paid: true },
   { name: "Victoria Simmons", paid: true },
