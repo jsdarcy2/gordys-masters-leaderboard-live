@@ -1,4 +1,3 @@
-
 import { PoolParticipant } from "@/types";
 
 /**
@@ -79,6 +78,56 @@ export const calculatePoolStandings = (
   standings.forEach((participant, index) => {
     participant.position = index + 1;
   });
+  
+  return standings;
+};
+
+/**
+ * Generate emergency mock pool standings data as a last resort
+ */
+export const generateEmergencyPoolStandings = (count: number = 20): PoolParticipant[] => {
+  const standings: PoolParticipant[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const name = generateParticipantName(i);
+    const totalScore = 270 + Math.floor(Math.random() * 30); // Random score between 270 and 300
+    const position = i + 1;
+    
+    // Generate 4 random golfer picks
+    const picks = [
+      "Scottie Scheffler", 
+      "Rory McIlroy", 
+      "Jon Rahm", 
+      "Brooks Koepka",
+      "Dustin Johnson",
+      "Justin Thomas",
+      "Bryson DeChambeau",
+      "Jordan Spieth",
+      "Tiger Woods",
+      "Collin Morikawa"
+    ].sort(() => 0.5 - Math.random()).slice(0, 4);
+    
+    // Generate random pick scores
+    const pickScores: {[golferName: string]: number} = {};
+    picks.forEach(golfer => {
+      pickScores[golfer] = 65 + Math.floor(Math.random() * 15); // Random score between 65 and 80
+    });
+    
+    standings.push({
+      name,
+      position,
+      totalScore,
+      totalPoints: -totalScore, // Inverse for compatibility (higher is better)
+      picks,
+      pickScores,
+      tiebreaker1: 280 + Math.floor(Math.random() * 20) - 10, // Random tiebreaker1 around 280
+      tiebreaker2: 140 + Math.floor(Math.random() * 10) - 5, // Random tiebreaker2 around 140
+      paid: Math.random() > 0.2 // 80% chance of having paid
+    });
+  }
+  
+  // Sort by position
+  standings.sort((a, b) => a.position - b.position);
   
   return standings;
 };

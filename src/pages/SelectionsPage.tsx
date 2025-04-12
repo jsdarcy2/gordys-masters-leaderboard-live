@@ -15,6 +15,7 @@ const SelectionsPage = () => {
   const [participantCount, setParticipantCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorCount, setErrorCount] = useState<number>(0);
   const { toast } = useToast();
 
   // Load participant count
@@ -28,6 +29,9 @@ const SelectionsPage = () => {
         console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
         setParticipantCount(count);
         
+        // Reset error count on success
+        setErrorCount(0);
+        
         // Additional verification to check if we have all expected participants
         if (count < 10) {
           console.warn(`Expected more participants but got ${count}`);
@@ -40,6 +44,8 @@ const SelectionsPage = () => {
       } catch (error) {
         console.error("Error loading participant count:", error);
         setError("Failed to load participant data. Using demo data instead.");
+        setErrorCount(prev => prev + 1);
+        
         toast({
           title: "Data loading issue",
           description: "Using demo data while we're unable to connect to the tournament API.",
@@ -81,9 +87,14 @@ const SelectionsPage = () => {
         const count = Object.keys(selectionsData).length;
         console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
         setParticipantCount(count);
+        
+        // Reset error count on success
+        setErrorCount(0);
       } catch (error) {
         console.error("Error during manual refresh:", error);
         setError("Failed to load participant data. Using demo data instead.");
+        setErrorCount(prev => prev + 1);
+        
         toast({
           title: "Data loading issue",
           description: "Still unable to connect to the tournament API. Using demo data.",

@@ -8,6 +8,7 @@ import PoolStandingsHeader from "@/components/pool/PoolStandingsHeader";
 import SearchBar from "@/components/pool/SearchBar";
 import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
+import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
@@ -15,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
+const ERROR_THRESHOLD = 2; // Show emergency fallback after 2 consecutive errors
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -24,9 +26,11 @@ const PoolStandings = () => {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isTournamentActive, setIsTournamentActive] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const errorCountRef = useRef(0);
   
   const loadStandingsData = async () => {
     try {
@@ -36,7 +40,12 @@ const PoolStandings = () => {
       console.log("Fetched pool standings data:", data.length, "participants");
       
       if (data.length === 0) {
+        errorCountRef.current++;
         setError("No data available. Please try again later.");
+        
+        if (errorCountRef.current >= ERROR_THRESHOLD) {
+          setShowFallback(true);
+        }
         return;
       }
       
@@ -49,19 +58,28 @@ const PoolStandings = () => {
         });
       }
       
+      // Reset error state on success
+      errorCountRef.current = 0;
+      setShowFallback(false);
       setStandings(data);
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
       setError(null);
       
     } catch (err) {
+      errorCountRef.current++;
+      console.error("Error fetching pool standings:", err);
       setError("Failed to load pool standings");
-      console.error(err);
+      
       toast({
         title: "Error",
         description: "Failed to load pool standings data. Please try again.",
         variant: "destructive",
       });
+      
+      if (errorCountRef.current >= ERROR_THRESHOLD) {
+        setShowFallback(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -153,6 +171,18 @@ const PoolStandings = () => {
     
   const totalParticipants = standings.length;
   const filteredCount = filteredStandings.length;
+
+  // If we should show the fallback, render it instead of the normal component
+  if (showFallback) {
+    return (
+      <div className="masters-card">
+        <PoolStandingsFallback 
+          onRetry={handleManualRefresh}
+          message="A tradition unlike any other - we're currently experiencing technical difficulties with the pool standings. Our team at Augusta is working to get the data back online." 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="masters-card">
