@@ -45,7 +45,7 @@ const Index = () => {
   );
 };
 
-// Fixed card component with proper click handling throughout
+// Updated Card component to ensure links work properly
 const Card = ({ 
   icon, 
   title, 
@@ -116,32 +116,33 @@ const Card = ({
     }
   };
 
+  // Using Link directly as the main card element instead of a nested link
   return (
-    <div className="relative h-full group">
+    <Link 
+      to={href} 
+      className="relative h-full block group no-underline"
+      aria-label={`Navigate to ${title}`}
+    >
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full`}>
         {/* Background elements with pointer-events-none */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
-            {/* Tiger Woods celebration image - optimized for being a subtle background */}
             <img 
               src={backgroundImage} 
               alt=""
               className="w-full h-full object-cover opacity-[0.08]"
             />
             
-            {/* Flag-like stripes overlay */}
             <div className="absolute inset-0 w-full h-full pointer-events-none">
               <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
               <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
               <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
             </div>
             
-            {/* Gradient overlay to ensure text readability */}
             <div className={`absolute inset-0 pointer-events-none ${getGradientOverlay()}`}></div>
           </div>
         )}
         
-        {/* Small flag emblem in the corner - with pointer-events-none */}
         <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
           <Flag 
             size={24} 
@@ -149,8 +150,7 @@ const Card = ({
           />
         </div>
         
-        {/* Card content with pointer-events-none to not interfere with the Link */}
-        <div className="flex items-center mb-3 relative pointer-events-none">
+        <div className="flex items-center mb-3 relative">
           <div className={`p-2.5 rounded-full ${getIconColors()}`}>
             {icon}
           </div>
@@ -162,10 +162,10 @@ const Card = ({
             {title}
           </h3>
         </div>
-        <p className="text-gray-700 mb-4 font-medium relative pointer-events-none">
+        <p className="text-gray-700 mb-4 font-medium relative">
           {subtitle}
         </p>
-        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative pointer-events-none`}>
+        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative`}>
           <span className="font-serif">View details</span>
           <ChevronRight 
             size={18} 
@@ -173,16 +173,7 @@ const Card = ({
           />
         </div>
       </div>
-      
-      {/* Full clickable overlay link */}
-      <Link 
-        to={href} 
-        className="absolute inset-0 w-full h-full z-10"
-        aria-label={`Navigate to ${title}`}
-      >
-        <span className="sr-only">Go to {title}</span>
-      </Link>
-    </div>
+    </Link>
   );
 };
 
