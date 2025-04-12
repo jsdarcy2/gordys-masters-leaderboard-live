@@ -73,7 +73,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                       <span>UPDATING</span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="z-50 bg-white border border-gray-200">
+                  <TooltipContent side="bottom" className="z-10 bg-white border border-gray-200">
                     <p>Connection being reestablished</p>
                   </TooltipContent>
                 </Tooltip>
@@ -84,6 +84,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                 className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white cursor-pointer"
                 onClick={handleManualRefresh}
                 disabled={refreshing}
+                aria-label="Refresh data"
               >
                 <RefreshCcw 
                   size={18} 

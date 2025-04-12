@@ -13,7 +13,7 @@ import { clearLeaderboardCache } from "@/services/leaderboard";
 
 const LeaderboardPage = () => {
   const isMobile = useIsMobile();
-  const { dataHealth, refreshData, dataSource } = useTournamentData();
+  const { dataHealth, refreshData, dataSource, hasLiveData } = useTournamentData();
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
@@ -44,9 +44,6 @@ const LeaderboardPage = () => {
     });
   };
 
-  // Check if we're using the live scores API
-  const isUsingLiveScores = dataSource === 'masters-scores-api';
-
   return (
     <Layout>
       <div className={`${scrolled ? 'sticky top-[72px] z-20 bg-masters-cream/95 py-3 shadow-sm border-b border-masters-green/10 backdrop-blur-sm transition-all duration-300' : 'mb-4 md:mb-6 py-0'}`}>
@@ -58,7 +55,7 @@ const LeaderboardPage = () => {
               <Flag size={12} className="mr-1 text-masters-green" />
               Augusta National
             </span>
-            {isUsingLiveScores && (
+            {hasLiveData && (
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-800">
                 <Activity size={12} className="mr-1 text-green-600 animate-pulse" />
                 Live Scores

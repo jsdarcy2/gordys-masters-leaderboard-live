@@ -2,7 +2,6 @@
 import React from "react";
 import { Info, ExternalLink, Calendar, FileSpreadsheet, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 
 interface DataSourceInfoProps {
   dataSource?: string;
@@ -76,7 +75,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
               <TooltipTrigger>
                 <Info size={14} className="mr-1 text-white/70" />
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="z-50 bg-white border border-gray-200">
+              <TooltipContent side="bottom" className="z-10 bg-white border border-gray-200">
                 <p className="max-w-xs">{errorMessage}</p>
               </TooltipContent>
             </Tooltip>

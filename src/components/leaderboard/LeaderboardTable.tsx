@@ -94,8 +94,8 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   <td className="px-2 py-3 text-right">{golfer.thru}</td>
                   <td className="px-2 py-3 text-right">
                     {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                      <span className="inline-flex items-center font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
-                        <CircleDollarSign size={13} className="mr-1 text-indigo-600" />
+                      <span className="inline-flex items-center font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 px-2 py-0.5 rounded">
+                        <CircleDollarSign size={13} className="mr-1 text-[#8B5CF6]" />
                         {getMastersPurseAmount(golfer.position)}
                       </span>
                     ) : (

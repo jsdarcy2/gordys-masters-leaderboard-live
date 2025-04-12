@@ -177,4 +177,5 @@ export function clearLeaderboardCache() {
   leaderboardCache = null;
   lastFetchTime = 0;
   console.log("Leaderboard cache cleared");
+  return true; // Return success indicator
 }
