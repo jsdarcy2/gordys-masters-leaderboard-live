@@ -56,7 +56,8 @@ const Image = ({
         onLoad={handleLoad}
         style={{
           objectFit: "cover",
-          imageRendering: "high-quality",
+          // Remove the imageRendering property with invalid value
+          // Use CSS class instead for image quality improvements
         }}
         {...props}
       />
