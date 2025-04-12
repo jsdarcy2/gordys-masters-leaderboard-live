@@ -11,8 +11,7 @@ let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
 
 /**
- * Fetch leaderboard data with improved reliability and multiple data sources
- * Now with Google Sheets integration as a primary source
+ * Fetch leaderboard data exclusively from Google Sheets
  */
 export async function fetchLeaderboardData(): Promise<{
   leaderboard: GolferScore[];
@@ -33,7 +32,7 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
-    // First check if Google Sheets is available
+    // Check if Google Sheets is available
     const sheetsAvailable = await checkGoogleSheetsAvailability();
     
     if (sheetsAvailable) {
@@ -55,15 +54,9 @@ export async function fetchLeaderboardData(): Promise<{
       }
     }
     
-    // If Google Sheets fails, try to get data from existing sources
-    console.log("Google Sheets data unavailable, falling back to primary API sources");
-    
-    // Here you would call your existing fetchFromPGATour, fetchFromESPN, etc.
-    // For now, we're returning an empty result
-    
-    // If all sources fail and we have a cache, use it regardless of age
+    // If Google Sheets fails and we have a cache, use it regardless of age
     if (leaderboardCache && leaderboardCache.length > 0) {
-      console.log("All data sources failed. Using expired cache as last resort.");
+      console.log("Google Sheets data unavailable. Using expired cache as last resort.");
       return {
         leaderboard: leaderboardCache,
         source: "cached-data",

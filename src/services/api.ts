@@ -8,12 +8,9 @@ export { fetchLeaderboardData, buildGolferScoreMap, scrapeMastersWebsite } from 
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// New centralized API health monitoring system
+// Google Sheets API health monitoring
 export const API_ENDPOINTS = {
-  PGA_TOUR: 'https://statdata.pgatour.com/r/current/leaderboard-v2mini.json',
-  ESPN: 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard/events/{year}/masters/leaderboard',
-  SPORTS_DATA: 'https://masters-score-stream-hub.lovable.app/leaderboard/masters/{year}',
-  MASTERS_WEB: 'https://www.masters.com/en_US/scores/index.html'
+  GOOGLE_SHEETS: `https://sheets.googleapis.com/v4/spreadsheets/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/values/A1:A1?key=AIzaSyBwGnwRwIzVb6cFM_K3ixpqPAjLaA_hMkk`
 };
 
 // Centralized API health tracking
@@ -29,7 +26,7 @@ interface ApiHealthStatus {
 // Initialize health status tracking
 const apiHealthStatus: Record<string, ApiHealthStatus> = {};
 
-// Check health of an API endpoint with improved validation for JSON responses
+// Check health of the Google Sheets API endpoint
 export const checkApiHealth = async (
   endpoint: string, 
   options: RequestInit = {}
@@ -151,73 +148,16 @@ export const checkApiHealth = async (
   }
 };
 
-// Get the currently best performing data source
+// Get the currently best performing data source - since we only have one source, this is simpler
 export const getBestDataSource = (): DataSource => {
-  // First, check if we have health data
-  if (Object.keys(apiHealthStatus).length === 0) {
-    return 'pgatour-api'; // Default to PGA Tour API if no health data
+  // Check if the Google Sheets API is healthy
+  const sheetsStatus = apiHealthStatus[API_ENDPOINTS.GOOGLE_SHEETS];
+  
+  if (!sheetsStatus || sheetsStatus.status === 'offline') {
+    return 'cached-data'; // Use cached data if Google Sheets is offline
   }
   
-  // Get all sources that are online or degraded
-  const availableSources = Object.values(apiHealthStatus)
-    .filter(status => status.status !== 'offline');
-  
-  if (availableSources.length === 0) {
-    // All sources offline - fallback to cache
-    return 'cached-data';
-  }
-  
-  // Sort by status (online > degraded) and then by success rate
-  availableSources.sort((a, b) => {
-    if (a.status === 'online' && b.status !== 'online') return -1;
-    if (a.status !== 'online' && b.status === 'online') return 1;
-    return b.successRate - a.successRate;
-  });
-  
-  // Map endpoint to data source type
-  const endpointToSource: Record<string, DataSource> = {
-    [API_ENDPOINTS.PGA_TOUR]: 'pgatour-api',
-    [API_ENDPOINTS.ESPN]: 'espn-api',
-    [API_ENDPOINTS.SPORTS_DATA]: 'sportsdata-api',
-    [API_ENDPOINTS.MASTERS_WEB]: 'masters-scraper'
-  };
-  
-  return endpointToSource[availableSources[0].endpoint] || 'cached-data';
-};
-
-// Initialize health checks for primary APIs
-export const initializeApiHealthMonitoring = () => {
-  const year = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
-  
-  // Replace {year} placeholder in URLs
-  const pgaTourEndpoint = API_ENDPOINTS.PGA_TOUR;
-  const espnEndpoint = API_ENDPOINTS.ESPN.replace('{year}', year);
-  const sportsDataEndpoint = API_ENDPOINTS.SPORTS_DATA.replace('{year}', year);
-  const mastersWebEndpoint = API_ENDPOINTS.MASTERS_WEB;
-  
-  // Initial health checks
-  checkApiHealth(pgaTourEndpoint);
-  checkApiHealth(espnEndpoint);
-  checkApiHealth(sportsDataEndpoint, {
-    headers: {
-      'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
-      'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
-    }
-  });
-  checkApiHealth(mastersWebEndpoint);
-  
-  // Set up periodic health checks (every 5 minutes)
-  setInterval(() => {
-    checkApiHealth(pgaTourEndpoint);
-    checkApiHealth(espnEndpoint);
-    checkApiHealth(sportsDataEndpoint, {
-      headers: {
-        'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
-        'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
-      }
-    });
-    checkApiHealth(mastersWebEndpoint);
-  }, 5 * 60 * 1000); // 5 minutes
+  return 'google-sheets';
 };
 
 // Get health status for all monitored endpoints
@@ -228,5 +168,13 @@ export const getApiHealthStatus = (): ApiHealthStatus[] => {
 // Initialize API health monitoring system
 if (typeof window !== 'undefined') {
   // Only run in browser environment
-  initializeApiHealthMonitoring();
+  const checkGoogleSheetsHealth = () => {
+    checkApiHealth(API_ENDPOINTS.GOOGLE_SHEETS);
+  };
+  
+  // Initial health check
+  checkGoogleSheetsHealth();
+  
+  // Set up periodic health checks (every 5 minutes)
+  setInterval(checkGoogleSheetsHealth, 5 * 60 * 1000);
 }
