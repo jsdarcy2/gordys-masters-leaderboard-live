@@ -1,3 +1,4 @@
+
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
@@ -8,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
 import WinnerIcons from "../leaderboard/WinnerIcons";
 import { Badge } from "@/components/ui/badge";
 
