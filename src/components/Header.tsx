@@ -43,7 +43,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-masters-darkgreen text-white py-4 md:py-5 shadow-md z-20 relative">
+    <header className="bg-masters-darkgreen text-white py-3 shadow-md z-20 relative">
       <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between max-w-7xl">
         {/* Logo Section */}
         <div className="text-lg md:text-xl font-bold font-serif">
@@ -63,7 +63,7 @@ const Header = () => {
             <Link
               key={page.name}
               to={page.path}
-              className={`hover:text-masters-yellow transition-colors duration-200 font-medium relative ${
+              className={`hover:text-masters-yellow transition-colors duration-150 font-medium relative ${
                 location.pathname === page.path
                   ? "text-masters-yellow underline underline-offset-4"
                   : ""
@@ -71,7 +71,7 @@ const Header = () => {
             >
               {page.name}
               {page.isNew && (
-                <CircleDot size={10} className="inline-block ml-1 text-masters-yellow animate-pulse absolute -top-1 -right-3" />
+                <CircleDot size={8} className="text-masters-yellow absolute -top-1 right-[-10px]" />
               )}
             </Link>
           ))}
@@ -110,7 +110,7 @@ const Header = () => {
                     >
                       {page.name}
                       {page.isNew && (
-                        <CircleDot size={10} className="inline-block ml-1 text-masters-yellow animate-pulse absolute -top-1 -right-3" />
+                        <CircleDot size={8} className="text-masters-yellow absolute -top-1 right-[-10px]" />
                       )}
                     </Link>
                   </SheetClose>
