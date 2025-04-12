@@ -35,6 +35,7 @@ export const buildGolferScoreMap = (leaderboard: GolferScore[]): Record<string, 
 
 /**
  * Generate mock golfer scores when real data isn't available
+ * Important: In golf, negative scores are better (under par)
  */
 export const generateMockGolferScores = (): Record<string, number> => {
   const mockGolfers = [
@@ -48,7 +49,7 @@ export const generateMockGolferScores = (): Record<string, number> => {
   
   const golferScores: Record<string, number> = {};
   mockGolfers.forEach(golfer => {
-    // Generate a random score between -10 and +5
+    // Generate a random score between -10 and +5 (negative is under par = good)
     const randomScore = Math.floor(Math.random() * 16) - 10;
     golferScores[golfer] = randomScore;
   });

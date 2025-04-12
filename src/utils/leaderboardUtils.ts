@@ -1,3 +1,4 @@
+
 /**
  * Format the last updated timestamp into a readable string
  */
@@ -39,6 +40,8 @@ export const formatScore = (score: number | undefined): string => {
 
 /**
  * Format golf score for display, handling edge cases
+ * In golf, negative numbers are GOOD (under par)
+ * Positive numbers are BAD (over par)
  */
 export const formatGolfScore = (score: number | string | undefined): string => {
   if (score === undefined || score === null) return "-";

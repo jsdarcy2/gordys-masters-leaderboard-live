@@ -54,8 +54,6 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.pickScores ? 
                 getBestFourGolfers(participant.pickScores) : [];
-              
-              console.log(`Rendering ${participant.name}, best four:`, bestFourGolfers);
                 
               return (
                 <tr
@@ -102,6 +100,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                   {/* Desktop view - Individual picks */}
                   {participant.picks && participant.picks.map((pick, idx) => {
                     const isBestFour = bestFourGolfers.includes(pick);
+                    const pickScore = participant.pickScores ? participant.pickScores[pick] : 0;
                     
                     return (
                       <td key={idx} className="px-2 py-3 text-right hidden md:table-cell">
@@ -122,13 +121,13 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                             )}
                           </div>
                           <span className={`text-xs ${
-                            participant.pickScores && participant.pickScores[pick] < 0 
+                            pickScore < 0 
                               ? 'text-green-500' 
-                              : participant.pickScores && participant.pickScores[pick] > 0 
+                              : pickScore > 0 
                                 ? 'text-red-500' 
                                 : 'text-gray-500'
                           }`}>
-                            {participant.pickScores && formatGolfScore(participant.pickScores[pick])}
+                            {formatGolfScore(pickScore)}
                           </span>
                         </div>
                       </td>

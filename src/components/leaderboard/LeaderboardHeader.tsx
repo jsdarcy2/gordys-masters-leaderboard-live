@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import DataSourceInfo from "./DataSourceInfo";
 import { formatLastUpdated } from "@/utils/leaderboardUtils";
+import { Button } from "@/components/ui/button";
 
 interface LeaderboardHeaderProps {
   lastUpdated: string;
@@ -106,72 +107,66 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
         <div className="flex-1">
           <h3 className="text-lg font-semibold mb-1 flex items-center">
             System Status: Outage
-            <span className="ml-2 flex items-center text-sm bg-red-500/50 text-white px-2 py-0.5 rounded-full">
-              <AlertTriangle size={12} className="mr-1 animate-pulse" />
+            <span className="ml-2 flex items-center text-xs bg-red-500/50 px-2 py-0.5 rounded-full">
+              <AlertTriangle size={12} className="mr-1" />
               CRITICAL
             </span>
           </h3>
-          <p className="text-sm opacity-90">
+          <p className="text-sm text-white/80">
             We're experiencing a critical service outage. Live data is temporarily unavailable.
           </p>
         </div>
-        
-        <div>
-          <button 
-            onClick={handleManualRefresh}
-            className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-sm flex items-center"
-          >
-            <RefreshCcw size={16} className="mr-1" />
-            Check Status
-          </button>
-        </div>
+        <Button 
+          className="bg-white/20 hover:bg-white/30 text-white"
+          size="sm"
+          onClick={handleManualRefresh}
+        >
+          <RefreshCcw size={16} className="mr-1" />
+          Check Status
+        </Button>
       </div>
     );
   }
-  
+
   return (
-    <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between bg-masters-green text-white">
-      <div className="flex-1 mb-2 sm:mb-0">
-        <h3 className="text-lg font-semibold mb-1 flex items-center">
-          Tournament Leaderboard
-          {hasLiveData && (
-            <span className="ml-2 flex items-center text-sm bg-green-600/30 text-white px-2 py-0.5 rounded-full">
-              <Signal size={12} className="mr-1 animate-pulse" />
-              LIVE
-            </span>
-          )}
-          {renderHealthIndicator()}
-        </h3>
-        
-        <DataSourceInfo 
-          dataSource={dataSource} 
-          lastUpdated={lastUpdated} 
-          errorMessage={errorMessage}
-          tournamentYear={tournamentYear}
-          hasLiveData={hasLiveData}
-        />
-      </div>
-      
-      <div className="flex items-center gap-3">
-        <div className="flex items-center mr-2">
-          <Label htmlFor="potential-toggle" className="mr-2 text-sm opacity-90">
-            Potential Winnings
-          </Label>
-          <Switch 
-            id="potential-toggle" 
-            checked={showPotentialWinnings} 
-            onCheckedChange={togglePotentialWinnings}
+    <div className="p-3 md:p-4 bg-masters-green text-white">
+      <div className="flex flex-col md:flex-row justify-between gap-2">
+        <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+          <DataSourceInfo 
+            dataSource={dataSource} 
+            lastUpdated={lastUpdated}
+            errorMessage={errorMessage}
+            tournamentYear={tournamentYear}
+            hasLiveData={hasLiveData}
           />
+          {renderHealthIndicator()}
         </div>
-        
-        <button 
-          onClick={handleManualRefresh}
-          disabled={loading || refreshing}
-          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded text-sm flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCcw size={16} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Switch 
+              id="show-winnings" 
+              checked={showPotentialWinnings}
+              onCheckedChange={togglePotentialWinnings}
+              className="data-[state=checked]:bg-masters-yellow"
+            />
+            <Label 
+              htmlFor="show-winnings" 
+              className="text-white text-xs cursor-pointer"
+            >
+              Show Prize Money
+            </Label>
+          </div>
+          <button 
+            className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCcw 
+              size={18} 
+              className={refreshing ? "animate-spin" : ""}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );
