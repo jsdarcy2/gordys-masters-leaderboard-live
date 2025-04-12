@@ -1,8 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ExternalLink } from 'lucide-react';
 
 // Updated payment data based on the provided information
 const paymentData = [
@@ -161,6 +164,16 @@ const PaymentStatus = () => {
   const paidCount = participants.filter(p => p.paid).length;
   const unpaidCount = participants.filter(p => !p.paid).length;
   
+  // Venmo payment URL
+  const openVenmo = (name: string) => {
+    const venmoUsername = "GordysPool"; // Replace with actual Venmo username
+    const paymentNote = `Masters Pool 2024 - ${name}`;
+    const amount = "50"; // Replace with actual amount
+    
+    // Open Venmo with prefilled information
+    window.open(`https://venmo.com/${venmoUsername}?txn=pay&note=${encodeURIComponent(paymentNote)}&amount=${amount}`, '_blank');
+  };
+  
   return (
     <div className="masters-card">
       <div className="masters-header">
@@ -211,9 +224,27 @@ const PaymentStatus = () => {
                           <Check size={16} className="text-masters-green" />
                         </span>
                       ) : (
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100">
-                          <X size={16} className="text-red-600" />
-                        </span>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100">
+                            <X size={16} className="text-red-600" />
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={() => openVenmo(participant.name)}
+                                  className="text-blue-500 hover:text-blue-600"
+                                  aria-label={`Pay via Venmo for ${participant.name}`}
+                                >
+                                  <ExternalLink size={16} />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Pay via Venmo</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
