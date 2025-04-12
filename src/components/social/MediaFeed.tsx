@@ -1,6 +1,6 @@
 
 import { useState, useRef } from "react";
-import { Camera, Video, Upload, Send, Smile, X } from "lucide-react";
+import { Camera, Video, Upload, Send, Smile, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
