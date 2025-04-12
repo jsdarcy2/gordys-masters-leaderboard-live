@@ -26,8 +26,8 @@ const Header = () => {
   
   return (
     <header className="relative bg-masters-green text-white border-b border-masters-yellow/20 shadow-sm">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 w-full h-full opacity-10">
+      {/* Nelson Bridge background image */}
+      <div className="absolute inset-0 w-full h-full opacity-15">
         <Image 
           src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
           alt="Augusta National" 
@@ -35,8 +35,21 @@ const Header = () => {
         />
       </div>
       
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-masters-green/90 to-masters-green/100"></div>
+      {/* Enhanced gradient overlay for better text contrast */}
+      <div className="absolute inset-0 bg-gradient-to-b from-masters-green/90 via-masters-green/95 to-masters-green/100"></div>
+      
+      {/* Subtle Nelson Bridge silhouette */}
+      <div className="absolute inset-0 w-full h-full">
+        <div className="container mx-auto h-full relative">
+          <div className="absolute bottom-0 right-0 w-1/3 h-1/2 opacity-8 hidden md:block">
+            <svg viewBox="0 0 400 200" className="w-full h-full fill-masters-yellow/5 stroke-masters-yellow/10" preserveAspectRatio="xMidYMax meet">
+              <path d="M0,200 C50,180 100,100 150,100 C200,100 250,150 300,150 C350,150 400,130 400,100 L400,200 L0,200 Z" strokeWidth="1" />
+              <path d="M100,200 L100,130 L300,130 L300,200" strokeWidth="1" fill="none" />
+              <path d="M125,130 L125,150 M150,130 L150,150 M175,130 L175,150 M200,130 L200,150 M225,130 L225,150 M250,130 L250,150 M275,130 L275,150" strokeWidth="1" stroke-dasharray="2,3" fill="none" />
+            </svg>
+          </div>
+        </div>
+      </div>
       
       <div className="container mx-auto relative z-10">
         <div className="px-4 py-3 md:py-4 flex flex-col">

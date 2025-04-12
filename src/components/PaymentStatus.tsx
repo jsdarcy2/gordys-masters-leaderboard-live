@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ExternalLink } from 'lucide-react';
 
 // Updated payment data based on the provided information
 const paymentData = [
@@ -236,7 +235,11 @@ const PaymentStatus = () => {
                                   className="text-blue-500 hover:text-blue-600"
                                   aria-label={`Pay via Venmo for ${participant.name}`}
                                 >
-                                  <ExternalLink size={16} />
+                                  <div className="flex items-center justify-center w-4 h-4">
+                                    <svg viewBox="0 0 24 24" className="w-full h-full fill-current" aria-hidden="true">
+                                      <path d="M19.8 5.1c.6 1 .9 2.1.9 3.2 0 5.5-4.7 12.2-8.6 17.7-4-5.5-8.6-12.1-8.6-17.7 0-1.2.3-2.3.9-3.2 1-1.6 2.7-2.6 4.6-2.6 1.2 0 2.3.4 3.2 1.1.9.7 1.5 1.7 1.8 2.8h.2c.3-1.1 1-2.1 1.8-2.8.9-.7 2-1.1 3.2-1.1 1.9 0 3.6 1 4.6 2.6z" />
+                                    </svg>
+                                  </div>
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent>
