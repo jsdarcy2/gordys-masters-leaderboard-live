@@ -1,4 +1,3 @@
-
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 import { clearPoolStandingsCache } from "./pool";
@@ -10,9 +9,9 @@ export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// Masters API endpoint - Using a mock JSON file
+// Masters API endpoint - Using the official Masters.com JSON endpoint
 export const API_ENDPOINTS = {
-  MASTERS_SCORES: "https://run.mocky.io/v3/cc5b7d16-7b22-401e-800a-3e92c6d2f2bb"
+  MASTERS_SCORES: "https://www.masters.com/en_US/scores/feeds/2025/scores.json"
 };
 
 // Simple API health check function

@@ -9,11 +9,11 @@ let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL (reduced from 15 minutes)
 
 /**
- * Fetch scores data from our hosted JSON
+ * Fetch scores data from Masters.com official JSON endpoint
  */
 async function fetchMastersScoresData(): Promise<GolferScore[]> {
   try {
-    console.log("Fetching data from Masters scores JSON...");
+    console.log("Fetching data from Masters.com official JSON...");
     const response = await fetch(API_ENDPOINTS.MASTERS_SCORES, {
       headers: {
         'Cache-Control': 'no-cache',
@@ -28,10 +28,63 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
     }
     
     const data = await response.json();
-    console.log("Masters scores data received");
+    console.log("Masters scores data received:", data);
     
     // Map the player data to our GolferScore format
-    if (data && data.data && Array.isArray(data.data.player)) {
+    // The structure might be different from our mock, so we need to check the actual response
+    if (data && data.player && Array.isArray(data.player)) {
+      return data.player.map((player: any, index: number) => {
+        // Extract and process player data based on Masters.com scores structure
+        const position = player.pos || String(index + 1);
+        const numericPosition = parseInt(position.replace(/T/g, ''), 10) || index + 1;
+        
+        // Parse score values, handling 'E' (even) as 0
+        const totalScore = player.topar === 'E' ? 0 : parseInt(player.topar, 10) || 0;
+        const todayScore = player.today === 'E' ? 0 : parseInt(player.today, 10) || 0;
+        
+        // Parse round scores - explicitly handle 'E' as 0
+        const round1Score = player.round1 === 'E' ? 0 : 
+                          player.round1 === '' ? undefined : 
+                          parseInt(player.round1, 10) || 0;
+                          
+        const round2Score = player.round2 === 'E' ? 0 : 
+                          player.round2 === '' ? undefined : 
+                          parseInt(player.round2, 10) || 0;
+                          
+        const round3Score = player.round3 === 'E' ? 0 : 
+                          player.round3 === '' ? undefined : 
+                          parseInt(player.round3, 10) || 0;
+                          
+        const round4Score = player.round4 === 'E' ? 0 : 
+                          player.round4 === '' ? undefined : 
+                          parseInt(player.round4, 10) || 0;
+        
+        // Determine player status
+        let playerStatus: "active" | "cut" | "withdrawn" = "active";
+        if (player.status) {
+          const statusLower = player.status.toLowerCase();
+          if (statusLower.includes('cut') || statusLower.includes('mc')) {
+            playerStatus = "cut";
+          } else if (statusLower.includes('wd')) {
+            playerStatus = "withdrawn";
+          }
+        }
+        
+        return {
+          position: numericPosition,
+          name: player.name || player.playerName || 'Unknown',
+          score: totalScore,
+          today: todayScore,
+          status: playerStatus,
+          round1: round1Score,
+          round2: round2Score,
+          round3: round3Score,
+          round4: round4Score,
+          thru: player.thru || "F"
+        };
+      });
+    } else if (data && data.data && data.data.player && Array.isArray(data.data.player)) {
+      // Alternative structure that might be present in the Masters.com JSON
       return data.data.player.map((player: any, index: number) => {
         // Extract and process player data based on Masters.com scores structure
         const position = player.pos || String(index + 1);
@@ -78,12 +131,14 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
           round1: round1Score,
           round2: round2Score,
           round3: round3Score,
-          round4: round4Score
+          round4: round4Score,
+          thru: player.thru || "F"
         };
       });
     }
     
-    throw new Error("Invalid data format from Masters scores data");
+    console.error("Unexpected data format from Masters.com:", data);
+    throw new Error("Invalid data format from Masters.com scores data");
   } catch (error) {
     console.error("Error fetching from Masters scores data:", error);
     throw error;

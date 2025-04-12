@@ -50,6 +50,46 @@ const AdminPage = () => {
       });
     }
   };
+  
+  const testMastersAPI = async () => {
+    toast({
+      title: "Testing Masters.com API",
+      description: "Checking Masters.com scores API connection...",
+    });
+    
+    try {
+      const response = await fetch("https://www.masters.com/en_US/scores/feeds/2025/scores.json", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        },
+        cache: 'no-store'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Masters API test - Data received:", data);
+        
+        toast({
+          title: "Masters API Connection Successful",
+          description: "Successfully connected to Masters.com API",
+        });
+      } else {
+        toast({
+          title: "Masters API Connection Failed",
+          description: `Could not connect to Masters.com API. Status: ${response.status}`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Masters API test error:", error);
+      toast({
+        title: "Masters API Error",
+        description: "An error occurred while testing the Masters.com API connection.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -111,7 +151,7 @@ const AdminPage = () => {
               <div>
                 <button 
                   onClick={testConnection}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium mr-2"
                 >
                   Test Connection
                 </button>
@@ -121,6 +161,23 @@ const AdminPage = () => {
               {useMockData 
                 ? "Using mock data for testing purposes"
                 : "Connected to live Google Sheets data"}
+            </p>
+          </Card>
+          
+          <Card className="p-4 flex-1">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Masters.com API</h3>
+              <div>
+                <button 
+                  onClick={testMastersAPI}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  Test Masters API
+                </button>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Using official Masters.com scores data
             </p>
           </Card>
         </div>
