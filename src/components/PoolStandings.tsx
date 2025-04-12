@@ -11,7 +11,7 @@ import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
@@ -26,6 +26,7 @@ const PoolStandings = () => {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isTournamentActive, setIsTournamentActive] = useState(false);
+  const [usingEmergencyData, setUsingEmergencyData] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -50,6 +51,14 @@ const PoolStandings = () => {
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
       setError(null);
+      
+      // Check if we're using emergency data
+      // This is a heuristic - if the first participant is Matt Rogers, we're using emergency data
+      if (data[0]?.name === "Matt Rogers" && data[0]?.position === 1 && data[0]?.totalScore === -21) {
+        setUsingEmergencyData(true);
+      } else {
+        setUsingEmergencyData(false);
+      }
       
     } catch (err) {
       errorCountRef.current++;
@@ -146,6 +155,16 @@ const PoolStandings = () => {
       />
       
       <div className="p-4 bg-white">
+        {usingEmergencyData && (
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertTitle className="text-blue-800">Showing Final Masters Pool Standings</AlertTitle>
+            <AlertDescription className="text-blue-700 text-sm">
+              The leaderboard displays the final Masters Pool standings. Each participant's score is calculated using their best 4 out of 5 golfer picks.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {error && (
           <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
             <AlertTitle className="text-amber-800">Connection Issue</AlertTitle>

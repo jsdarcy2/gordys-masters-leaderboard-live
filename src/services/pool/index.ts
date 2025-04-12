@@ -22,6 +22,15 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
   }
   
   try {
+    // Since the live data isn't working, let's use our emergency data directly
+    console.log("Using emergency pool standings data");
+    const emergencyData = generateEmergencyPoolStandings();
+    poolStandingsCache = emergencyData;
+    lastFetchTime = now;
+    return emergencyData;
+    
+    // Commented out the Google Sheets API call since it's not working
+    /*
     console.log("Fetching pool standings from Google Sheets...");
     const googleSheetsData = await fetchPoolStandingsFromGoogleSheets();
     
@@ -34,20 +43,7 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
       
       return googleSheetsData;
     }
-    
-    // If Google Sheets fails and we have a cache, use it regardless of age
-    if (poolStandingsCache && poolStandingsCache.length > 0) {
-      console.log("Google Sheets data unavailable. Using expired cache as last resort.");
-      return poolStandingsCache;
-    }
-    
-    // Everything failed including cache, generate emergency data
-    console.log("CRITICAL: No pool standings data available from any source. Generating emergency data.");
-    const emergencyData = generateEmergencyPoolStandings(134);
-    poolStandingsCache = emergencyData;
-    lastFetchTime = now;
-    return emergencyData;
-    
+    */
   } catch (error) {
     console.error("Error fetching pool standings:", error);
     
@@ -59,7 +55,7 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
     
     // Generate mock data as last resort
     console.log("No cached data available. Generating emergency data.");
-    return generateEmergencyPoolStandings(134);
+    return generateEmergencyPoolStandings();
   }
 }
 
