@@ -19,9 +19,8 @@ const API_KEY = "AIzaSyDa_J9wM1OZJ3CMHXWRYzf5u1vIBr6SBcI"; // Updated API key
 async function fetchSheetData(sheetName: string): Promise<any[][]> {
   try {
     // Using the sheets.spreadsheets.values.get API endpoint
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`
-    );
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
+    const response = await fetch(url);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch sheet data: ${response.status} ${response.statusText}`);
@@ -42,6 +41,19 @@ async function fetchSheetData(sheetName: string): Promise<any[][]> {
 }
 
 /**
+ * Extracts column indices from header row
+ */
+function getColumnIndices(headers: string[], columnNames: string[]): Record<string, number> {
+  const indices: Record<string, number> = {};
+  
+  columnNames.forEach(name => {
+    indices[name] = headers.indexOf(name.toLowerCase());
+  });
+  
+  return indices;
+}
+
+/**
  * Fetches and parses pool standings data from the Google Sheet
  */
 export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticipant[]> {
@@ -55,10 +67,10 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
     
     // Extract header row to identify column indices
     const headers = rowData[0].map(header => header.toLowerCase());
-    const positionIndex = headers.indexOf("position");
-    const nameIndex = headers.indexOf("name");
-    const scoreIndex = headers.indexOf("total score");
-    const pointsIndex = headers.indexOf("total points");
+    const indices = getColumnIndices(headers, [
+      "position", "name", "total score", "total points",
+      "tiebreaker 1", "tiebreaker 2", "paid"
+    ]);
     
     // Find pick columns (looking for pick 1, pick 2, pick 3, pick 4, pick 5)
     const pickIndices: number[] = [];
@@ -75,10 +87,6 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
         pickScoreIndices.push(pickScoreIndex);
       }
     }
-    
-    const tiebreaker1Index = headers.indexOf("tiebreaker 1");
-    const tiebreaker2Index = headers.indexOf("tiebreaker 2");
-    const paidIndex = headers.indexOf("paid");
     
     // Map row data to PoolParticipant objects
     const standings: PoolParticipant[] = rowData.slice(1).map(row => {
@@ -107,15 +115,15 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
       const bestFourGolfers = getBestFourGolfers(pickScores);
       
       return {
-        position: parseInt(row[positionIndex], 10) || 0,
-        name: row[nameIndex] || "Unknown",
-        totalScore: parseInt(row[scoreIndex], 10) || 0,
-        totalPoints: parseInt(row[pointsIndex], 10) || 0,
+        position: parseInt(row[indices["position"]], 10) || 0,
+        name: row[indices["name"]] || "Unknown",
+        totalScore: parseInt(row[indices["total score"]], 10) || 0,
+        totalPoints: parseInt(row[indices["total points"]], 10) || 0,
         picks,
         pickScores,
-        tiebreaker1: row[tiebreaker1Index] ? parseInt(row[tiebreaker1Index], 10) : undefined,
-        tiebreaker2: row[tiebreaker2Index] ? parseInt(row[tiebreaker2Index], 10) : undefined,
-        paid: row[paidIndex]?.toLowerCase() === "true" || row[paidIndex]?.toLowerCase() === "yes" || false,
+        tiebreaker1: row[indices["tiebreaker 1"]] ? parseInt(row[indices["tiebreaker 1"]], 10) : undefined,
+        tiebreaker2: row[indices["tiebreaker 2"]] ? parseInt(row[indices["tiebreaker 2"]], 10) : undefined,
+        paid: row[indices["paid"]]?.toLowerCase() === "true" || row[indices["paid"]]?.toLowerCase() === "yes" || false,
         bestFourGolfers
       };
     });
@@ -148,33 +156,31 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
     
     // Extract header row to identify column indices
     const headers = rowData[0].map(header => header.toLowerCase());
-    const positionIndex = headers.indexOf("position");
-    const nameIndex = headers.indexOf("name");
-    const scoreIndex = headers.indexOf("score");
-    const todayIndex = headers.indexOf("today");
-    const thruIndex = headers.indexOf("thru");
-    const statusIndex = headers.indexOf("status");
-    const strokesIndex = headers.indexOf("strokes");
+    const indices = getColumnIndices(headers, [
+      "position", "name", "score", "today", "thru", "status", "strokes"
+    ]);
     
     // Log any rows that might be skipped due to invalid data
     rowData.slice(1).forEach((row, index) => {
-      if (!row[nameIndex] || row[nameIndex].trim() === "") {
+      if (!row[indices["name"]] || row[indices["name"]].trim() === "") {
         console.log(`Skipping row ${index + 1} due to missing name`);
       }
     });
     
     // Map row data to GolferScore objects
-    const leaderboard: GolferScore[] = rowData.slice(1).map(row => {
-      return {
-        position: parseInt(row[positionIndex], 10) || 0,
-        name: row[nameIndex] || "Unknown",
-        score: parseInt(row[scoreIndex], 10) || 0,
-        today: parseInt(row[todayIndex], 10) || 0,
-        thru: row[thruIndex] || "F",
-        status: (row[statusIndex]?.toLowerCase() || "active") as "active" | "cut" | "withdrawn",
-        strokes: row[strokesIndex] ? parseInt(row[strokesIndex], 10) : undefined
-      };
-    });
+    const leaderboard: GolferScore[] = rowData.slice(1)
+      .filter(row => row[indices["name"]] && row[indices["name"]].trim() !== "")
+      .map(row => {
+        return {
+          position: parseInt(row[indices["position"]], 10) || 0,
+          name: row[indices["name"]] || "Unknown",
+          score: parseInt(row[indices["score"]], 10) || 0,
+          today: parseInt(row[indices["today"]], 10) || 0,
+          thru: row[indices["thru"]] || "F",
+          status: (row[indices["status"]]?.toLowerCase() || "active") as "active" | "cut" | "withdrawn",
+          strokes: row[indices["strokes"]] ? parseInt(row[indices["strokes"]], 10) : undefined
+        };
+      });
     
     // After processing but before sorting
     console.log(`Processed leaderboard entries: ${leaderboard.length}`);
@@ -193,9 +199,8 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
 export async function checkGoogleSheetsAvailability(): Promise<boolean> {
   try {
     // Try to fetch a small amount of data to check availability
-    const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/A1:A1?key=${API_KEY}`
-    );
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/A1:A1?key=${API_KEY}`;
+    const response = await fetch(url);
     
     return response.ok;
   } catch (error) {

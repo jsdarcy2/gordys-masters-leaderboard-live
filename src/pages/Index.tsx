@@ -15,7 +15,8 @@ const Index = () => {
           subtitle="Follow the live leaderboard" 
           href="/leaderboard"
           backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
-          variant="green" />
+          variant="green" 
+        />
               
         <Card 
           icon={<Trophy className="text-masters-gold" />} 
@@ -24,7 +25,8 @@ const Index = () => {
           href="/selections"
           backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
           highlight={true}
-          variant="gold" />
+          variant="gold" 
+        />
               
         <Card 
           icon={<Clock className="text-masters-darkgreen" />} 
@@ -32,7 +34,8 @@ const Index = () => {
           subtitle="Celebrating 20 years" 
           href="/archive"
           backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
-          variant="green" />
+          variant="green" 
+        />
       </div>
       
       <div className="w-full rounded-lg overflow-hidden shadow-card border border-masters-green/10">
@@ -84,6 +87,35 @@ const Card = ({
     return "text-masters-green group-hover:text-masters-green";
   };
 
+  // Get the flag stripe overlay color based on variant/highlight
+  const getStripeColor = () => {
+    return highlight || variant === "gold" 
+      ? "bg-masters-gold" 
+      : "bg-masters-green";
+  };
+
+  // Get gradient overlay color based on variant/highlight
+  const getGradientOverlay = () => {
+    if (highlight) {
+      return "bg-gradient-to-br from-masters-gold/30 to-masters-lightgold/20";
+    } else if (variant === "gold") {
+      return "bg-gradient-to-br from-masters-gold/10 to-white/70";
+    } else {
+      return "bg-gradient-to-br from-masters-green/10 to-white/70";
+    }
+  };
+
+  // Get icon color classes
+  const getIconColors = () => {
+    if (highlight) {
+      return "bg-masters-green/10 text-masters-darkgreen";
+    } else if (variant === "gold") {
+      return "bg-masters-gold/10 text-masters-gold";
+    } else {
+      return "bg-masters-green/10 text-masters-darkgreen";
+    }
+  };
+
   return (
     <div className="relative h-full group">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full`}>
@@ -99,31 +131,13 @@ const Card = ({
             
             {/* Flag-like stripes overlay */}
             <div className="absolute inset-0 w-full h-full pointer-events-none">
-              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${
-                highlight 
-                  ? "bg-masters-gold" 
-                  : variant === "gold" 
-                    ? "bg-masters-gold" 
-                    : "bg-masters-green"
-              }`}></div>
+              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
               <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
-              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${
-                highlight 
-                  ? "bg-masters-gold" 
-                  : variant === "gold" 
-                    ? "bg-masters-gold" 
-                    : "bg-masters-green"
-              }`}></div>
+              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
             </div>
             
             {/* Gradient overlay to ensure text readability */}
-            <div className={`absolute inset-0 pointer-events-none ${
-              highlight 
-                ? "bg-gradient-to-br from-masters-gold/30 to-masters-lightgold/20" 
-                : variant === "gold" 
-                  ? "bg-gradient-to-br from-masters-gold/10 to-white/70" 
-                  : "bg-gradient-to-br from-masters-green/10 to-white/70"
-            }`}></div>
+            <div className={`absolute inset-0 pointer-events-none ${getGradientOverlay()}`}></div>
           </div>
         )}
         
@@ -131,33 +145,19 @@ const Card = ({
         <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
           <Flag 
             size={24} 
-            className={`${
-              highlight 
-                ? "text-masters-darkgreen" 
-                : variant === "gold" 
-                  ? "text-masters-gold" 
-                  : "text-masters-green"
-            }`} 
+            className={highlight ? "text-masters-darkgreen" : variant === "gold" ? "text-masters-gold" : "text-masters-green"}
           />
         </div>
         
         {/* Card content with pointer-events-none to not interfere with the Link */}
         <div className="flex items-center mb-3 relative pointer-events-none">
-          <div className={`p-2.5 rounded-full ${
-            highlight 
-              ? "bg-masters-green/10" 
-              : variant === "gold" 
-                ? "bg-masters-gold/10" 
-                : "bg-masters-green/10"
-          }`}>
+          <div className={`p-2.5 rounded-full ${getIconColors()}`}>
             {icon}
           </div>
           <h3 className={`text-xl font-serif ml-3 ${
-            highlight 
-              ? "text-masters-darkgreen" 
-              : variant === "gold" 
-                ? "text-masters-gold" 
-                : "text-masters-darkgreen"
+            highlight ? "text-masters-darkgreen" : 
+            variant === "gold" ? "text-masters-gold" : 
+            "text-masters-darkgreen"
           }`}>
             {title}
           </h3>
@@ -167,7 +167,10 @@ const Card = ({
         </p>
         <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative pointer-events-none`}>
           <span className="font-serif">View details</span>
-          <ChevronRight size={18} className="transform transition-transform duration-300 group-hover:translate-x-1" />
+          <ChevronRight 
+            size={18} 
+            className="transform transition-transform duration-300 group-hover:translate-x-1" 
+          />
         </div>
       </div>
       
