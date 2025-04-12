@@ -92,9 +92,8 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="ml-1.5 inline-flex items-center justify-center text-masters-gold bg-transparent text-xs cursor-help border-b border-dotted border-masters-gold">
-                                <CircleDollarSign size={14} className="mr-0.5" />
-                                <span className="text-xs">{earningsAmount}</span>
+                              <span className="ml-1.5 inline-flex items-center justify-center text-masters-gold cursor-help">
+                                <CircleDollarSign size={14} className="hover:scale-110 transition-transform" />
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="bg-masters-gold text-white border-masters-gold shadow-md font-medium">
