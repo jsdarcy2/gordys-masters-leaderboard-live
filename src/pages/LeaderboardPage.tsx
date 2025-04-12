@@ -14,15 +14,18 @@ const LeaderboardPage = () => {
   
   // Ensure the outage state is set correctly based on API failures
   useEffect(() => {
-    // Regular logic for production
-    if (
-      (consecutiveFailures && consecutiveFailures >= 5) || 
-      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3)
-    ) {
-      setIsCriticalOutage(true);
-    } else {
-      setIsCriticalOutage(false);
-    }
+    // Check for critical outage conditions
+    const hasOutage = 
+      (consecutiveFailures && consecutiveFailures >= 3) || 
+      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 2);
+    
+    setIsCriticalOutage(hasOutage);
+    
+    console.log("Outage check:", {
+      consecutiveFailures,
+      dataHealthStatus: dataHealth?.status,
+      isCriticalOutage: hasOutage
+    });
   }, [dataHealth, consecutiveFailures]);
   
   useEffect(() => {

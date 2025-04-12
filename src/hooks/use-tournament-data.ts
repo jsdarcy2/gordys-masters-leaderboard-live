@@ -80,7 +80,7 @@ export function useTournamentData(): UseLeaderboardResult {
     return data;
   }, []);
 
-  // Enhanced fetch from source with health checks and detailed logging
+  // Enhanced fetch from source with improved validation
   const fetchFromSource = useCallback(async (
     sourceName: string, 
     fetcher: () => Promise<any>
@@ -91,7 +91,7 @@ export function useTournamentData(): UseLeaderboardResult {
         s.endpoint.includes(sourceName.toLowerCase().replace('-api', ''))
       );
       
-      if (healthStatus && healthStatus.status === 'offline' && healthStatus.consecutiveFailures > 3) {
+      if (healthStatus && healthStatus.status === 'offline' && healthStatus.consecutiveFailures > 2) {
         console.log(`Skipping ${sourceName} as it's been offline (${healthStatus.consecutiveFailures} consecutive failures)`);
         return null;
       }
@@ -101,6 +101,12 @@ export function useTournamentData(): UseLeaderboardResult {
       const data = await fetcher();
       const endTime = performance.now();
       const fetchTime = endTime - startTime;
+      
+      // Additional validation to ensure we have proper JSON data, not HTML
+      if (typeof data === 'string' && (data.includes('<!DOCTYPE html>') || data.includes('<html'))) {
+        console.error(`${sourceName} returned HTML instead of JSON data`);
+        return null;
+      }
       
       console.log(`Successfully fetched data from ${sourceName} in ${fetchTime.toFixed(0)}ms:`, 
         Array.isArray(data?.leaderboard) ? `${data.leaderboard.length} players` : "invalid data");
@@ -257,7 +263,7 @@ export function useTournamentData(): UseLeaderboardResult {
     });
   }, [fetchFromSource, currentYear]);
 
-  // Try Sports Data API (second backup)
+  // Try Sports Data API (second backup) with improved validation
   const fetchFromSportsData = useCallback(async () => {
     const year = currentYear;
     const endpoint = API_ENDPOINTS.SPORTS_DATA.replace('{year}', year);
@@ -275,13 +281,28 @@ export function useTournamentData(): UseLeaderboardResult {
         headers: {
           'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
           'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app',
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'Accept': 'application/json'
         }
       });
       
       if (!response.ok) throw new Error(`Sports Data API error: ${response.status}`);
       
-      const data = await response.json();
+      // Check if response is HTML instead of JSON
+      const responseText = await response.text();
+      if (responseText.includes('<!DOCTYPE html>') || responseText.includes('<html')) {
+        console.error("Sports Data API returned HTML instead of JSON");
+        throw new Error("API returned HTML instead of JSON data");
+      }
+      
+      // Try to parse as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse Sports Data API response as JSON:", e);
+        throw new Error("Invalid JSON response from API");
+      }
       
       // Transform Sports Data API format to our application format
       const players = data?.leaderboard?.players || [];

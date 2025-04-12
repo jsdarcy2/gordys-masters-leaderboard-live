@@ -13,7 +13,7 @@ import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import EmergencyFallback from "./leaderboard/EmergencyFallback";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
-const CRITICAL_OUTAGE_THRESHOLD = 5;
+const CRITICAL_OUTAGE_THRESHOLD = 3;
 
 interface LeaderboardProps {
   forceCriticalOutage?: boolean;
@@ -51,15 +51,20 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       return;
     }
 
-    if (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) {
-      console.log("Setting emergency fallback due to consecutive failures:", consecutiveFailures);
-      setShowEmergencyFallback(true);
-    } else if (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3) {
-      console.log("Setting emergency fallback due to offline status + failures:", consecutiveFailures);
-      setShowEmergencyFallback(true);
-    } else if (dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
-      setShowEmergencyFallback(false);
-    }
+    const shouldShowEmergency = 
+      (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) ||
+      (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 2) ||
+      (dataSource === "mock-data") || 
+      (dataSource === "no-data" && consecutiveFailures && consecutiveFailures >= 2);
+    
+    console.log("Emergency fallback check:", { 
+      consecutiveFailures, 
+      dataHealthStatus: dataHealth?.status,
+      dataSource,
+      shouldShowEmergency
+    });
+    
+    setShowEmergencyFallback(shouldShowEmergency);
   }, [consecutiveFailures, dataHealth, dataSource, forceCriticalOutage]);
 
   useEffect(() => {

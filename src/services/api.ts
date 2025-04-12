@@ -29,7 +29,7 @@ interface ApiHealthStatus {
 // Initialize health status tracking
 const apiHealthStatus: Record<string, ApiHealthStatus> = {};
 
-// Check health of an API endpoint
+// Check health of an API endpoint with improved validation for JSON responses
 export const checkApiHealth = async (
   endpoint: string, 
   options: RequestInit = {}
@@ -48,34 +48,23 @@ export const checkApiHealth = async (
   };
   
   try {
-    // Perform a HEAD request when possible to minimize data transfer
-    const method = options.method || 'HEAD';
+    // For full requests, we need to validate the response is actual JSON data, not HTML
+    const method = options.method || 'GET';
     const response = await fetch(endpoint, {
       ...options,
       method,
       headers: {
         ...options.headers,
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache',
+        'Accept': 'application/json'
       }
     });
     
     const endTime = performance.now();
     const latency = endTime - startTime;
     
-    // Update health status based on response
-    if (response.ok) {
-      const updatedStatus: ApiHealthStatus = {
-        endpoint,
-        status: latency > 2000 ? 'degraded' : 'online',
-        latency,
-        lastChecked: now,
-        successRate: currentStatus.successRate * 0.9 + 10, // Weighted average
-        consecutiveFailures: 0
-      };
-      
-      apiHealthStatus[endpoint] = updatedStatus;
-      return updatedStatus;
-    } else {
+    // First check if response is OK
+    if (!response.ok) {
       // API responded but with an error
       const updatedStatus: ApiHealthStatus = {
         endpoint,
@@ -89,6 +78,61 @@ export const checkApiHealth = async (
       apiHealthStatus[endpoint] = updatedStatus;
       return updatedStatus;
     }
+    
+    // For GET requests, try to parse response as JSON to ensure it's valid data
+    if (method === 'GET') {
+      const responseText = await response.text();
+      
+      // Check if response is HTML instead of JSON
+      if (responseText.trim().startsWith('<!DOCTYPE html>') || 
+          responseText.trim().startsWith('<html')) {
+        console.error(`API returned HTML instead of JSON: ${endpoint}`);
+        
+        const updatedStatus: ApiHealthStatus = {
+          endpoint,
+          status: 'offline',
+          latency,
+          lastChecked: now,
+          successRate: currentStatus.successRate * 0.8,
+          consecutiveFailures: currentStatus.consecutiveFailures + 1
+        };
+        
+        apiHealthStatus[endpoint] = updatedStatus;
+        return updatedStatus;
+      }
+      
+      // Try to parse as JSON
+      try {
+        JSON.parse(responseText);
+      } catch (e) {
+        console.error(`API returned invalid JSON: ${endpoint}`);
+        
+        const updatedStatus: ApiHealthStatus = {
+          endpoint,
+          status: 'offline',
+          latency,
+          lastChecked: now,
+          successRate: currentStatus.successRate * 0.8,
+          consecutiveFailures: currentStatus.consecutiveFailures + 1
+        };
+        
+        apiHealthStatus[endpoint] = updatedStatus;
+        return updatedStatus;
+      }
+    }
+    
+    // If we got here, the response was successful
+    const updatedStatus: ApiHealthStatus = {
+      endpoint,
+      status: latency > 2000 ? 'degraded' : 'online',
+      latency,
+      lastChecked: now,
+      successRate: currentStatus.successRate * 0.9 + 10, // Weighted average
+      consecutiveFailures: 0
+    };
+    
+    apiHealthStatus[endpoint] = updatedStatus;
+    return updatedStatus;
   } catch (error) {
     const endTime = performance.now();
     
