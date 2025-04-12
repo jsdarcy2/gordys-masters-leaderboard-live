@@ -1,4 +1,3 @@
-
 /**
  * Google Sheets API integration for Masters Pool data
  * 
@@ -11,7 +10,7 @@ import { getBestFourGolfers } from "@/utils/scoringUtils";
 
 // Google Sheets document ID from the URL
 const SHEETS_DOC_ID = "1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o";
-const API_KEY = "AIzaSyBQDIWQxlUZl-1O-2M9JqOvxkfNrq5G-yk"; // Updated API key for Google Sheets
+const API_KEY = "AIzaSyDIWNdmPj7lSWfP8RmK9-I_I2CGOyh2WFc"; // Updated API key for Google Sheets
 
 /**
  * Fetches data from a specific sheet in the Google Sheets document
@@ -158,7 +157,6 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
  */
 export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]> {
   try {
-    // Add at the start of the function
     console.log("Fetching leaderboard data...");
     
     const sheetName = "Leaderboard";
@@ -167,9 +165,6 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
     if (!rowData || rowData.length < 2) {
       throw new Error("Invalid or empty leaderboard data");
     }
-    
-    // After fetching the raw data
-    console.log(`Raw data rows: ${rowData.length}`);
     
     // Extract header row to identify column indices
     const headers = rowData[0].map(header => header.toLowerCase());
@@ -198,9 +193,6 @@ export async function fetchLeaderboardFromGoogleSheets(): Promise<GolferScore[]>
           strokes: row[indices["strokes"]] ? parseInt(row[indices["strokes"]], 10) : undefined
         };
       });
-    
-    // After processing but before sorting
-    console.log(`Processed leaderboard entries: ${leaderboard.length}`);
     
     // Sort by position
     return leaderboard.sort((a, b) => a.position - b.position);
