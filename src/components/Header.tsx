@@ -41,39 +41,24 @@ const Header = () => {
         : "bg-gradient-to-r from-masters-dark/90 via-masters-green/90 to-masters-dark/90"
       } border-b border-masters-gold/20`}>
       
-      {/* Augusta National backdrop - elegant and subtle */}
-      <div className="absolute inset-0 w-full h-full opacity-[0.07]">
+      {/* Masters celebration image background - subtle overlay */}
+      <div className="absolute inset-0 w-full h-full opacity-[0.15]">
         <Image 
-          src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
-          alt="Augusta National" 
+          src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
+          alt="Masters Celebration" 
           className="w-full h-full object-cover"
         />
       </div>
       
-      {/* Enhanced overlay with improved glassmorphism */}
-      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/90 via-masters-green/80 to-masters-dark/90 backdrop-blur-[2px]"></div>
+      {/* Enhanced overlay with improved glassmorphism - adjusted to ensure text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/85 via-masters-green/75 to-masters-dark/85 backdrop-blur-[2px]"></div>
       
-      {/* Amen Corner silhouette for visual identity */}
+      {/* Masters logo silhouette - subtle accent */}
       <div className="absolute inset-0 w-full h-full pointer-events-none">
         <div className="container mx-auto h-full relative">
-          <div className="absolute right-0 bottom-0 w-1/2 h-1/2 opacity-8 hidden md:block">
-            <svg viewBox="0 0 800 200" className="w-full h-full fill-none" preserveAspectRatio="xMidYMax meet">
-              {/* Stylized Amen Corner outline */}
-              <path 
-                d="M0,200 C100,180 200,160 300,160 C400,160 450,140 500,140 C600,140 700,120 800,100 L800,200 L0,200 Z" 
-                className="fill-masters-gold/[0.03] stroke-masters-gold/[0.05]" 
-                strokeWidth="1" 
-              />
-              {/* Azalea hints around the corner */}
-              <circle cx="400" cy="150" r="5" className="fill-[#FFD6E0]/5" />
-              <circle cx="410" cy="145" r="4" className="fill-[#FFD6E0]/5" />
-              <circle cx="420" cy="155" r="3" className="fill-[#FFD6E0]/5" />
-              {/* Pine silhouette */}
-              <path 
-                d="M600,140 L600,110 M580,140 L580,100 M560,140 L560,105 M620,140 L620,115 M640,140 L640,90" 
-                className="stroke-masters-dustygreen/10" 
-                strokeWidth="1" 
-              />
+          <div className="absolute right-4 top-4 w-16 h-16 opacity-10 hidden md:block">
+            <svg viewBox="0 0 512 512" className="w-full h-full fill-masters-gold stroke-masters-gold" preserveAspectRatio="xMidYMid meet">
+              <path d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 400h-32l-38.4-51.2c-6.4 6.4-16 9.6-22.4 12.8l25.6 38.4h-44.8l-19.2-32c-16 3.2-32 3.2-51.2 3.2v28.8h-38.4v-28.8c-19.2 0-35.2 0-51.2-3.2l-19.2 32H96l25.6-38.4c-9.6-3.2-16-6.4-22.4-12.8L60.8 408H28.8v-32h19.2c0-9.6 3.2-16 6.4-25.6l-25.6-19.2v-38.4l25.6 19.2c6.4-9.6 16-19.2 25.6-25.6l-19.2-25.6h38.4l12.8 25.6c9.6-3.2 19.2-6.4 32-6.4l-6.4-32h38.4l-6.4 32c12.8 0 22.4 3.2 32 6.4l12.8-25.6h38.4l-19.2 25.6c9.6 6.4 19.2 16 25.6 25.6l25.6-19.2V292l-25.6 19.2c3.2 9.6 6.4 16 6.4 25.6h19.2c3.2 6.4 0 38.4 0 38.4z" />
             </svg>
           </div>
         </div>
@@ -116,7 +101,7 @@ const Header = () => {
           {/* Desktop navigation - more elegant, inspired by Augusta */}
           <nav className="hidden md:block mt-6">
             <div className="flex justify-center">
-              <ul className="flex space-x-2 bg-masters-dark/40 backdrop-blur-md rounded-full px-4 py-2 shadow-sm border border-white/10">
+              <ul className="flex space-x-2 bg-masters-dark/50 backdrop-blur-md rounded-full px-4 py-2 shadow-sm border border-white/10">
                 {NAV_TABS.map((tab) => (
                   <li key={tab.id}>
                     <Link

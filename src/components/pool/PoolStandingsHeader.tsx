@@ -26,8 +26,19 @@ const PoolStandingsHeader = ({
 
   return (
     <div className="relative overflow-hidden rounded-t-lg shadow-subtle">
-      {/* Elegant background with softer gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-masters-darkgreen/90 via-masters-green/90 to-masters-darkgreen/90">
+      {/* Elegant background with softer gradient and Masters celebration image */}
+      <div className="absolute inset-0">
+        {/* Masters image as very subtle background */}
+        <div className="absolute inset-0 opacity-[0.07]">
+          <img 
+            src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-masters-darkgreen/95 via-masters-green/90 to-masters-darkgreen/95"></div>
+
         {/* Subtle texture overlay */}
         <div className="absolute inset-0 opacity-[0.05]">
           <div className="w-full h-full" style={{ 

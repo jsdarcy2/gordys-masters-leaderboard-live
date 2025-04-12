@@ -105,29 +105,100 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   // Use a normal header even in "outage" mode
   if (criticalOutage) {
     return (
-      <div className="p-3 md:p-4 bg-masters-green text-white">
+      <div className="p-3 md:p-4 relative overflow-hidden">
+        {/* Masters celebration image as subtle background */}
+        <div className="absolute inset-0 opacity-[0.07]">
+          <img 
+            src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+        
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-masters-green/95"></div>
+        
+        <div className="relative z-10 text-white">
+          <div className="flex flex-col md:flex-row justify-between gap-2">
+            <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+              <DataSourceInfo 
+                dataSource={dataSource || "updating"} 
+                lastUpdated={lastUpdated}
+                errorMessage="Data refresh in progress"
+                tournamentYear={tournamentYear}
+                hasLiveData={false}
+              />
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center text-xs bg-blue-500/30 text-white px-2 py-0.5 rounded-full ml-2">
+                      <Signal size={12} className="mr-1" />
+                      <span>UPDATING</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p>Connection being reestablished</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  id="show-winnings" 
+                  checked={showPotentialWinnings}
+                  onCheckedChange={togglePotentialWinnings}
+                  className="data-[state=checked]:bg-masters-yellow"
+                />
+                <Label 
+                  htmlFor="show-winnings" 
+                  className="text-white text-xs cursor-pointer"
+                >
+                  Show Prize Money
+                </Label>
+              </div>
+              <button 
+                className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+              >
+                <RefreshCcw 
+                  size={18} 
+                  className={refreshing ? "animate-spin" : ""}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-3 md:p-4 relative overflow-hidden">
+      {/* Masters celebration image as subtle background */}
+      <div className="absolute inset-0 opacity-[0.07]">
+        <img 
+          src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
+          alt="" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-masters-green/95"></div>
+      
+      <div className="relative z-10 text-white">
         <div className="flex flex-col md:flex-row justify-between gap-2">
           <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
             <DataSourceInfo 
-              dataSource={dataSource || "updating"} 
+              dataSource={dataSource} 
               lastUpdated={lastUpdated}
-              errorMessage="Data refresh in progress"
+              errorMessage={errorMessage}
               tournamentYear={tournamentYear}
-              hasLiveData={false}
+              hasLiveData={hasLiveData}
             />
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center text-xs bg-blue-500/30 text-white px-2 py-0.5 rounded-full ml-2">
-                    <Signal size={12} className="mr-1" />
-                    <span>UPDATING</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p>Connection being reestablished</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {renderHealthIndicator()}
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -155,49 +226,6 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
               />
             </button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-3 md:p-4 bg-masters-green text-white">
-      <div className="flex flex-col md:flex-row justify-between gap-2">
-        <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
-          <DataSourceInfo 
-            dataSource={dataSource} 
-            lastUpdated={lastUpdated}
-            errorMessage={errorMessage}
-            tournamentYear={tournamentYear}
-            hasLiveData={hasLiveData}
-          />
-          {renderHealthIndicator()}
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Switch 
-              id="show-winnings" 
-              checked={showPotentialWinnings}
-              onCheckedChange={togglePotentialWinnings}
-              className="data-[state=checked]:bg-masters-yellow"
-            />
-            <Label 
-              htmlFor="show-winnings" 
-              className="text-white text-xs cursor-pointer"
-            >
-              Show Prize Money
-            </Label>
-          </div>
-          <button 
-            className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
-            onClick={handleManualRefresh}
-            disabled={refreshing}
-          >
-            <RefreshCcw 
-              size={18} 
-              className={refreshing ? "animate-spin" : ""}
-            />
-          </button>
         </div>
       </div>
     </div>
