@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
@@ -148,6 +149,7 @@ const PoolStandings = () => {
         isTournamentActive={isTournamentActive}
         activeParticipants={activeParticipantCount}
         missedCutCount={missedCutCount}
+        onRefresh={handleManualRefresh}
       />
       
       <div className="p-4 bg-white">

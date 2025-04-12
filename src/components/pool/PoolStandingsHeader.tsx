@@ -1,5 +1,5 @@
 
-import { Clock, Users, Activity, Trophy } from "lucide-react";
+import { Clock, Users, Activity, Trophy, RefreshCcw } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PoolStandingsHeaderProps {
@@ -9,6 +9,7 @@ interface PoolStandingsHeaderProps {
   isTournamentActive?: boolean;
   activeParticipants?: number;
   missedCutCount?: number;
+  onRefresh?: () => void;
 }
 
 const PoolStandingsHeader = ({ 
@@ -17,7 +18,8 @@ const PoolStandingsHeader = ({
   loading, 
   isTournamentActive = false,
   activeParticipants,
-  missedCutCount
+  missedCutCount,
+  onRefresh
 }: PoolStandingsHeaderProps) => {
   const formatLastUpdated = (dateString: string) => {
     if (!dateString) return "";
@@ -86,6 +88,15 @@ const PoolStandingsHeader = ({
               <div className="flex items-center text-masters-gold/90">
                 <Clock size={16} className="mr-1.5" />
                 <span>Updated: {formatLastUpdated(lastUpdated)}</span>
+                {onRefresh && (
+                  <button 
+                    onClick={onRefresh}
+                    className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors"
+                    aria-label="Refresh standings"
+                  >
+                    <RefreshCcw size={14} />
+                  </button>
+                )}
               </div>
             )}
           </div>
