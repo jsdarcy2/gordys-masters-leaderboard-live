@@ -1,8 +1,9 @@
+
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Leaderboard from "@/components/Leaderboard";
 import { Separator } from "@/components/ui/separator";
-import { BarChart3, Golf, Tv } from "lucide-react";
+import { BarChart3, Flag, Tv } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTournamentData } from "@/hooks/use-tournament-data";
 

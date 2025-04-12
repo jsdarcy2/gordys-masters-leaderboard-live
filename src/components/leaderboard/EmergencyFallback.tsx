@@ -1,7 +1,8 @@
+
 import React from "react";
 import LiveStream from "@/components/LiveStream";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Golf, Martini } from "lucide-react";
+import { RefreshCw, Flag, Martini } from "lucide-react";
 import Image from "@/components/ui/image";
 
 interface EmergencyFallbackProps {
@@ -50,7 +51,7 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
               <h3 className="text-masters-green font-serif text-xl font-medium">A Message from Jim Nantz</h3>
               <div className="ml-2 flex gap-1">
                 <Martini size={16} className="text-masters-green" />
-                <Golf size={16} className="text-masters-green" />
+                <Flag size={16} className="text-masters-green" />
               </div>
             </div>
             <p className="text-masters-dark/90 text-base leading-relaxed">
