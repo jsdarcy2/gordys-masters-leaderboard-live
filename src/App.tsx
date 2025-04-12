@@ -15,6 +15,7 @@ import ArchivePage from "./pages/ArchivePage";
 import MastersChampionsPage from "./pages/MastersChampionsPage";
 import WatchLivePage from "./pages/WatchLivePage";
 import AdminPage from "./pages/AdminPage";
+import SocialPage from "./pages/SocialPage";
 import NotFound from "./pages/NotFound";
 
 // Scroll to top on route change
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/masters-champions" element={<MastersChampionsPage />} />
           <Route path="/watch-live" element={<WatchLivePage />} />
+          <Route path="/social" element={<SocialPage />} />
           <Route path="/rules" element={<RulesPage />} />
           <Route path="/admin" element={<AdminPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
