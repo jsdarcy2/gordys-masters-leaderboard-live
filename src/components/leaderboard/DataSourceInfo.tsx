@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Info, ExternalLink, Calendar, Signal } from "lucide-react";
+import { Info, ExternalLink, Calendar, Signal, FileSpreadsheet } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DataSourceInfoProps {
@@ -54,6 +54,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   };
   
   const sourceLink = getDataSourceLink();
+  const googleSheetLink = "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
   
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
@@ -98,6 +99,18 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
               <ExternalLink size={12} className="ml-0.5" />
             </a>
           )}
+          
+          {/* Google Sheets backup link */}
+          <a 
+            href={googleSheetLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="ml-3 text-white/90 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center"
+            title="Google Sheet Backup"
+          >
+            <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
+            <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>
+          </a>
         </span>
       </div>
     </div>
