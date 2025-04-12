@@ -1,7 +1,6 @@
 
 import { GolferScore } from "@/types";
 import { API_ENDPOINTS } from "@/services/api";
-import { generateMastersLeaderboard } from "./leaderboardData";
 
 // Cache for leaderboard data
 let leaderboardCache: GolferScore[] | null = null;
@@ -128,35 +127,14 @@ export async function fetchLeaderboardData(): Promise<{
       };
     }
     
-    // If no data received from API, try to use mock data as fallback
-    const mockData = generateMastersLeaderboard();
-    if (mockData && mockData.length > 0) {
-      console.log("Using generated mock leaderboard data as fallback");
-      return {
-        leaderboard: mockData,
-        source: "mock-data",
-        lastUpdated: new Date().toISOString()
-      };
-    }
-    
-    throw new Error("No data returned from Masters scores data");
+    // If no data from API, return empty array
+    return {
+      leaderboard: [],
+      source: "no-data",
+      lastUpdated: new Date().toISOString()
+    };
   } catch (error) {
     console.warn("Error fetching leaderboard data:", error);
-    
-    // Try to generate mock data as first fallback
-    try {
-      const mockData = generateMastersLeaderboard();
-      if (mockData && mockData.length > 0) {
-        console.log("Using generated mock leaderboard data due to API error");
-        return {
-          leaderboard: mockData,
-          source: "mock-data",
-          lastUpdated: new Date().toISOString()
-        };
-      }
-    } catch (mockError) {
-      console.error("Error generating mock data:", mockError);
-    }
     
     // If we have a cache, return it regardless of age in case of error
     if (leaderboardCache && leaderboardCache.length > 0) {
@@ -197,6 +175,8 @@ export const clearLeaderboardCache = async (): Promise<void> => {
   try {
     localStorage.removeItem('masters_leaderboard');
     localStorage.removeItem('masters_leaderboard_timestamp');
+    leaderboardCache = null;
+    lastFetchTime = 0;
     console.log('Leaderboard cache cleared successfully');
     return Promise.resolve();
   } catch (error) {

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import LeaderboardTable from "./LeaderboardTable";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
@@ -118,6 +119,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
         refreshing={refreshing}
         tournamentActive={tournamentActive}
         onRefresh={refreshData}
+        handleManualRefresh={refreshData}
+        dataSource={dataSource}
       />
       
       <div className="p-4 relative">
@@ -137,8 +140,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
               leaderboard={leaderboard}
               refreshing={refreshing}
               changedPositions={changedPositions}
-              dataSource={dataSource}
-              onRefresh={refreshData}
+              showPotentialWinnings={true}
             />
             
             <div className="mt-4 text-gray-500 text-sm">
