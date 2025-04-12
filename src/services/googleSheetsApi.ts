@@ -1,4 +1,3 @@
-
 /**
  * Google Sheets API integration for Masters Pool data
  * 

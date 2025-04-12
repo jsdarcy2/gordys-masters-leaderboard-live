@@ -1,8 +1,7 @@
 
 import React from "react";
-import { Info, AlertTriangle, ExternalLink, Calendar, Signal } from "lucide-react";
+import { Info, ExternalLink, Calendar, Signal } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 interface DataSourceInfoProps {
   dataSource?: string;
@@ -39,58 +38,19 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     if (!dataSource) return "Updating";
     
     switch (dataSource.toLowerCase()) {
-      case "espn-api":
-        return "ESPN Golf";
-      case "sportsdata-api":
-        return "Sports Data API";
-      case "historical-data":
-        return "Historical Data";
       case "cached-data":
         return "Recent Data";
       case "no-data":
         return "Updating";
-      case "mock-data":
-        return "Estimated Data";
-      case "pgatour-api":
-        return "PGA Tour";
-      case "masters-scraper":
-        return "Masters.com";
-      case "masters-api":
-        return "Masters.com API";
       case "masters-scores-api":
         return "Masters Live Scores";
-      case "fixed-data":
-        return "Masters 2024";
-      case "google-sheets":
-        return "Live Tracker";
       default:
         return dataSource;
     }
   };
   
   const getDataSourceLink = () => {
-    if (!dataSource) return null;
-    
-    const year = tournamentYear || new Date().getFullYear();
-    
-    switch (dataSource.toLowerCase()) {
-      case "espn-api":
-        return `https://www.espn.com/golf/${year}/masters/leaderboard`;
-      case "pgatour-api":
-        return `https://www.pgatour.com/leaderboard`;
-      case "sportsdata-api":
-      case "masters-scraper":
-      case "masters-api":
-      case "masters-scores-api":
-        return `https://www.masters.com/en_US/scores/index.html`;
-      case "historical-data":
-      case "fixed-data":
-        return `https://www.masters.com/en_US/scores/index.html`;
-      case "google-sheets":
-        return `https://www.masters.com/en_US/scores/index.html`;
-      default:
-        return null;
-    }
+    return dataSource ? "https://www.masters.com/en_US/scores/index.html" : null;
   };
   
   const sourceLink = getDataSourceLink();
@@ -98,7 +58,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
       <div className="flex items-center">
-        {errorMessage && dataSource !== 'mock-data' && dataSource !== 'no-data' ? (
+        {errorMessage ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>

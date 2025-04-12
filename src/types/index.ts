@@ -34,20 +34,8 @@ export interface PoolParticipant {
 
 export type TournamentRound = 1 | 2 | 3 | 4;
 
-// Update the DataSource type to include more sources
-export type DataSource = 
-  | 'espn-api' 
-  | 'sportsdata-api' 
-  | 'historical-data' 
-  | 'cached-data' 
-  | 'mock-data' 
-  | 'no-data' 
-  | 'masters-scraper'
-  | 'pgatour-api'
-  | 'google-sheets'
-  | 'masters-api'
-  | 'masters-scores-api'
-  | 'fixed-data';  // Added masters-api, masters-scores-api and fixed-data as valid data sources
+// Simplified DataSource type to only include Masters scores API
+export type DataSource = 'masters-scores-api' | 'cached-data' | 'no-data';
 
 export type TournamentData = {
   lastUpdated: string;

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Leaderboard from "@/components/Leaderboard";
@@ -37,8 +38,8 @@ const LeaderboardPage = () => {
     });
   };
 
-  // Check if we're using the live scores API with proper type safety
-  const isUsingLiveScores = dataSource === 'masters-scores-api' as DataSource;
+  // Check if we're using the live scores API
+  const isUsingLiveScores = dataSource === 'masters-scores-api';
 
   return (
     <Layout>
