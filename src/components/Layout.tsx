@@ -9,8 +9,8 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const isMobile = useIsMobile();
-  const bgPatternOpacity = isMobile ? "opacity-[0.0025]" : "opacity-[0.0035]";
-  const floralOpacity = isMobile ? "opacity-[0.0025]" : "opacity-[0.0035]";
+  const bgPatternOpacity = isMobile ? "opacity-[0.0015]" : "opacity-[0.0035]";
+  const floralOpacity = isMobile ? "opacity-[0.0015]" : "opacity-[0.0035]";
 
   return (
     <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-70">
@@ -35,11 +35,11 @@ const Layout = ({ children }: LayoutProps) => {
       
       <Header />
       
-      <main className="flex-grow container mx-auto px-4 py-8 md:py-10 max-w-7xl animate-fade-in">
+      <main className="flex-grow container mx-auto px-3 sm:px-4 py-6 md:py-10 max-w-7xl animate-fade-in">
         {children}
       </main>
       
-      <footer className="bg-gradient-to-r from-masters-darkgreen via-masters-green to-masters-darkgreen text-white py-6 md:py-8 mt-12 border-t-4 border-masters-gold/50 relative overflow-hidden">
+      <footer className="bg-gradient-to-r from-masters-darkgreen via-masters-green to-masters-darkgreen text-white py-5 md:py-8 mt-8 md:mt-12 border-t-4 border-masters-gold/50 relative overflow-hidden">
         {/* Subtle footer bridge image */}
         <div className="absolute inset-0 opacity-08">
           <img 
@@ -73,7 +73,7 @@ const Layout = ({ children }: LayoutProps) => {
         
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
+            <div className="mb-4 md:mb-0 text-center md:text-left">
               <p className="text-sm md:text-base font-serif">
                 © {new Date().getFullYear()} Gordy's Masters Pool 2025
               </p>

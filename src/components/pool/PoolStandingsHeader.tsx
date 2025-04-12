@@ -57,36 +57,36 @@ const PoolStandingsHeader = ({
         <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-masters-gold/60 to-transparent"></div>
       </div>
       
-      <div className="relative z-10 px-6 py-5 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-          <div className="flex items-center gap-3">
-            <Trophy size={22} className="text-masters-gold" />
-            <h2 className="text-xl md:text-2xl font-serif tracking-wide">
+      <div className="relative z-10 px-4 sm:px-6 py-4 sm:py-5 text-white">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Trophy size={20} className="text-masters-gold" />
+            <h2 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">
               Gordy's Masters Pool Standings
             </h2>
           </div>
-          <div className="flex flex-wrap items-center gap-4 md:gap-5 text-sm">
+          <div className="flex flex-wrap items-center gap-2 md:gap-5 text-xs sm:text-sm mt-2 md:mt-0">
             {isTournamentActive && (
               <div className="flex items-center text-green-300">
-                <Activity size={16} className="mr-1.5 animate-pulse" />
+                <Activity size={14} className="mr-1 animate-pulse" />
                 <span className="font-medium">Live</span>
               </div>
             )}
             {!loading && activeParticipants !== undefined && missedCutCount !== undefined && (
               <div className="flex items-center text-masters-gold/90">
-                <Users size={16} className="mr-1.5" />
+                <Users size={14} className="mr-1" />
                 <span>{activeParticipants} Active / {missedCutCount} Cut</span>
               </div>
             )}
             {!loading && activeParticipants === undefined && totalParticipants > 0 && (
               <div className="flex items-center text-masters-gold/90">
-                <Users size={16} className="mr-1.5" />
+                <Users size={14} className="mr-1" />
                 <span>{totalParticipants} Participants</span>
               </div>
             )}
             {!loading && lastUpdated && (
               <div className="flex items-center text-masters-gold/90">
-                <Clock size={16} className="mr-1.5" />
+                <Clock size={14} className="mr-1" />
                 <span>Updated: {formatLastUpdated(lastUpdated)}</span>
                 {onRefresh && (
                   <button 
@@ -94,7 +94,7 @@ const PoolStandingsHeader = ({
                     className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors"
                     aria-label="Refresh standings"
                   >
-                    <RefreshCcw size={14} />
+                    <RefreshCcw size={12} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
                   </button>
                 )}
               </div>
