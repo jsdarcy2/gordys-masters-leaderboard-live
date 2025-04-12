@@ -51,6 +51,42 @@ const PAID_PARTICIPANTS = new Set([
   "Robby Stofer", "Jess Troyak", "Annie Carlson", "Ethan Sturgis"
 ]);
 
+// List of all participant names - used to determine who hasn't paid
+const ALL_PARTICIPANTS = new Set([
+  "Kyle Flippen", "Jim Jones", "Charlotte Ramalingam", "Louis Baker", "Chris Crawford", 
+  "Ava Rose Darcy", "Mike Baker", "Chuck Corbett Sr", "Jay Despard", "Pete Drago", 
+  "Alexa Drago", "Charles Elder", "J.J. Furst", "Grayson Ginkel", "David Hardt", 
+  "Sargent Johnson, Jr.", "Jamie Lockhart", "Johnny McWhite", "James Petrikas Sr.", 
+  "Phil Present Jr.", "John Saunders", "Jon Schwingler", "Cora Stofer", "Ford Stofer", 
+  "Sylas Stofer", "Sarah Sturgis", "Jimmy Beltz", "Nate Carlson", "Ollie Drago", 
+  "Adam Duff", "Brian Ginkel", "Peter Kepic Sr.", "Owen Kepic", "Peggy McClintock", 
+  "Roth Sanner", "Stuie Snyder", "Bette Stephens", "Gordon Stofer III", "Avery Sturgis", 
+  "Scott Tande", "Elia Ayaz", "Ted Beckman", "James Carlson", "Hadley Carlson", 
+  "Ed Corbett", "Holland Darcy", "Audrey Darcy", "Charlie Drago", "Mik Gusenius", 
+  "Andy Gustafson", "Chris Kelley", "Paul Kelly", "Max Kepic", "Dan Lenmark", 
+  "Elle McClintock", "Rich McClintock", "Charles Meech Jr", "Chad Murphy", "Nash Nibbe", 
+  "Julie Nibbe", "James Petrikas Jr.", "Davey Phelps", "Will Phelps", "Phil Present III", 
+  "Matt Rogers", "Jackson Saunders", "Ryan Schmitt", "Tyler Smith", "Steve Sorenson", 
+  "Katie Stephens", "Reven Stephens", "Caelin Stephens", "Debbie Stofer", "Gordon Stofer Jr.", 
+  "Addie Stofer", "Chris Willette", "Peter Bassett", "John Gustafson", "Brack Herfurth", 
+  "Davis Jones", "Peter Kepic Jr.", "Greg Kevane", "Rory Kevane", "Pete Kostroski", 
+  "Rollie Logan", "Bo Massopust", "Knox Nibbe", "Jay Perlmutter", "Donny Schmitt", 
+  "Hayden Simmons", "Tommy Simmons", "Winfield Stephens", "Eileen Stofer", "Jon Sturgis", 
+  "Hilary Beckman", "Justin Darcy", "Lily Gustafson", "Darby Herfurth", "Henry Herfurth", 
+  "Rachel Herfurth", "Jenny McClintock", "Kevin McClintock", "Jon Moseley", "Les Perry", 
+  "Toby Schwingler", "Jack Simmons", "Jimmy Stofer", "Teddy Stofer", "Ben Applebaum", 
+  "Ross Baker", "Oliver Beckman", "Peter Beugg", "Quinn Carlson", "Tilly Duff", 
+  "Gretchen Duff", "Eric Fox", "Jess Herfurth", "Decker Herfurth", "Amy Jones", 
+  "Carter Jones", "Sargent Johnson", "Sarah Kepic", "Andy Koch", "Chad Kollar", 
+  "Jack Lenmark", "C.J. Nibbe", "Ravi Ramalingam", "Victoria Simmons", "Robby Stofer", 
+  "Jess Troyak", "Annie Carlson", "Ethan Sturgis"
+]);
+
+// Calculate unpaid participants by filtering PAID_PARTICIPANTS from ALL_PARTICIPANTS
+const UNPAID_PARTICIPANTS = new Set(
+  [...ALL_PARTICIPANTS].filter(name => !PAID_PARTICIPANTS.has(name))
+);
+
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
   // Find ties in the displayStandings
   const tiedPositions: Record<number, number> = {};
@@ -113,10 +149,13 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
             displayStandings.map((participant, index) => {
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.bestFourGolfers || [];
-              // Check if the participant has paid, either in their data, the paid list, or just paid this session
-              const isPaid = participant.paid !== false || 
-                            PAID_PARTICIPANTS.has(participant.name) || 
-                            justPaid.has(participant.name);
+              
+              // Check if the participant has paid
+              const isPaid = PAID_PARTICIPANTS.has(participant.name) || justPaid.has(participant.name);
+              
+              // Explicitly check if participant is unpaid
+              const isUnpaid = UNPAID_PARTICIPANTS.has(participant.name) && !justPaid.has(participant.name);
+              
               const missedCut = participant.totalScore > 200;
               const isTied = tiedPositions[participant.position] > 1;
               const showEarnings = participant.position <= 3;
@@ -162,7 +201,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                   <td className="px-2 py-3 font-medium">
                     <div className="flex flex-wrap items-center gap-2">
                       {participant.name}
-                      {!isPaid && (
+                      {isUnpaid && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
