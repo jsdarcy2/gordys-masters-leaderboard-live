@@ -9,43 +9,51 @@ const Index = () => {
   return (
     <Layout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <Card icon={<Flag className="text-masters-yellow" />} 
-              title="Tournament" 
-              subtitle="Follow the live leaderboard" 
-              href="/leaderboard" />
+        <Card 
+          icon={<Flag className="text-masters-yellow" />} 
+          title="Tournament" 
+          subtitle="Follow the live leaderboard" 
+          href="/leaderboard"
+          accentClass="accent-magnolia" />
               
-        <Card icon={<Trophy className="text-masters-yellow" />} 
-              title="Pool Standings" 
-              subtitle="See who's winning the pool" 
-              href="/selections"
-              highlight={true} />
+        <Card 
+          icon={<Trophy className="text-masters-yellow" />} 
+          title="Pool Standings" 
+          subtitle="See who's winning the pool" 
+          href="/selections"
+          highlight={true}
+          accentClass="accent-azalea" />
               
-        <Card icon={<Clock className="text-masters-yellow" />} 
-              title="Past Champions" 
-              subtitle="Celebrating 20 years" 
-              href="/archive" />
+        <Card 
+          icon={<Clock className="text-masters-yellow" />} 
+          title="Past Champions" 
+          subtitle="Celebrating 20 years" 
+          href="/archive"
+          accentClass="accent-jasmine" />
       </div>
       
-      <div className="w-full augusta-shadow">
+      <div className="w-full augusta-shadow azalea-accent dogwood-accent">
         <PoolStandings />
       </div>
     </Layout>
   );
 };
 
-// Quick card component for homepage links
+// Updated card component for homepage links with subtle floral accents
 const Card = ({ 
   icon, 
   title, 
   subtitle, 
   href,
-  highlight = false 
+  highlight = false,
+  accentClass = "" 
 }: { 
   icon: React.ReactNode; 
   title: string; 
   subtitle: string; 
   href: string;
   highlight?: boolean;
+  accentClass?: string;
 }) => {
   return (
     <Link to={href} className="block">
@@ -53,7 +61,21 @@ const Card = ({
         highlight 
           ? "bg-masters-green/90 border-masters-gold/50 text-white" 
           : "bg-white border-gray-200 hover:border-masters-green/40"
-      } augusta-shadow`}>
+      } augusta-shadow ${accentClass} relative overflow-hidden`}>
+        
+        {/* Subtle floral accent in the corner */}
+        {!highlight && (
+          <div className="absolute top-0 right-0 w-16 h-16 opacity-[0.03] pointer-events-none">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M50,20 Q60,5 70,20 T90,20 Q100,30 90,40 T90,60 Q80,70 70,60 T50,60 Q40,70 30,60 T10,60 Q0,50 10,40 T10,20 Q20,10 30,20 T50,20" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="1" 
+                    className={highlight ? "text-masters-yellow" : "text-masters-green"} />
+            </svg>
+          </div>
+        )}
+        
         <div className="flex items-center mb-3">
           {icon}
           <h3 className={`text-lg font-serif ml-2 ${highlight ? "text-masters-yellow" : "text-masters-green"}`}>

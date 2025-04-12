@@ -43,6 +43,17 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Augusta floral accents (subtle) */
+    --augusta-azalea: 345 83% 86%;
+    --augusta-dogwood-pink: 340 75% 91%;
+    --augusta-dogwood-white: 40 30% 98%;
+    --augusta-magnolia: 40 25% 96%;
+    --augusta-jasmine: 49 80% 85%;
+    --augusta-camellia: 355 71% 89%;
+    --augusta-golden-bell: 45 85% 75%;
+    --augusta-redbud: 330 65% 83%;
+    --augusta-holly: 120 32% 84%;
   }
 }
 
@@ -94,17 +105,43 @@
     @apply rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white;
   }
 
-  /* New elegant components */
+  /* Refined elegant components with subtle floral influences */
   .augusta-panel {
     @apply bg-white/90 backdrop-blur-sm border border-masters-green/20 rounded-md shadow-sm;
+    background-image: 
+      radial-gradient(circle at 95% 5%, rgba(255, 192, 203, 0.03) 0%, transparent 40%),  /* Azalea hint */
+      radial-gradient(circle at 5% 95%, rgba(255, 223, 0, 0.02) 0%, transparent 40%);   /* Golden Bell hint */
   }
   
   .augusta-divider {
-    @apply h-px bg-gradient-to-r from-transparent via-masters-gold/40 to-transparent my-4;
+    @apply h-px my-4;
+    background-image: linear-gradient(to right, transparent, rgba(242, 199, 92, 0.3), transparent);
   }
   
   .augusta-btn {
     @apply bg-masters-green hover:bg-masters-darkgreen text-white transition-colors px-4 py-2 rounded-md;
+    box-shadow: 0 1px 2px rgba(0, 103, 71, 0.15);
+  }
+  
+  /* Floral accent decorations */
+  .azalea-accent {
+    @apply relative overflow-hidden;
+  }
+  
+  .azalea-accent::before {
+    content: '';
+    @apply absolute right-0 top-0 w-24 h-24 opacity-5 pointer-events-none;
+    background-image: radial-gradient(circle, rgba(255, 182, 193, 0.5) 0%, transparent 70%);
+  }
+  
+  .dogwood-accent {
+    @apply relative overflow-hidden;
+  }
+  
+  .dogwood-accent::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-20 h-20 opacity-5 pointer-events-none;
+    background-image: radial-gradient(circle, rgba(255, 250, 250, 0.8) 0%, transparent 70%);
   }
 }
 
@@ -121,9 +158,10 @@
     @apply text-black;
   }
   
-  /* New utilities for Augusta National aesthetic */
+  /* Refined utilities for Augusta National aesthetic */
   .augusta-shadow {
-    @apply shadow-[0_2px_15px_-3px_rgba(0,103,71,0.07),0_8px_6px_-6px_rgba(0,103,71,0.05)];
+    box-shadow: 0 4px 12px -2px rgba(0, 103, 71, 0.06), 
+                0 2px 6px -1px rgba(0, 103, 71, 0.04);
   }
   
   .text-augusta {
@@ -136,5 +174,22 @@
   
   .border-augusta {
     @apply border border-masters-gold/30;
+  }
+  
+  /* Floral accent utilities */
+  .accent-azalea {
+    background-image: linear-gradient(to right, transparent, rgba(255, 182, 193, 0.03), transparent);
+  }
+  
+  .accent-dogwood {
+    background-image: linear-gradient(to bottom, transparent, rgba(255, 250, 250, 0.04), transparent);
+  }
+  
+  .accent-magnolia {
+    background-image: radial-gradient(circle at top right, rgba(255, 250, 245, 0.07), transparent 70%);
+  }
+  
+  .accent-jasmine {
+    background-image: radial-gradient(circle at bottom left, rgba(255, 240, 110, 0.03), transparent 60%);
   }
 }

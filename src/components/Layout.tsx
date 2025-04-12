@@ -9,8 +9,24 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-70">
-      {/* Augusta-inspired subtle background pattern */}
+      {/* Augusta-inspired subtle background pattern with hints of floral texture */}
       <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.04] pointer-events-none -z-10"></div>
+      
+      {/* Extremely subtle floral accents - almost imperceptible but add depth */}
+      <div className="fixed inset-0 pointer-events-none -z-5">
+        <div className="absolute top-0 right-0 w-1/4 h-1/4 opacity-[0.02]">
+          <svg viewBox="0 0 100 100" className="w-full h-full text-pink-200">
+            {/* Abstracted azalea shape */}
+            <path d="M50,20 Q65,5 80,20 Q95,35 80,50 Q65,65 50,50 Q35,65 20,50 Q5,35 20,20 Q35,5 50,20" fill="currentColor" />
+          </svg>
+        </div>
+        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 opacity-[0.015]">
+          <svg viewBox="0 0 100 100" className="w-full h-full text-yellow-200">
+            {/* Abstracted golden bell shape */}
+            <path d="M40,80 Q50,60 60,80 L65,30 Q50,15 35,30 L40,80" fill="currentColor" />
+          </svg>
+        </div>
+      </div>
       
       <Header />
       
@@ -28,8 +44,27 @@ const Layout = ({ children }: LayoutProps) => {
           />
         </div>
         
-        {/* Gradient overlay */}
+        {/* Gradient overlay with subtle floral hints */}
         <div className="absolute inset-0 bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark opacity-85"></div>
+        
+        {/* Extremely subtle floral accent patterns */}
+        <div className="absolute inset-0 opacity-[0.04] pointer-events-none">
+          <div className="absolute bottom-0 right-0 w-1/3 h-1/3">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-white">
+              {/* Abstract magnolia pattern */}
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="0.5" />
+              <circle cx="50" cy="50" r="10" fill="none" stroke="currentColor" strokeWidth="0.5" />
+            </svg>
+          </div>
+          <div className="absolute top-0 left-0 w-1/4 h-1/4">
+            <svg viewBox="0 0 100 100" className="w-full h-full text-white">
+              {/* Abstract dogwood pattern */}
+              <path d="M50,20 L60,50 L90,60 L60,70 L50,100 L40,70 L10,60 L40,50 Z" fill="none" stroke="currentColor" strokeWidth="0.5" />
+            </svg>
+          </div>
+        </div>
         
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center">
