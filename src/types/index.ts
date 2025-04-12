@@ -29,6 +29,7 @@ export interface PoolParticipant {
   tiebreaker2?: number;
   paid: boolean;
   bestFourTotal?: number; // Optional to not break existing code
+  bestFourGolfers?: string[]; // Added this property to fix the TypeScript errors
 }
 
 export type TournamentRound = 1 | 2 | 3 | 4;
