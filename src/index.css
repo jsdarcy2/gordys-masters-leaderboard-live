@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,6 +54,12 @@
     --augusta-golden-bell: 45 85% 75%;
     --augusta-redbud: 330 65% 83%;
     --augusta-holly: 120 32% 84%;
+    
+    /* Enhanced header colors */
+    --masters-header-dark: 158 100% 13%;
+    --masters-header-light: 158 80% 25%;
+    --masters-gold: 45 80% 65%;
+    --masters-gold-light: 45 80% 75%;
   }
 }
 

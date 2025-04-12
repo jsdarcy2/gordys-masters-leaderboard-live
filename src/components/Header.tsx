@@ -25,9 +25,9 @@ const Header = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   
   return (
-    <header className="relative bg-masters-green text-white border-b border-masters-gold/30 shadow-md">
-      {/* Augusta National background image with lower opacity */}
-      <div className="absolute inset-0 w-full h-full opacity-20">
+    <header className="relative bg-gradient-to-b from-masters-dark to-masters-green text-white border-b border-masters-gold/30 shadow-md">
+      {/* Improved background texture with reduced opacity */}
+      <div className="absolute inset-0 w-full h-full opacity-15">
         <Image 
           src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
           alt="Augusta National" 
@@ -35,8 +35,8 @@ const Header = () => {
         />
       </div>
       
-      {/* Enhanced gradient overlay for better text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-b from-masters-green/90 via-masters-green/80 to-masters-green/95"></div>
+      {/* Enhanced overlay with glassmorphism effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/80 via-masters-green/70 to-masters-dark/80 backdrop-blur-sm"></div>
       
       {/* Subtle Nelson Bridge silhouette */}
       <div className="absolute inset-0 w-full h-full">
@@ -64,10 +64,12 @@ const Header = () => {
       <div className="container mx-auto relative z-10">
         <div className="px-4 py-4 md:py-5 flex flex-col">
           <div className="flex justify-between items-center">
-            {/* Logo area */}
+            {/* Logo area with subtle highlight */}
             <div className="flex flex-col">
-              <h1 className="text-xl md:text-2xl font-serif font-bold text-white tracking-tight">
-                Gordy's Masters Pool
+              <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight">
+                <span className="text-white">Gordy's</span> 
+                <span className="text-masters-gold">Masters</span> 
+                <span className="text-white">Pool</span>
                 <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-masters-yellow/90 text-masters-dark">
                   <Star size={10} className="mr-0.5" />
                   2025
@@ -78,27 +80,27 @@ const Header = () => {
               </p>
             </div>
             
-            {/* Mobile menu button */}
+            {/* Mobile menu button with improved hover effect */}
             <button 
               onClick={toggleMobileMenu}
-              className="block md:hidden text-white p-1 rounded-md hover:bg-masters-dark/40 transition-colors"
+              className="block md:hidden text-white p-1 rounded-md hover:bg-white/10 transition-colors"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
           
-          {/* Desktop navigation */}
+          {/* Desktop navigation with refined styling */}
           <nav className="hidden md:block mt-4">
-            <ul className="flex space-x-6">
+            <ul className="flex space-x-1 bg-masters-dark/30 backdrop-blur-sm rounded-full px-2 py-1">
               {NAV_TABS.map((tab) => (
                 <li key={tab.id}>
                   <Link
                     to={tab.href}
-                    className={`font-serif text-sm transition-all duration-200 py-1 flex items-center ${
+                    className={`font-serif text-sm transition-all duration-200 px-3 py-1.5 rounded-full flex items-center ${
                       location.pathname === tab.href
-                        ? "text-masters-yellow border-b-2 border-masters-yellow"
-                        : "text-white/90 hover:text-masters-yellow hover:border-b border-masters-yellow/30"
+                        ? "bg-white/10 text-masters-yellow font-medium shadow-inner"
+                        : "text-white/90 hover:bg-white/5 hover:text-masters-yellow"
                     }`}
                   >
                     {tab.icon && <span className="mr-1">{tab.icon}</span>}
@@ -110,9 +112,9 @@ const Header = () => {
           </nav>
         </div>
         
-        {/* Mobile navigation */}
+        {/* Mobile navigation with improved styling */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden bg-masters-dark/95 backdrop-blur-sm border-t border-white/10 animate-fade-in">
+          <nav className="md:hidden bg-masters-dark/80 backdrop-blur-md border-t border-white/10 animate-fade-in rounded-b-lg shadow-lg">
             <ul className="flex flex-col">
               {NAV_TABS.map((tab) => (
                 <li key={tab.id} className="border-b border-white/10 last:border-b-0">
@@ -120,8 +122,8 @@ const Header = () => {
                     to={tab.href}
                     className={`block py-3 px-4 font-serif text-sm flex items-center ${
                       location.pathname === tab.href
-                        ? "text-masters-yellow bg-masters-dark/70"
-                        : "text-white hover:bg-masters-dark/50"
+                        ? "text-masters-yellow bg-white/5"
+                        : "text-white hover:bg-white/5"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

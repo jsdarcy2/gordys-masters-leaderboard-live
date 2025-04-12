@@ -66,6 +66,7 @@ export default {
 				masters: {
 					green: '#006747',
 					darkgreen: '#005538',
+					darkergreen: '#00472e', // Added darker shade
 					gold: '#F2C75C',
 					yellow: '#FFE733',
 					cream: '#F9F6EE',
@@ -108,6 +109,9 @@ export default {
 			fontFamily: {
 				serif: ['EB Garamond', 'Georgia', 'Times New Roman', 'serif'],
 				sans: ['EB Garamond', 'system-ui', 'sans-serif'],
+			},
+			opacity: {
+				'15': '0.15',
 			}
 		}
 	},
