@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -81,3 +82,6 @@ export interface CardProps {
   href: string;
   highlight?: boolean;
 }
+
+export const ADMIN_PASSWORD = "2025"; // Admin password for restricted features
+

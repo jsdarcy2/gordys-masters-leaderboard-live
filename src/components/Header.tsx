@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star, Tv, Trophy } from "lucide-react";
+import { Menu, X, Star, Tv, Trophy, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
@@ -77,14 +77,25 @@ const Header = () => {
               </div>
             </div>
             
-            {/* Mobile menu button with more elegant styling */}
-            <button 
-              onClick={toggleMobileMenu}
-              className="block md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            <div className="flex items-center">
+              {/* Admin link (subtle) */}
+              <Link
+                to="/admin"
+                className="text-white/40 hover:text-white/70 transition-colors mr-3 md:mr-4"
+                title="Admin Panel"
+              >
+                <Settings size={18} />
+              </Link>
+              
+              {/* Mobile menu button with more elegant styling */}
+              <button 
+                onClick={toggleMobileMenu}
+                className="block md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
+            </div>
           </div>
           
           {/* Desktop navigation - more elegant, inspired by Augusta */}
@@ -131,6 +142,21 @@ const Header = () => {
                   </Link>
                 </li>
               ))}
+              {/* Add admin link to mobile menu */}
+              <li className="border-b border-white/5 last:border-b-0">
+                <Link
+                  to="/admin"
+                  className={`block py-3.5 px-6 font-serif text-sm flex items-center ${
+                    location.pathname === "/admin"
+                      ? "text-masters-yellow bg-white/5"
+                      : "text-white hover:bg-white/5"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings size={14} className="mr-2" />
+                  Admin
+                </Link>
+              </li>
             </ul>
           </nav>
         )}
