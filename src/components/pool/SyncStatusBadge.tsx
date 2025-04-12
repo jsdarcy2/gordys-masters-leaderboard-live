@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCcw, CheckCircle2, AlertCircle, XCircle, RefreshCcw, DatabaseOff } from "lucide-react";
+import { RotateCcw, CheckCircle2, AlertCircle, XCircle, RefreshCcw, Database } from "lucide-react";
 import { checkPoolStandingsSync } from "@/services/pool";
 import { Button } from "@/components/ui/button";
 import { forceRefreshPoolData } from "@/services/api";
@@ -113,7 +113,7 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="outline" className={`bg-amber-50 text-amber-600 ${className}`}>
-              <DatabaseOff size={14} className="mr-1" />
+              <Database size={14} className="mr-1" />
               Google Sheets Unavailable
             </Badge>
           </TooltipTrigger>
