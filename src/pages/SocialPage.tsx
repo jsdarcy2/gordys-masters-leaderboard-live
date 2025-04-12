@@ -11,8 +11,8 @@ const SocialPage = () => {
           <p className="text-gray-600">Share and connect with other Masters pool participants</p>
         </div>
         
-        {/* Subtle augusta styling consistent with other pages */}
-        <div className="augusta-panel p-6 rounded-md shadow-subtle">
+        {/* Augusta-styled panel matching the aesthetic of other pages */}
+        <div className="augusta-panel p-6 rounded-md shadow-subtle border-masters-gold/20">
           <SocialTabs />
         </div>
       </div>
