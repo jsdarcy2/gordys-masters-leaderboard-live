@@ -85,7 +85,7 @@ const Card = ({
   };
 
   return (
-    <Link to={href} className="block relative z-10">
+    <Link to={href} className="block relative z-10 h-full">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group h-full`}>
         {/* Background elements with pointer-events-none to ensure clicks pass through to the link */}
         {backgroundImage && (
