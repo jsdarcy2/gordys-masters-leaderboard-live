@@ -71,6 +71,11 @@
     @apply font-serif;
     letter-spacing: 0.02em;
   }
+  
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
 }
 
 @layer components {
@@ -144,6 +149,28 @@
     @apply absolute left-0 bottom-0 w-20 h-20 opacity-5 pointer-events-none;
     background-image: radial-gradient(circle, rgba(255, 250, 250, 0.8) 0%, transparent 70%);
   }
+  
+  /* Enhanced image display */
+  .aspect-ratio-box {
+    position: relative;
+    width: 100%;
+  }
+  
+  .image-container {
+    @apply overflow-hidden relative;
+  }
+  
+  .image-container img {
+    @apply transition-all duration-200;
+  }
+  
+  .image-container:hover img {
+    @apply scale-105;
+  }
+  
+  .robe-winner-image {
+    @apply border border-masters-green/10 shadow-sm;
+  }
 }
 
 @layer utilities {
@@ -192,5 +219,19 @@
   
   .accent-jasmine {
     background-image: radial-gradient(circle at bottom left, rgba(255, 240, 110, 0.03), transparent 60%);
+  }
+  
+  /* Image utilities */
+  .img-sharp {
+    image-rendering: -webkit-optimize-contrast;
+    transform: translateZ(0);
+  }
+  
+  .img-crisp-edges {
+    image-rendering: crisp-edges;
+  }
+  
+  .img-pixel {
+    image-rendering: pixelated;
   }
 }

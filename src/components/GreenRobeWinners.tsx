@@ -180,7 +180,7 @@ const GreenRobeWinners = () => {
         className="w-full"
       >
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between bg-masters-green/5">
             <CollapsibleTrigger className="w-full text-left">
               <CardTitle className="text-xl md:text-2xl font-serif text-masters-green flex items-center">
                 <Award size={24} className="text-masters-gold mr-2" />
@@ -191,7 +191,7 @@ const GreenRobeWinners = () => {
           </CardHeader>
           
           <CollapsibleContent>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="mb-4 p-4 bg-masters-light rounded-md">
                 <p className="italic text-gray-700">
                   The prestigious Green Robe - a tradition unlike any other. Awarded to the pool champion each year, 
@@ -199,36 +199,37 @@ const GreenRobeWinners = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {GREEN_ROBE_WINNERS.map((record, index) => (
-                  <Card key={index} className={index === 0 ? "border-2 border-masters-gold" : ""}>
-                    <CardContent className="p-4">
+                  <Card key={index} className={`overflow-hidden ${index === 0 ? "border-2 border-masters-gold shadow-md" : "shadow-sm"}`}>
+                    <CardContent className="p-0">
                       <div className="flex flex-col h-full">
-                        <div className="mb-2">
+                        <div className="bg-masters-green/10 p-3">
                           <h3 className="text-xl font-serif font-medium text-masters-green">
-                            {record.year} Champion
-                            {record.year === 2017 ? 's' : ''}
+                            {record.year} Champion{record.year === 2017 ? 's' : ''}
                           </h3>
                         </div>
                         
                         {'winners' in record ? (
-                          <div className="grid grid-cols-1 gap-4">
+                          <div className="grid grid-cols-1 gap-0">
                             {record.winners.map((winner, i) => (
-                              <div key={i} className="flex flex-col md:flex-row gap-4">
+                              <div key={i} className="flex flex-col md:flex-row">
                                 {winner.image && (
-                                  <div className="w-full md:w-1/2">
-                                    <Image 
-                                      src={winner.image} 
-                                      alt={`${winner.name} with Green Robe`}
-                                      className="w-full h-64 object-cover rounded-md"
-                                    />
+                                  <div className="w-full md:w-1/2 relative">
+                                    <div className="aspect-ratio-box" style={{ paddingBottom: "75%" }}>
+                                      <Image 
+                                        src={winner.image} 
+                                        alt={`${winner.name} with Green Robe`}
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                      />
+                                    </div>
                                   </div>
                                 )}
-                                <div className="w-full md:w-1/2 flex flex-col justify-center">
+                                <div className="w-full md:w-1/2 flex flex-col justify-center p-4">
                                   <p className="text-lg font-medium">{winner.name}</p>
-                                  <p className="text-gray-600 italic">"{winner.quote}"</p>
+                                  <p className="text-gray-600 italic mt-1">"{winner.quote}"</p>
                                   {winner.hometown && (
-                                    <p className="text-sm text-gray-500 mt-1 flex items-center">
+                                    <p className="text-sm text-gray-500 mt-2 flex items-center">
                                       Hometown: {winner.hometown} 
                                       {winner.hometown.slice(-2) && stateFlags[winner.hometown.slice(-2)] && (
                                         <span>{stateFlags[winner.hometown.slice(-2)]}</span>
@@ -238,29 +239,31 @@ const GreenRobeWinners = () => {
                                 </div>
                               </div>
                             ))}
-                            <p className="text-sm text-gray-500 mt-2">Co-champions this year!</p>
+                            <p className="text-sm text-gray-500 p-3 bg-masters-light/50">Co-champions this year!</p>
                           </div>
                         ) : (
-                          <div className="flex flex-col md:flex-row gap-4">
+                          <div className="flex flex-col md:flex-row">
                             {record.image && (
-                              <div className="w-full md:w-1/2">
-                                <Image 
-                                  src={record.image} 
-                                  alt={`${record.winner} with Green Robe`}
-                                  className="w-full h-64 object-cover rounded-md"
-                                />
+                              <div className="w-full md:w-1/2 relative">
+                                <div className="aspect-ratio-box" style={{ paddingBottom: "75%" }}>
+                                  <Image 
+                                    src={record.image} 
+                                    alt={`${record.winner} with Green Robe`}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                  />
+                                </div>
                               </div>
                             )}
-                            <div className="w-full md:w-1/2 flex flex-col justify-center">
+                            <div className="w-full md:w-1/2 flex flex-col justify-center p-4">
                               <p className="text-lg font-medium">
                                 {record.winner}
                                 {record.nickname && (
                                   <span className="ml-2 text-sm text-gray-600">({record.nickname})</span>
                                 )}
                               </p>
-                              <p className="text-gray-600 italic">"{record.quote}"</p>
+                              <p className="text-gray-600 italic mt-1">"{record.quote}"</p>
                               {record.hometown && (
-                                <p className="text-sm text-gray-500 mt-1 flex items-center">
+                                <p className="text-sm text-gray-500 mt-2 flex items-center">
                                   Hometown: {record.hometown} 
                                   {record.hometown.slice(-2) && stateFlags[record.hometown.slice(-2)] && (
                                     <span>{stateFlags[record.hometown.slice(-2)]}</span>
