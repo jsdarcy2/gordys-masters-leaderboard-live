@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -186,6 +187,19 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
   };
 
+  // Render LiveDataButton component with consistent styling
+  const LiveDataButton = () => (
+    <Button 
+      onClick={handleManualRefresh} 
+      variant="outline" 
+      size="sm" 
+      className="ml-auto mt-1 bg-white text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+    >
+      <RefreshCw size={14} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+      Check for Live Data
+    </Button>
+  );
+
   if (showEmergencyFallback) {
     return (
       <div className="masters-card">
@@ -243,58 +257,58 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
         
         {dataSource === 'no-data' && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800">Refreshing Data</AlertTitle>
-            <AlertDescription className="text-blue-700 text-sm">
-              Live tournament data is being refreshed. This will only take a moment.
-              <Button 
-                onClick={handleManualRefresh} 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 bg-white"
-              >
-                <RefreshCw size={14} className="mr-1" />
-                Refresh Now
-              </Button>
-            </AlertDescription>
+            <div className="flex flex-col w-full">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="ml-2 flex-1">
+                  <AlertTitle className="text-blue-800">Refreshing Data</AlertTitle>
+                  <AlertDescription className="text-blue-700 text-sm">
+                    Live tournament data is being refreshed. This will only take a moment.
+                  </AlertDescription>
+                </div>
+              </div>
+              <div className="flex justify-end mt-2">
+                <LiveDataButton />
+              </div>
+            </div>
           </Alert>
         )}
         
         {dataSource === 'cached-data' && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800">Using Recent Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
-            <AlertDescription className="text-blue-700 text-sm">
-              Showing most recent available scores. Live updates will resume momentarily.
-              <Button 
-                onClick={handleManualRefresh} 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 bg-white"
-              >
-                <RefreshCw size={14} className="mr-1" />
-                Refresh Now
-              </Button>
-            </AlertDescription>
+            <div className="flex flex-col w-full">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="ml-2 flex-1">
+                  <AlertTitle className="text-blue-800">Using Recent Data for {dataYear || TOURNAMENT_YEAR} Masters</AlertTitle>
+                  <AlertDescription className="text-blue-700 text-sm">
+                    Showing most recent available scores. Live updates will resume momentarily.
+                  </AlertDescription>
+                </div>
+              </div>
+              <div className="flex justify-end mt-2">
+                <LiveDataButton />
+              </div>
+            </div>
           </Alert>
         )}
         
         {dataSource === 'mock-data' && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800">Estimated Standings</AlertTitle>
-            <AlertDescription className="text-blue-700 text-sm">
-              Displaying estimated tournament positions while we establish connection to live data.
-              <Button 
-                onClick={handleManualRefresh} 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 bg-white"
-              >
-                <RefreshCw size={14} className="mr-1" />
-                Check for Live Data
-              </Button>
-            </AlertDescription>
+            <div className="flex flex-col w-full">
+              <div className="flex items-start">
+                <Info className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="ml-2 flex-1">
+                  <AlertTitle className="text-blue-800">Estimated Standings</AlertTitle>
+                  <AlertDescription className="text-blue-700 text-sm">
+                    Displaying estimated tournament positions while we establish connection to live data.
+                  </AlertDescription>
+                </div>
+              </div>
+              <div className="flex justify-end mt-2">
+                <LiveDataButton />
+              </div>
+            </div>
           </Alert>
         )}
         
