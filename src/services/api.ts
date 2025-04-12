@@ -1,4 +1,3 @@
-
 import { GolferScore, PoolParticipant, TournamentRound, DataSource } from "@/types";
 import { useTournamentData } from "@/hooks/use-tournament-data";
 
@@ -10,7 +9,7 @@ export { useTournamentData } from '@/hooks/use-tournament-data';
 
 // Google Sheets API health monitoring
 export const API_ENDPOINTS = {
-  GOOGLE_SHEETS: `https://sheets.googleapis.com/v4/spreadsheets/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/values/A1:A1?key=AIzaSyBwGnwRwIzVb6cFM_K3ixpqPAjLaA_hMkk`
+  GOOGLE_SHEETS: `https://sheets.googleapis.com/v4/spreadsheets/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/values/A1:A1?key=AIzaSyDa_J9wM1OZJ3CMHXWRYzf5u1vIBr6SBcI`
 };
 
 // Centralized API health tracking

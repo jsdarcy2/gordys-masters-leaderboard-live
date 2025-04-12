@@ -10,7 +10,7 @@ import { PoolParticipant, GolferScore } from "@/types";
 
 // Google Sheets document ID from the URL
 const SHEETS_DOC_ID = "1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o";
-const API_KEY = "AIzaSyBwGnwRwIzVb6cFM_K3ixpqPAjLaA_hMkk"; // This is a client-side public API key
+const API_KEY = "AIzaSyDa_J9wM1OZJ3CMHXWRYzf5u1vIBr6SBcI"; // Updated API key
 
 /**
  * Fetches data from a specific sheet in the Google Sheets document
