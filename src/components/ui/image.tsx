@@ -48,16 +48,14 @@ const Image = ({
       <img
         src={src}
         alt={alt}
-        className={`${className} ${isLoaded ? 'transition-opacity duration-300' : 'opacity-0'}`}
+        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
         width={width}
         height={height}
         loading="lazy"
         onError={handleError}
         onLoad={handleLoad}
         style={{
-          objectFit: "cover",
-          // Remove the imageRendering property with invalid value
-          // Use CSS class instead for image quality improvements
+          objectFit: "cover"
         }}
         {...props}
       />

@@ -85,20 +85,20 @@ const Card = ({
   };
 
   return (
-    <Link to={href} className="block">
+    <Link to={href} className="block relative z-10">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group`}>
-        {/* Tiger Woods celebration background with Masters flag */}
+        {/* Background elements with pointer-events-none to ensure clicks pass through to the link */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
             {/* Tiger Woods celebration image - optimized for being a subtle background */}
-            <Image 
+            <img 
               src={backgroundImage} 
               alt=""
               className="w-full h-full object-cover opacity-[0.08]"
             />
             
             {/* Flag-like stripes overlay */}
-            <div className="absolute inset-0 w-full h-full">
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
               <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${
                 highlight 
                   ? "bg-masters-gold" 
@@ -117,7 +117,7 @@ const Card = ({
             </div>
             
             {/* Gradient overlay to ensure text readability */}
-            <div className={`absolute inset-0 ${
+            <div className={`absolute inset-0 pointer-events-none ${
               highlight 
                 ? "bg-gradient-to-br from-masters-gold/30 to-masters-lightgold/20" 
                 : variant === "gold" 
@@ -127,7 +127,7 @@ const Card = ({
           </div>
         )}
         
-        {/* Small flag emblem in the corner */}
+        {/* Small flag emblem in the corner - with pointer-events-none */}
         <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
           <Flag 
             size={24} 
@@ -141,6 +141,7 @@ const Card = ({
           />
         </div>
         
+        {/* Card content with z-index to ensure it's clickable */}
         <div className="flex items-center mb-3 relative z-10">
           <div className={`p-2.5 rounded-full ${
             highlight 

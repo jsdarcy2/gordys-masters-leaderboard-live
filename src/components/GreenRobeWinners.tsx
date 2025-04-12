@@ -216,8 +216,8 @@ const GreenRobeWinners = () => {
                               <div key={i} className="flex flex-col md:flex-row">
                                 {winner.image && (
                                   <div className="w-full md:w-1/2 relative">
-                                    <div className="aspect-ratio-box" style={{ paddingBottom: "75%" }}>
-                                      <Image 
+                                    <div className="aspect-ratio-box relative" style={{ paddingBottom: "75%" }}>
+                                      <img 
                                         src={winner.image} 
                                         alt={`${winner.name} with Green Robe`}
                                         className="absolute inset-0 w-full h-full object-cover"
@@ -245,8 +245,8 @@ const GreenRobeWinners = () => {
                           <div className="flex flex-col md:flex-row">
                             {record.image && (
                               <div className="w-full md:w-1/2 relative">
-                                <div className="aspect-ratio-box" style={{ paddingBottom: "75%" }}>
-                                  <Image 
+                                <div className="aspect-ratio-box relative" style={{ paddingBottom: "75%" }}>
+                                  <img 
                                     src={record.image} 
                                     alt={`${record.winner} with Green Robe`}
                                     className="absolute inset-0 w-full h-full object-cover"
