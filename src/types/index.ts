@@ -44,7 +44,10 @@ export type DataSource =
   | 'no-data' 
   | 'masters-scraper'
   | 'pgatour-api'
-  | 'google-sheets';  // Added google-sheets as a valid data source
+  | 'google-sheets'
+  | 'masters-api'
+  | 'masters-scores-api'
+  | 'fixed-data';  // Added masters-api, masters-scores-api and fixed-data as valid data sources
 
 export type TournamentData = {
   lastUpdated: string;

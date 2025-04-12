@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Leaderboard from "@/components/Leaderboard";
@@ -8,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTournamentData } from "@/hooks/use-tournament-data";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { DataSource } from "@/types";
 
 const LeaderboardPage = () => {
   const isMobile = useIsMobile();
@@ -37,8 +37,8 @@ const LeaderboardPage = () => {
     });
   };
 
-  // Check if we're using the live scores API
-  const isUsingLiveScores = dataSource === 'masters-scores-api';
+  // Check if we're using the live scores API with proper type safety
+  const isUsingLiveScores = dataSource === 'masters-scores-api' as DataSource;
 
   return (
     <Layout>
