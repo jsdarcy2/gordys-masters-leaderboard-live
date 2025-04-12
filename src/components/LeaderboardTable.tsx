@@ -1,7 +1,7 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw, CircleX } from "lucide-react";
+import { RefreshCw, CircleX, CircleDollarSign } from "lucide-react";
 import WinnerIcons from "./leaderboard/WinnerIcons";
 import { 
   getScoreClass, 
@@ -37,7 +37,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th className="masters-table-header text-right">Today</th>
               <th className="masters-table-header text-right">Thru</th>
               <th className="masters-table-header text-right rounded-tr-md">
-                Masters Prize
+                Prize Money
               </th>
             </tr>
           </thead>
@@ -90,11 +90,14 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     {formatScore(golfer.today)}
                   </td>
                   <td className="px-2 py-3 text-right">{golfer.thru}</td>
-                  <td className="px-2 py-3 text-right font-medium">
+                  <td className="px-2 py-3 text-right">
                     {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                      <span className="text-purple-600">${getMastersPurseAmount(golfer.position)}</span>
+                      <span className="inline-flex items-center font-medium text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded">
+                        <CircleDollarSign size={13} className="mr-1 text-[#8B5CF6]" />
+                        {getMastersPurseAmount(golfer.position)}
+                      </span>
                     ) : (
-                      <span className="text-gray-400">$0</span>
+                      <span className="text-gray-400 text-sm">$0</span>
                     )}
                   </td>
                 </tr>

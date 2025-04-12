@@ -14,7 +14,7 @@ const LoadingState = () => {
             <th className="masters-table-header text-right">Score</th>
             <th className="masters-table-header text-right">Today</th>
             <th className="masters-table-header text-right">Thru</th>
-            <th className="masters-table-header text-right rounded-tr-md">Masters Prize</th>
+            <th className="masters-table-header text-right rounded-tr-md">Prize Money</th>
           </tr>
         </thead>
         <tbody>

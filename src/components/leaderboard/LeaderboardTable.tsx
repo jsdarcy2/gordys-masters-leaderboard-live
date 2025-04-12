@@ -1,7 +1,7 @@
 
 import React from "react";
 import { GolferScore } from "@/types";
-import { RefreshCw, CircleX } from "lucide-react";
+import { RefreshCw, CircleX, CircleDollarSign } from "lucide-react";
 import WinnerIcons from "./WinnerIcons";
 import { 
   getScoreClass, 
@@ -38,20 +38,15 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               <th className="masters-table-header text-right">Score</th>
               <th className="masters-table-header text-right">Today</th>
               <th className="masters-table-header text-right">Thru</th>
-              {showPotentialWinnings && (
-                <th className="masters-table-header text-right rounded-tr-md">
-                  Masters Prize
-                </th>
-              )}
-              {!showPotentialWinnings && (
-                <th className="masters-table-header text-right rounded-tr-md"></th>
-              )}
+              <th className="masters-table-header text-right rounded-tr-md">
+                Prize Money
+              </th>
             </tr>
           </thead>
           <tbody>
             {leaderboard.length === 0 ? (
               <tr>
-                <td colSpan={showPotentialWinnings ? 6 : 5} className="text-center py-8 text-gray-500">
+                <td colSpan={6} className="text-center py-8 text-gray-500">
                   No leaderboard data available
                 </td>
               </tr>
@@ -97,16 +92,16 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                     {formatScore(golfer.today)}
                   </td>
                   <td className="px-2 py-3 text-right">{golfer.thru}</td>
-                  {showPotentialWinnings && (
-                    <td className="px-2 py-3 text-right font-medium">
-                      {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                        <span className="text-purple-600">${getMastersPurseAmount(golfer.position)}</span>
-                      ) : (
-                        <span className="text-gray-400">$0</span>
-                      )}
-                    </td>
-                  )}
-                  {!showPotentialWinnings && <td></td>}
+                  <td className="px-2 py-3 text-right">
+                    {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
+                      <span className="inline-flex items-center font-medium text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded">
+                        <CircleDollarSign size={13} className="mr-1 text-[#8B5CF6]" />
+                        {getMastersPurseAmount(golfer.position)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">$0</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

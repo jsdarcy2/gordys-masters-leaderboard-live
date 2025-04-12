@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Info, ExternalLink, Calendar, Signal, FileSpreadsheet } from "lucide-react";
+import { Info, ExternalLink, Calendar, FileSpreadsheet, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface DataSourceInfoProps {
@@ -67,13 +67,13 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   const shouldShowLiveSignal = dataSource === "masters-scores-api" || hasLiveData;
   
   return (
-    <div className="flex items-center gap-2 text-sm text-white/80">
+    <div className="flex items-center gap-2 text-sm text-white/90">
       <div className="flex items-center">
         {errorMessage ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <Info size={14} className="mr-1 text-white/60" />
+                <Info size={14} className="mr-1 text-white/70" />
               </TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-xs">{errorMessage}</p>
@@ -81,23 +81,30 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <Info size={14} className="mr-1 text-white/60" />
+          <Info size={14} className="mr-1 text-white/70" />
         )}
         <span>
-          <span className="text-white/60">Source:</span> <span className="text-white font-medium">
+          <span className="text-white/70">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
-            {shouldShowLiveSignal && (
-              <Signal size={12} className="inline-block ml-1 text-green-400 animate-pulse" />
-            )}
           </span> 
+          
+          {shouldShowLiveSignal && (
+            <span className="ml-1.5 bg-green-500/20 text-white/95 text-xs px-1.5 py-0.5 rounded inline-flex items-center">
+              <BadgeCheck size={12} className="mr-0.5 text-green-400" />
+              LIVE
+            </span>
+          )}
+          
           {tournamentYear && (
-            <span className="ml-1">
+            <span className="ml-1.5 text-white/90">
               <Calendar size={12} className="inline mr-0.5" />
               {tournamentYear}
             </span>
           )}
-          <span> • </span>
-          <span className="text-white/60">Updated:</span> {formatLastUpdated(lastUpdated)}
+          
+          <span className="mx-1.5 text-white/50">•</span>
+          
+          <span className="text-white/70">Updated:</span> <span className="text-white/90">{formatLastUpdated(lastUpdated)}</span>
           
           {sourceLink && (
             <a 
@@ -116,7 +123,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
             href={googleSheetLink} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="ml-3 text-white/90 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
+            className="ml-3 text-white/95 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
             title="Google Sheet Backup"
             onClick={handleExternalClick}
           >
