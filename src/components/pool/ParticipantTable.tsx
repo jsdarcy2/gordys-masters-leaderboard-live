@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
 import { Check, Ban, CircleDollarSign, ExternalLink } from "lucide-react";
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import WinnerIcons from "../leaderboard/WinnerIcons";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface ParticipantTableProps {
   displayStandings: PoolParticipant[];
@@ -30,6 +31,27 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
   displayStandings.forEach(participant => {
     tiedPositions[participant.position] = (tiedPositions[participant.position] || 0) + 1;
   });
+
+  // State to track participants who have paid during this session
+  const [justPaid, setJustPaid] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  // Handle when a payment is initiated
+  const handlePaymentClick = (participantName: string) => {
+    // Mark the participant as paid
+    setJustPaid(prev => {
+      const newSet = new Set(prev);
+      newSet.add(participantName);
+      return newSet;
+    });
+    
+    // Show confirmation toast
+    toast({
+      title: "Payment Initiated",
+      description: `Thank you for paying! The badge will be hidden now.`,
+      variant: "default",
+    });
+  };
 
   return (
     <div className="overflow-x-auto mt-4">
@@ -65,7 +87,7 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
             displayStandings.map((participant, index) => {
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.bestFourGolfers || [];
-              const isPaid = participant.paid !== false;
+              const isPaid = participant.paid !== false || justPaid.has(participant.name);
               const missedCut = participant.totalScore > 200;
               const isTied = tiedPositions[participant.position] > 1;
               const showEarnings = participant.position <= 3;
@@ -120,6 +142,10 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded font-normal hover:bg-blue-200 transition-colors flex items-center gap-1"
+                                onClick={(e) => {
+                                  // This doesn't prevent navigation, just triggers the paid status update
+                                  handlePaymentClick(participant.name);
+                                }}
                               >
                                 <span>unpaid</span>
                                 <ExternalLink size={10} />
