@@ -14,7 +14,7 @@ const Index = () => {
           title="Tournament" 
           subtitle="Follow the live leaderboard" 
           href="/leaderboard"
-          backgroundImage="/lovable-uploads/9ecfd09f-c722-4155-a926-4b986d130495.png"
+          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
           variant="green" />
               
         <Card 
@@ -22,7 +22,7 @@ const Index = () => {
           title="Pool Standings" 
           subtitle="See who's winning the pool" 
           href="/selections"
-          backgroundImage="/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png"
+          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
           highlight={true}
           variant="gold" />
               
@@ -31,7 +31,7 @@ const Index = () => {
           title="Past Champions" 
           subtitle="Celebrating 20 years" 
           href="/archive"
-          backgroundImage="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png"
+          backgroundImage="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png"
           variant="green" />
       </div>
       
@@ -42,7 +42,7 @@ const Index = () => {
   );
 };
 
-// Redesigned card component with subtle Masters flag-like imagery
+// Redesigned card component with Tiger Woods celebration and Masters flag
 const Card = ({ 
   icon, 
   title, 
@@ -87,20 +87,27 @@ const Card = ({
   return (
     <Link to={href} className="block">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group`}>
-        {/* Flag-like background with subtle Masters imagery */}
+        {/* Tiger Woods celebration background with Masters flag */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
-            {/* Flag-like stripes in the background */}
+            {/* Tiger Woods celebration image - optimized for being a subtle background */}
+            <Image 
+              src={backgroundImage} 
+              alt=""
+              className="w-full h-full object-cover opacity-[0.08]"
+            />
+            
+            {/* Flag-like stripes overlay */}
             <div className="absolute inset-0 w-full h-full">
-              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.04] ${
+              <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${
                 highlight 
                   ? "bg-masters-gold" 
                   : variant === "gold" 
                     ? "bg-masters-gold" 
                     : "bg-masters-green"
               }`}></div>
-              <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.05]"></div>
-              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.04] ${
+              <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
+              <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${
                 highlight 
                   ? "bg-masters-gold" 
                   : variant === "gold" 
@@ -108,13 +115,6 @@ const Card = ({
                     : "bg-masters-green"
               }`}></div>
             </div>
-            
-            {/* Masters image overlay on the flag pattern */}
-            <Image 
-              src={backgroundImage} 
-              alt=""
-              className="w-full h-full object-cover opacity-[0.05]"
-            />
             
             {/* Gradient overlay to ensure text readability */}
             <div className={`absolute inset-0 ${
@@ -127,7 +127,7 @@ const Card = ({
           </div>
         )}
         
-        {/* Flag emblem in the top right corner */}
+        {/* Small flag emblem in the corner */}
         <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
           <Flag 
             size={24} 
