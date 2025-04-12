@@ -43,16 +43,16 @@ const Header = () => {
       } border-b border-masters-gold/20`}>
       
       {/* Augusta National 12th hole with Hogan Bridge background - increased visibility */}
-      <div className="absolute inset-0 w-full h-full opacity-[0.25]">
+      <div className="absolute inset-0 w-full h-full opacity-35">
         <img 
           src="/lovable-uploads/7266d407-6b13-45d7-9b85-897bbd3c9f92.png" 
           alt="Augusta National 12th Hole with Hogan Bridge" 
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-bottom"
         />
       </div>
       
       {/* Enhanced overlay with improved glassmorphism - adjusted for bridge visibility */}
-      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/80 via-masters-green/70 to-masters-dark/80 backdrop-blur-[1px]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/75 via-masters-green/65 to-masters-dark/75 backdrop-blur-[1px]"></div>
       
       <div className="container mx-auto relative z-10">
         <div className="px-6 py-6 md:py-8 flex flex-col">

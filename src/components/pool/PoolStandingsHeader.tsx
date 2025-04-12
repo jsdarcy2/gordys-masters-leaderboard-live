@@ -40,8 +40,20 @@ const PoolStandingsHeader: React.FC<PoolStandingsHeaderProps> = ({
   };
   
   return (
-    <div className="bg-masters-green p-4 text-white flex flex-wrap items-center justify-between">
-      <div className="flex items-center mr-4">
+    <div className="bg-masters-green p-4 text-white flex flex-wrap items-center justify-between relative overflow-hidden">
+      {/* Add subtle background image showing the bridge */}
+      <div className="absolute inset-0 opacity-[0.15] pointer-events-none">
+        <img 
+          src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
+          alt="" 
+          className="w-full h-full object-cover object-bottom"
+        />
+      </div>
+      
+      {/* Semi-transparent overlay to maintain text readability */}
+      <div className="absolute inset-0 bg-masters-green/85 pointer-events-none"></div>
+      
+      <div className="flex items-center mr-4 relative z-10">
         <div className="hidden sm:block">
           <Award size={24} className="text-masters-yellow mr-3" />
         </div>
@@ -67,7 +79,7 @@ const PoolStandingsHeader: React.FC<PoolStandingsHeaderProps> = ({
         onClick={onRefresh} 
         variant="outline" 
         size="sm" 
-        className="bg-white/10 text-white hover:bg-white/20 border-white/20 ml-auto"
+        className="bg-white/10 text-white hover:bg-white/20 border-white/20 ml-auto relative z-10"
         disabled={loading}
       >
         <RefreshCcw size={14} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} />

@@ -41,7 +41,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   tournamentActive = false
 }) => {
   const isMobile = useIsMobile();
-  const imageOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.010]";
+  const imageOpacity = isMobile ? "opacity-[0.07]" : "opacity-[0.12]";
 
   // Use a normal header even in "outage" mode
   if (criticalOutage) {
@@ -52,12 +52,12 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
           <img 
             src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
             alt="" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-bottom"
           />
         </div>
         
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-masters-green/95 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-masters-green/90 pointer-events-none"></div>
         
         <div className="relative z-10 text-white">
           <div className="flex flex-col md:flex-row justify-between gap-2">
@@ -104,17 +104,17 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
 
   return (
     <div className="p-3 md:p-4 relative overflow-hidden">
-      {/* Masters celebration image as subtle background */}
+      {/* Masters celebration image as subtle background with enhanced bridge visibility */}
       <div className={`absolute inset-0 ${imageOpacity} pointer-events-none`}>
         <img 
           src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
           alt="" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-bottom"
         />
       </div>
       
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-masters-green/95 pointer-events-none"></div>
+      {/* Gradient overlay adjusted for bridge visibility */}
+      <div className="absolute inset-0 bg-masters-green/85 pointer-events-none"></div>
       
       <div className="relative z-10 text-white">
         <div className="flex flex-col md:flex-row justify-between gap-2 items-start md:items-center">

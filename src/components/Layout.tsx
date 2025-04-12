@@ -43,17 +43,17 @@ const Layout = ({ children }: LayoutProps) => {
       </main>
       
       <footer className="bg-gradient-to-r from-masters-darkgreen via-masters-green to-masters-darkgreen text-white py-5 md:py-8 mt-8 md:mt-12 border-t-4 border-masters-gold/50 relative overflow-hidden">
-        {/* Subtle footer bridge image */}
-        <div className="absolute inset-0 opacity-08">
+        {/* Enhanced footer bridge image with increased visibility */}
+        <div className="absolute inset-0 opacity-25">
           <img 
             src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
             alt="Augusta National Bridge" 
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-bottom"
           />
         </div>
         
-        {/* Gradient overlay with subtle floral hints */}
-        <div className="absolute inset-0 bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark opacity-85"></div>
+        {/* Adjusted gradient overlay to make bridge more visible */}
+        <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/80 via-masters-green/75 to-masters-dark/80 opacity-75"></div>
         
         {/* Extremely subtle floral accent patterns */}
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
