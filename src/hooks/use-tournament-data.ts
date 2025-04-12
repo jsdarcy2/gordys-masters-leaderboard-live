@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { GolferScore, DataSource } from "@/types";
@@ -122,6 +121,9 @@ export function useTournamentData(): UseLeaderboardResult {
         localStorage.setItem('leaderboardLastUpdated', result.lastUpdated);
         localStorage.setItem('leaderboardSource', result.source);
         localStorage.setItem('leaderboardYear', currentYear);
+        
+        // Always set hasLiveData to true for our hosted data
+        setHasLiveData(true);
         
         // Update system health status
         setDataHealth({

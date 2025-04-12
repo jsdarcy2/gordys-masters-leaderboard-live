@@ -26,8 +26,8 @@ const PoolStandingsHeader = ({
   };
 
   const isMobile = useIsMobile();
-  const imageOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
-  const textureOpacity = isMobile ? "opacity-[0.011]" : "opacity-[0.015]";
+  const imageOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.015]";
+  const textureOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.015]";
 
   return (
     <div className="relative overflow-hidden rounded-t-lg shadow-subtle">

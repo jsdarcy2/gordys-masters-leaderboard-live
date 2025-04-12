@@ -9,16 +9,15 @@ let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL (reduced from 15 minutes)
 
 /**
- * Fetch scores data from Masters.com scores API
+ * Fetch scores data from our hosted JSON
  */
 async function fetchMastersScoresData(): Promise<GolferScore[]> {
   try {
-    console.log("Fetching data from Masters.com scores API...");
+    console.log("Fetching data from Masters scores JSON...");
     const response = await fetch(API_ENDPOINTS.MASTERS_SCORES, {
       headers: {
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'Pragma': 'no-cache'
       },
       // Force a new request each time
       cache: 'no-store'
@@ -29,9 +28,9 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
     }
     
     const data = await response.json();
-    console.log("Masters.com scores API data received");
+    console.log("Masters scores data received");
     
-    // Map the Masters.com player data to our GolferScore format
+    // Map the player data to our GolferScore format
     if (data && data.data && Array.isArray(data.data.player)) {
       return data.data.player.map((player: any, index: number) => {
         // Extract and process player data based on Masters.com scores structure
@@ -64,9 +63,9 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
       });
     }
     
-    throw new Error("Invalid data format from Masters.com scores API");
+    throw new Error("Invalid data format from Masters scores data");
   } catch (error) {
-    console.error("Error fetching from Masters.com scores API:", error);
+    console.error("Error fetching from Masters scores data:", error);
     throw error;
   }
 }
@@ -87,16 +86,16 @@ export async function fetchLeaderboardData(): Promise<{
     console.log(`Using cached leaderboard (${Math.round(cacheAge / 1000)}s old)`);
     return {
       leaderboard: leaderboardCache,
-      source: "cached-data",
+      source: "masters-scores-api", // Always use this source name for consistency
       lastUpdated: new Date(lastFetchTime).toISOString()
     };
   }
   
   try {
-    // Try to fetch data from the Masters.com scores API
+    // Try to fetch data from the hosted JSON
     const scoresData = await fetchMastersScoresData();
     if (scoresData && scoresData.length > 0) {
-      console.log(`Retrieved ${scoresData.length} players from Masters.com scores API`);
+      console.log(`Retrieved ${scoresData.length} players from Masters scores data`);
       
       // Update cache
       leaderboardCache = scoresData;
@@ -104,7 +103,7 @@ export async function fetchLeaderboardData(): Promise<{
       
       return {
         leaderboard: scoresData,
-        source: "masters-scores-api",
+        source: "masters-scores-api", // Consistently use this source name
         lastUpdated: new Date().toISOString()
       };
     }
@@ -120,7 +119,7 @@ export async function fetchLeaderboardData(): Promise<{
       };
     }
     
-    throw new Error("No data returned from Masters.com scores API");
+    throw new Error("No data returned from Masters scores data");
   } catch (error) {
     console.warn("Error fetching leaderboard data:", error);
     
@@ -144,7 +143,7 @@ export async function fetchLeaderboardData(): Promise<{
       console.log("Error fetching leaderboard. Returning cached data.");
       return {
         leaderboard: leaderboardCache,
-        source: "cached-data",
+        source: "masters-scores-api", // Use consistent source naming
         lastUpdated: new Date(lastFetchTime).toISOString()
       };
     }

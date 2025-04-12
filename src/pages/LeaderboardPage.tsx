@@ -9,6 +9,7 @@ import { useTournamentData } from "@/hooks/use-tournament-data";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { DataSource } from "@/types";
+import { clearLeaderboardCache } from "@/services/leaderboard";
 
 const LeaderboardPage = () => {
   const isMobile = useIsMobile();
@@ -31,7 +32,12 @@ const LeaderboardPage = () => {
   }, []);
 
   const handleRefreshClick = () => {
+    // Clear the cache first to force a new fetch
+    clearLeaderboardCache();
+    
+    // Then refresh the data
     refreshData(true);
+    
     toast({
       title: "Refreshing data",
       description: "Fetching the latest data from Masters.com"

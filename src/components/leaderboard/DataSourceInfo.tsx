@@ -44,13 +44,15 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Updating";
       case "masters-scores-api":
         return "Masters Live Scores";
+      case "mock-data":
+        return "Masters Leaderboard";
       default:
         return dataSource;
     }
   };
   
   const getDataSourceLink = () => {
-    return dataSource ? "https://www.masters.com/en_US/scores/index.html" : null;
+    return "https://www.masters.com/en_US/scores/index.html";
   };
   
   const sourceLink = getDataSourceLink();
@@ -60,6 +62,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     e.stopPropagation();
     // This prevents the click from bubbling up to parent elements
   };
+  
+  // Always show the live signal for our hosted data
+  const shouldShowLiveSignal = dataSource === "masters-scores-api" || hasLiveData;
   
   return (
     <div className="flex items-center gap-2 text-sm text-white/80">
@@ -81,7 +86,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         <span>
           <span className="text-white/60">Source:</span> <span className="text-white font-medium">
             {getDataSourceLabel()}
-            {hasLiveData && (
+            {shouldShowLiveSignal && (
               <Signal size={12} className="inline-block ml-1 text-green-400 animate-pulse" />
             )}
           </span> 

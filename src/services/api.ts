@@ -7,9 +7,9 @@ export { fetchLeaderboardData, buildGolferScoreMap } from './leaderboard';
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// Masters.com API endpoint
+// Masters.com API endpoint - Updating to use our own hosted API
 export const API_ENDPOINTS = {
-  MASTERS_SCORES: "https://www.masters.com/en_US/scores/feeds/2025/scores.json"
+  MASTERS_SCORES: "https://lovable-uploads/c7c1aa26-ae59-4ff9-abfe-aa16c5c35bd4.json"
 };
 
 // Simple API health check function
