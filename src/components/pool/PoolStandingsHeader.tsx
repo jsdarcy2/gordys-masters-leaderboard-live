@@ -1,6 +1,8 @@
 
-import { Clock, Users, Activity, Trophy, RefreshCcw, DollarSign } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import React from "react";
+import { RefreshCcw, Award, Users, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import SyncStatusBadge from "@/components/pool/SyncStatusBadge";
 
 interface PoolStandingsHeaderProps {
   lastUpdated: string;
@@ -9,105 +11,68 @@ interface PoolStandingsHeaderProps {
   isTournamentActive?: boolean;
   activeParticipants?: number;
   missedCutCount?: number;
-  onRefresh?: () => void;
+  onRefresh: () => void;
 }
 
-const PoolStandingsHeader = ({ 
-  lastUpdated, 
-  totalParticipants, 
-  loading, 
+const PoolStandingsHeader: React.FC<PoolStandingsHeaderProps> = ({
+  lastUpdated,
+  totalParticipants,
+  loading,
   isTournamentActive = false,
-  activeParticipants,
-  missedCutCount,
+  activeParticipants = 0,
+  missedCutCount = 0,
   onRefresh
-}: PoolStandingsHeaderProps) => {
-  const formatLastUpdated = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}) => {
+  const formatLastUpdated = (timestamp: string): string => {
+    if (!timestamp) return "Updating...";
+    
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString(undefined, { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return "Updating...";
+    }
   };
-
-  const isMobile = useIsMobile();
-  const imageOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.015]";
-  const textureOpacity = isMobile ? "opacity-[0.005]" : "opacity-[0.015]";
-
+  
   return (
-    <div className="relative overflow-hidden rounded-t-lg shadow-subtle">
-      {/* Elegant background with softer gradient and Masters celebration image */}
-      <div className="absolute inset-0">
-        {/* Masters image as very subtle background */}
-        <div className={`absolute inset-0 ${imageOpacity}`}>
-          <img 
-            src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
+    <div className="bg-masters-green p-4 text-white flex flex-wrap items-center justify-between">
+      <div className="flex items-center mr-4">
+        <div className="hidden sm:block">
+          <Award size={24} className="text-masters-yellow mr-3" />
         </div>
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-masters-darkgreen/95 via-masters-green/90 to-masters-darkgreen/95"></div>
-
-        {/* Subtle texture overlay */}
-        <div className={`absolute inset-0 ${textureOpacity}`}>
-          <div className="w-full h-full" style={{ 
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-          }}></div>
+        <div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">Gordy's Masters Pool</h2>
+          <div className="flex items-center text-xs text-white/80 mt-1">
+            <Users size={12} className="mr-1" />
+            <span>{totalParticipants} participants</span>
+            {isTournamentActive && (
+              <>
+                <span className="mx-1.5 text-white/40">•</span>
+                <Clock size={12} className="mr-1" />
+                <span>Updated: {formatLastUpdated(lastUpdated)}</span>
+              </>
+            )}
+            <span className="mx-1.5 text-white/40">•</span>
+            <SyncStatusBadge />
+          </div>
         </div>
-        
-        {/* Gold accent line at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-masters-gold/60 to-transparent"></div>
       </div>
       
-      <div className="relative z-10 px-4 sm:px-6 py-4 sm:py-5 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 md:gap-3">
-          <div className="flex items-center gap-2 md:gap-3">
-            <Trophy size={20} className="text-masters-gold" />
-            <h2 className="text-lg sm:text-xl md:text-2xl font-serif tracking-wide">
-              Gordy's Masters Pool Standings
-            </h2>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 md:gap-5 text-xs sm:text-sm mt-2 md:mt-0">
-            {isTournamentActive && (
-              <div className="flex items-center text-green-300">
-                <Activity size={14} className="mr-1 animate-pulse" />
-                <span className="font-medium">Live</span>
-              </div>
-            )}
-            {!loading && activeParticipants !== undefined && missedCutCount !== undefined && (
-              <div className="flex items-center text-masters-gold/90">
-                <Users size={14} className="mr-1" />
-                <span>{activeParticipants} Active / {missedCutCount} Cut</span>
-              </div>
-            )}
-            {!loading && activeParticipants === undefined && totalParticipants > 0 && (
-              <div className="flex items-center text-masters-gold/90">
-                <Users size={14} className="mr-1" />
-                <span>{totalParticipants} Participants</span>
-              </div>
-            )}
-            {!loading && lastUpdated && (
-              <div className="flex items-center text-masters-gold/90">
-                <Clock size={14} className="mr-1" />
-                <span>Updated: {formatLastUpdated(lastUpdated)}</span>
-                {onRefresh && (
-                  <button 
-                    onClick={onRefresh}
-                    className="ml-2 p-1 rounded-full hover:bg-white/10 transition-colors"
-                    aria-label="Refresh standings"
-                  >
-                    <RefreshCcw size={12} className="sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-                  </button>
-                )}
-              </div>
-            )}
-            {/* Prize money info */}
-            <div className="flex items-center text-masters-gold/90">
-              <DollarSign size={14} className="mr-1" />
-              <span className="hidden sm:inline">Prize: </span>
-              <span>1st: $1,200{isMobile ? "" : " • 2nd: $500 • 3rd: $300"}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Button 
+        onClick={onRefresh} 
+        variant="outline" 
+        size="sm" 
+        className="bg-white/10 text-white hover:bg-white/20 border-white/20 ml-auto"
+        disabled={loading}
+      >
+        <RefreshCcw size={14} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} />
+        {loading ? "Refreshing..." : "Refresh"}
+      </Button>
     </div>
   );
 };

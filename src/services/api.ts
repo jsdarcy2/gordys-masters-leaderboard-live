@@ -1,4 +1,3 @@
-
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 
@@ -8,9 +7,9 @@ export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// Masters.com API endpoint - Updating to use our own hosted API
+// Masters API endpoint - Using a mock JSON file as fallback
 export const API_ENDPOINTS = {
-  MASTERS_SCORES: "https://lovable-uploads/c7c1aa26-ae59-4ff9-abfe-aa16c5c35bd4.json"
+  MASTERS_SCORES: "https://api.npoint.io/a2ac70e55a7a87b33976"
 };
 
 // Simple API health check function

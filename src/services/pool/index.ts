@@ -1,4 +1,3 @@
-
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
 import { generateEmergencyPoolStandings, calculatePoolStandings } from "./participantUtils";
@@ -38,6 +37,74 @@ async function fetchRawSelectionsData(): Promise<Record<string, { picks: string[
   });
   
   return selectionsData;
+}
+
+/**
+ * Check if pool standings are in sync with Google Sheets data
+ * Returns a sync status object with details about the sync status
+ */
+export async function checkPoolStandingsSync(): Promise<{
+  inSync: boolean;
+  localCount: number;
+  sheetsCount: number;
+  differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
+}> {
+  try {
+    // Get local data
+    const localData = await fetchPoolStandings();
+    
+    // Get Google Sheets data
+    const sheetsData = await fetchPoolStandingsFromGoogleSheets();
+    
+    // Create maps for easier comparison
+    const localMap = new Map<string, number>();
+    localData.forEach(participant => {
+      localMap.set(participant.name, participant.totalScore);
+    });
+    
+    const sheetsMap = new Map<string, number>();
+    sheetsData.forEach(participant => {
+      sheetsMap.set(participant.name, participant.totalScore);
+    });
+    
+    // Find differences
+    const differences: Array<{ name: string, localScore?: number, sheetsScore?: number }> = [];
+    
+    // Check local participants missing from sheets
+    localMap.forEach((score, name) => {
+      if (!sheetsMap.has(name)) {
+        differences.push({ name, localScore: score });
+      } else if (sheetsMap.get(name) !== score) {
+        differences.push({ 
+          name, 
+          localScore: score, 
+          sheetsScore: sheetsMap.get(name) 
+        });
+      }
+    });
+    
+    // Check sheets participants missing from local
+    sheetsMap.forEach((score, name) => {
+      if (!localMap.has(name)) {
+        differences.push({ name, sheetsScore: score });
+      }
+    });
+    
+    return {
+      inSync: differences.length === 0,
+      localCount: localData.length,
+      sheetsCount: sheetsData.length,
+      differences
+    };
+  } catch (error) {
+    console.error("Error checking sync status:", error);
+    return {
+      inSync: false,
+      localCount: 0,
+      sheetsCount: 0,
+      differences: [{ name: "Error checking sync" }]
+    };
+  }
 }
 
 /**

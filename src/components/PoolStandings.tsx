@@ -8,6 +8,7 @@ import SearchBar from "@/components/pool/SearchBar";
 import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
+import SyncStatusBadge from "@/components/pool/SyncStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Info, Ban, FileSpreadsheet } from "lucide-react";
@@ -234,8 +235,9 @@ const PoolStandings = () => {
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
             <FileSpreadsheet className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800 text-sm flex justify-between items-center">
-              <span>
-                Using Google Sheets backup data. Primary data source is currently unavailable.
+              <span className="flex items-center">
+                <span>Using Google Sheets backup data. Primary data source is currently unavailable.</span>
+                <SyncStatusBadge className="ml-2" />
               </span>
               <Button 
                 onClick={handleManualRefresh} 
@@ -251,12 +253,17 @@ const PoolStandings = () => {
         )}
       
         {usingEmergencyData && (
-          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800">Showing Final Masters Pool Standings</AlertTitle>
-            <AlertDescription className="text-blue-700 text-sm">
-              The leaderboard displays the final Masters Pool standings. Each participant's score is calculated using their best 4 out of 5 golfer picks.
-            </AlertDescription>
+          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200 flex items-center justify-between">
+            <div className="flex items-center">
+              <Info className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <div className="ml-2">
+                <AlertTitle className="text-blue-800">Showing Final Masters Pool Standings</AlertTitle>
+                <AlertDescription className="text-blue-700 text-sm">
+                  The leaderboard displays the final Masters Pool standings. Each participant's score is calculated using their best 4 out of 5 golfer picks.
+                </AlertDescription>
+              </div>
+            </div>
+            <SyncStatusBadge />
           </Alert>
         )}
         
@@ -272,6 +279,9 @@ const PoolStandings = () => {
                   <Ban size={12} />
                   <span>{missedCutCount} missed cut</span>
                 </Badge>
+              </div>
+              <div className="ml-auto">
+                <SyncStatusBadge />
               </div>
             </AlertDescription>
           </Alert>

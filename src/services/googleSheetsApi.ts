@@ -11,7 +11,7 @@ import { getBestFourGolfers } from "@/utils/scoringUtils";
 
 // Google Sheets document ID from the URL
 const SHEETS_DOC_ID = "1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o";
-const API_KEY = "AIzaSyDa_J9wM1OZJ3CMHXWRYzf5u1vIBr6SBcI"; // Updated API key
+const API_KEY = "AIzaSyBQDIWQxlUZl-1O-2M9JqOvxkfNrq5G-yk"; // Updated API key for Google Sheets
 
 /**
  * Fetches data from a specific sheet in the Google Sheets document
@@ -20,6 +20,7 @@ async function fetchSheetData(sheetName: string): Promise<any[][]> {
   try {
     // Using the sheets.spreadsheets.values.get API endpoint
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_DOC_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
+    console.log(`Fetching Google Sheets data from: ${sheetName}`);
     const response = await fetch(url);
     
     if (!response.ok) {
