@@ -99,11 +99,11 @@
   }
 
   .masters-header {
-    @apply bg-masters-green bg-opacity-95 text-white font-serif p-3 rounded-t-md shadow-sm;
+    @apply bg-gradient-to-r from-masters-darkgreen to-masters-green bg-opacity-95 text-white font-serif p-3 rounded-t-md shadow-sm;
   }
   
   .masters-table-header {
-    @apply bg-masters-green bg-opacity-95 text-white p-2 font-serif;
+    @apply bg-gradient-to-r from-masters-darkgreen to-masters-green bg-opacity-95 text-white p-2 font-serif;
   }
   
   .masters-table-row-even {
@@ -111,24 +111,24 @@
   }
   
   .masters-table-row-odd {
-    @apply bg-masters-yellow bg-opacity-10;
+    @apply bg-masters-yellow bg-opacity-5;
   }
   
   .masters-card {
-    @apply rounded-md overflow-hidden border border-gray-200 shadow-sm bg-white;
+    @apply rounded-md overflow-hidden border border-gray-200 shadow-card bg-white;
   }
 
   /* Refined elegant components with subtle floral influences */
   .augusta-panel {
-    @apply bg-white/90 backdrop-blur-sm border border-masters-green/20 rounded-md shadow-sm;
+    @apply bg-white/95 backdrop-blur-sm border border-masters-green/20 rounded-md shadow-subtle;
     background-image: 
-      radial-gradient(circle at 95% 5%, rgba(255, 192, 203, 0.03) 0%, transparent 40%),  /* Azalea hint */
-      radial-gradient(circle at 5% 95%, rgba(255, 223, 0, 0.02) 0%, transparent 40%);   /* Golden Bell hint */
+      radial-gradient(circle at 95% 5%, rgba(255, 192, 203, 0.02) 0%, transparent 40%),  /* Azalea hint */
+      radial-gradient(circle at 5% 95%, rgba(255, 223, 0, 0.01) 0%, transparent 40%);   /* Golden Bell hint */
   }
   
   .augusta-divider {
     @apply h-px my-4;
-    background-image: linear-gradient(to right, transparent, rgba(242, 199, 92, 0.3), transparent);
+    background-image: linear-gradient(to right, transparent, rgba(242, 199, 92, 0.25), transparent);
   }
   
   .augusta-btn {
@@ -195,8 +195,8 @@
   
   /* Refined utilities for Augusta National aesthetic */
   .augusta-shadow {
-    box-shadow: 0 4px 12px -2px rgba(0, 103, 71, 0.06), 
-                0 2px 6px -1px rgba(0, 103, 71, 0.04);
+    box-shadow: 0 4px 12px -2px rgba(0, 103, 71, 0.05), 
+                0 2px 6px -1px rgba(0, 103, 71, 0.03);
   }
   
   .text-augusta {
@@ -213,19 +213,19 @@
   
   /* Floral accent utilities */
   .accent-azalea {
-    background-image: linear-gradient(to right, transparent, rgba(255, 182, 193, 0.03), transparent);
+    background-image: linear-gradient(to right, transparent, rgba(255, 182, 193, 0.02), transparent);
   }
   
   .accent-dogwood {
-    background-image: linear-gradient(to bottom, transparent, rgba(255, 250, 250, 0.04), transparent);
+    background-image: linear-gradient(to bottom, transparent, rgba(255, 250, 250, 0.03), transparent);
   }
   
   .accent-magnolia {
-    background-image: radial-gradient(circle at top right, rgba(255, 250, 245, 0.07), transparent 70%);
+    background-image: radial-gradient(circle at top right, rgba(255, 250, 245, 0.05), transparent 70%);
   }
   
   .accent-jasmine {
-    background-image: radial-gradient(circle at bottom left, rgba(255, 240, 110, 0.03), transparent 60%);
+    background-image: radial-gradient(circle at bottom left, rgba(255, 240, 110, 0.02), transparent 60%);
   }
   
   /* Image utilities */
@@ -238,7 +238,25 @@
     image-rendering: crisp-edges;
   }
   
-  .img-pixel {
-    image-rendering: pixelated;
+  /* Refined card styles */
+  .elegant-card {
+    @apply bg-white shadow-card hover:shadow-elegant transition-all duration-300 rounded-lg border border-gray-100;
+  }
+  
+  .elegant-card-header {
+    @apply bg-gradient-to-r from-masters-green/95 to-masters-darkgreen/95 text-white p-3 rounded-t-lg;
+  }
+  
+  /* Additional animation utilities */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  
+  .soft-glow {
+    box-shadow: 0 0 15px rgba(242, 199, 92, 0.15);
+  }
+  
+  .gold-glow {
+    filter: drop-shadow(0 0 4px rgba(242, 199, 92, 0.4));
   }
 }

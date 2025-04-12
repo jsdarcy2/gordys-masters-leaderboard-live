@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
-import { Flag, Trophy, Clock } from "lucide-react";
+import { Flag, Trophy, Clock, ChevronRight } from "lucide-react";
 
 const Index = () => {
   return (
@@ -32,8 +32,8 @@ const Index = () => {
           accentClass="accent-jasmine" />
       </div>
       
-      <div className="w-full augusta-shadow rounded-lg overflow-hidden">
-        <div className="bg-white/80 backdrop-blur-sm border border-masters-green/20">
+      <div className="w-full shadow-elegant rounded-lg overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-sm border border-masters-green/20">
           <PoolStandings />
         </div>
       </div>
@@ -59,11 +59,11 @@ const Card = ({
 }) => {
   return (
     <Link to={href} className="block">
-      <div className={`rounded-lg p-6 transition-all shadow-sm hover:shadow-md border ${
+      <div className={`rounded-lg p-6 transition-all shadow-card hover:shadow-elegant border ${
         highlight 
-          ? "bg-masters-green/90 border-masters-gold/50 text-white" 
-          : "bg-white border-gray-200 hover:border-masters-green/40"
-      } augusta-shadow ${accentClass} relative overflow-hidden`}>
+          ? "bg-gradient-to-br from-masters-green to-masters-darkgreen border-masters-gold/40 text-white" 
+          : "bg-white border-gray-200/80 hover:border-masters-green/40"
+      } ${accentClass} relative overflow-hidden group`}>
         
         {/* Subtle floral accent in the corner */}
         {!highlight && (
@@ -79,25 +79,20 @@ const Card = ({
         )}
         
         <div className="flex items-center mb-3">
-          {icon}
-          <h3 className={`text-lg font-serif ml-2 ${highlight ? "text-masters-yellow" : "text-masters-green"}`}>
+          <div className={`p-2 rounded-full ${highlight ? "bg-white/10" : "bg-masters-softgreen/20"}`}>
+            {icon}
+          </div>
+          <h3 className={`text-lg font-serif ml-3 ${highlight ? "text-masters-yellow" : "text-masters-green"}`}>
             {title}
           </h3>
         </div>
-        <p className={`text-sm ${highlight ? "text-gray-100" : "text-gray-600"}`}>
+        <p className={`text-sm mb-4 ${highlight ? "text-gray-100" : "text-gray-600"}`}>
           {subtitle}
         </p>
-        <Button 
-          variant={highlight ? "secondary" : "outline"} 
-          size="sm" 
-          className={`mt-4 w-full font-serif tracking-wide ${
-            highlight 
-              ? "text-masters-green bg-masters-yellow hover:bg-masters-yellow/90" 
-              : "text-masters-green hover:bg-masters-light"
-          }`}
-        >
-          {highlight ? "Enter Now" : "View"}
-        </Button>
+        <div className={`mt-2 flex items-center justify-between ${highlight ? "text-masters-yellow/80" : "text-masters-green/80"} text-sm font-medium`}>
+          <span className="font-serif">View details</span>
+          <ChevronRight size={18} className={`transform transition-transform duration-300 ${highlight ? "group-hover:translate-x-1" : "group-hover:translate-x-1"}`} />
+        </div>
       </div>
     </Link>
   );

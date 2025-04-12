@@ -25,52 +25,48 @@ const PoolStandingsHeader = ({
   };
 
   return (
-    <div className="masters-header relative overflow-hidden">
-      {/* Subtle azalea pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="flex justify-end">
-          <svg width="300" height="80" viewBox="0 0 300 80" className="text-[#FFC0CB]">
-            <circle cx="260" cy="20" r="5" className="fill-current opacity-40" />
-            <circle cx="280" cy="30" r="4" className="fill-current opacity-30" />
-            <circle cx="270" cy="40" r="6" className="fill-current opacity-40" />
-            <circle cx="250" cy="35" r="4" className="fill-current opacity-30" />
-            <circle cx="290" cy="15" r="3" className="fill-current opacity-40" />
-          </svg>
-        </div>
+    <div className="bg-gradient-to-r from-masters-darkgreen to-masters-green relative overflow-hidden rounded-t-md shadow-sm">
+      {/* Decorative overlay pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="w-full h-full" style={{ 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
+        }}></div>
       </div>
       
-      <div className="flex justify-between items-center relative z-10">
-        <div className="flex items-center gap-2">
-          <Trophy size={22} className="text-masters-yellow hidden md:inline-block" />
-          <h2 className="text-xl md:text-2xl font-serif">
-            Gordy's Masters Pool Standings
-          </h2>
-        </div>
-        <div className="flex items-center gap-3">
-          {isTournamentActive && (
-            <div className="flex items-center text-sm text-green-400">
-              <Activity size={14} className="mr-1 animate-pulse" />
-              <span>Live</span>
-            </div>
-          )}
-          {!loading && activeParticipants !== undefined && missedCutCount !== undefined && (
-            <div className="flex items-center text-sm text-masters-yellow">
-              <Users size={14} className="mr-1" />
-              <span>{activeParticipants} Active / {missedCutCount} Cut</span>
-            </div>
-          )}
-          {!loading && activeParticipants === undefined && totalParticipants > 0 && (
-            <div className="flex items-center text-sm text-masters-yellow">
-              <Users size={14} className="mr-1" />
-              <span>{totalParticipants} Participants</span>
-            </div>
-          )}
-          {!loading && lastUpdated && (
-            <div className="flex items-center text-sm text-masters-yellow">
-              <Clock size={14} className="mr-1" />
-              <span>Updated: {formatLastUpdated(lastUpdated)}</span>
-            </div>
-          )}
+      <div className="relative z-10 p-3 md:p-4 text-white">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Trophy size={22} className="text-masters-yellow hidden md:inline-block" />
+            <h2 className="text-xl md:text-2xl font-serif">
+              Gordy's Masters Pool Standings
+            </h2>
+          </div>
+          <div className="flex items-center gap-3 md:gap-4">
+            {isTournamentActive && (
+              <div className="flex items-center text-sm text-green-400">
+                <Activity size={14} className="mr-1 animate-pulse" />
+                <span>Live</span>
+              </div>
+            )}
+            {!loading && activeParticipants !== undefined && missedCutCount !== undefined && (
+              <div className="flex items-center text-sm text-masters-yellow/90">
+                <Users size={14} className="mr-1" />
+                <span>{activeParticipants} Active / {missedCutCount} Cut</span>
+              </div>
+            )}
+            {!loading && activeParticipants === undefined && totalParticipants > 0 && (
+              <div className="flex items-center text-sm text-masters-yellow/90">
+                <Users size={14} className="mr-1" />
+                <span>{totalParticipants} Participants</span>
+              </div>
+            )}
+            {!loading && lastUpdated && (
+              <div className="flex items-center text-sm text-masters-yellow/90">
+                <Clock size={14} className="mr-1" />
+                <span>Updated: {formatLastUpdated(lastUpdated)}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

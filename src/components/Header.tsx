@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavTab } from "@/types";
 import { useLocation, Link } from "react-router-dom";
-import { Menu, X, Star, Tv } from "lucide-react";
+import { Menu, X, Star, Tv, ChevronDown } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "@/components/ui/separator";
 import Image from "@/components/ui/image";
@@ -19,15 +19,29 @@ const NAV_TABS: NavTab[] = [
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
   
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   return (
-    <header className="relative bg-gradient-to-b from-masters-dark to-masters-green text-white border-b border-masters-gold/30 shadow-md">
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${
+      scrolled 
+        ? "bg-gradient-to-r from-masters-darkgreen to-masters-green shadow-md" 
+        : "bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark"
+      } text-white border-b border-masters-gold/30`}>
       {/* Improved background texture with reduced opacity */}
-      <div className="absolute inset-0 w-full h-full opacity-15">
+      <div className="absolute inset-0 w-full h-full opacity-10">
         <Image 
           src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
           alt="Augusta National" 
@@ -39,7 +53,7 @@ const Header = () => {
       <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/80 via-masters-green/70 to-masters-dark/80 backdrop-blur-sm"></div>
       
       {/* Subtle Nelson Bridge silhouette */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         <div className="container mx-auto h-full relative">
           <div className="absolute bottom-0 right-0 w-1/3 h-1/2 opacity-10 hidden md:block">
             <svg viewBox="0 0 400 200" className="w-full h-full fill-masters-yellow/5 stroke-masters-yellow/20" preserveAspectRatio="xMidYMax meet">
@@ -62,13 +76,14 @@ const Header = () => {
       </div>
       
       <div className="container mx-auto relative z-10">
-        <div className="px-4 py-4 md:py-5 flex flex-col">
+        <div className="px-4 py-3 md:py-4 flex flex-col">
           <div className="flex justify-between items-center">
-            {/* Logo area with subtle highlight */}
-            <div className="flex flex-col">
-              <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight">
+            {/* Logo area with subtle glow effect */}
+            <div className="flex flex-col relative">
+              <div className="absolute -inset-1 bg-masters-gold/10 opacity-70 blur-sm rounded-full"></div>
+              <h1 className="text-xl md:text-2xl font-serif font-bold tracking-tight relative">
                 <span className="text-white">Gordy's</span> 
-                <span className="text-masters-gold">Masters</span> 
+                <span className="text-masters-gold animate-gentle-pulse">Masters</span> 
                 <span className="text-white">Pool</span>
                 <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-masters-yellow/90 text-masters-dark">
                   <Star size={10} className="mr-0.5" />
@@ -83,7 +98,7 @@ const Header = () => {
             {/* Mobile menu button with improved hover effect */}
             <button 
               onClick={toggleMobileMenu}
-              className="block md:hidden text-white p-1 rounded-md hover:bg-white/10 transition-colors"
+              className="block md:hidden text-white p-1.5 rounded-md hover:bg-white/10 transition-colors"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -92,29 +107,31 @@ const Header = () => {
           
           {/* Desktop navigation with refined styling */}
           <nav className="hidden md:block mt-4">
-            <ul className="flex space-x-1 bg-masters-dark/30 backdrop-blur-sm rounded-full px-2 py-1">
-              {NAV_TABS.map((tab) => (
-                <li key={tab.id}>
-                  <Link
-                    to={tab.href}
-                    className={`font-serif text-sm transition-all duration-200 px-3 py-1.5 rounded-full flex items-center ${
-                      location.pathname === tab.href
-                        ? "bg-white/10 text-masters-yellow font-medium shadow-inner"
-                        : "text-white/90 hover:bg-white/5 hover:text-masters-yellow"
-                    }`}
-                  >
-                    {tab.icon && <span className="mr-1">{tab.icon}</span>}
-                    {tab.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <div className="flex justify-center">
+              <ul className="flex space-x-1 bg-masters-dark/40 backdrop-blur-sm rounded-full px-2 py-1 shadow-inner border border-white/5">
+                {NAV_TABS.map((tab) => (
+                  <li key={tab.id}>
+                    <Link
+                      to={tab.href}
+                      className={`font-serif text-sm transition-all duration-200 px-3 py-1.5 rounded-full flex items-center ${
+                        location.pathname === tab.href
+                          ? "bg-white/15 text-masters-yellow font-medium shadow-inner"
+                          : "text-white/90 hover:bg-white/5 hover:text-masters-yellow"
+                      }`}
+                    >
+                      {tab.icon && <span className="mr-1">{tab.icon}</span>}
+                      {tab.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
         </div>
         
         {/* Mobile navigation with improved styling */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden bg-masters-dark/80 backdrop-blur-md border-t border-white/10 animate-fade-in rounded-b-lg shadow-lg">
+          <nav className="md:hidden bg-masters-dark/90 backdrop-blur-md border-t border-white/10 animate-smooth-appear rounded-b-lg shadow-md">
             <ul className="flex flex-col">
               {NAV_TABS.map((tab) => (
                 <li key={tab.id} className="border-b border-white/10 last:border-b-0">
