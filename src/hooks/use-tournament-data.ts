@@ -266,15 +266,15 @@ export function useTournamentData(): UseLeaderboardResult {
       // Check API health first
       await checkApiHealth(endpoint, {
         headers: {
-          'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-          'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+          'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+          'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
         }
       });
       
       const response = await fetch(endpoint, {
         headers: {
-          'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-          'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com',
+          'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+          'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app',
           'Cache-Control': 'no-cache'
         }
       });
@@ -546,6 +546,8 @@ export function useTournamentData(): UseLeaderboardResult {
           // Set up retry with progressive backoff
           if (retryCount < RETRY_INTERVALS.length) {
             const nextRetryDelay = RETRY_INTERVALS[retryCount];
+            console.log(`Scheduling retry in ${nextRetryDelay / 1000} seconds (attempt ${retryCount + 1})`);
+            
             if (retryTimer) clearTimeout(retryTimer);
             const timer = setTimeout(() => {
               fetchLeaderboardData(true);
@@ -633,8 +635,8 @@ export function useTournamentData(): UseLeaderboardResult {
       await checkApiHealth(API_ENDPOINTS.ESPN.replace('{year}', year));
       await checkApiHealth(API_ENDPOINTS.SPORTS_DATA.replace('{year}', year), {
         headers: {
-          'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-          'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+          'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+          'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
         }
       });
       await checkApiHealth(API_ENDPOINTS.MASTERS_WEB);

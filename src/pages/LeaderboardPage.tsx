@@ -14,11 +14,7 @@ const LeaderboardPage = () => {
   
   // Ensure the outage state is set correctly based on API failures
   useEffect(() => {
-    // Force isCriticalOutage to true for immediate testing - remove this in production
-    setIsCriticalOutage(true);
-    
-    // Regular logic (commented out for testing)
-    /*
+    // Regular logic for production
     if (
       (consecutiveFailures && consecutiveFailures >= 5) || 
       (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3)
@@ -27,7 +23,6 @@ const LeaderboardPage = () => {
     } else {
       setIsCriticalOutage(false);
     }
-    */
   }, [dataHealth, consecutiveFailures]);
   
   useEffect(() => {

@@ -1,4 +1,3 @@
-
 import { DataSource, GolferScore, TournamentRound } from "@/types";
 import { getCurrentRound, TOURNAMENT_YEAR, isTournamentInProgress } from "../tournament";
 import { scrapeMastersWebsite } from "./scraper";
@@ -198,10 +197,10 @@ export const fetchLeaderboardData = async () => {
       try {
         console.log(`Falling back to Sports Data API for ${TOURNAMENT_YEAR} Masters...`);
         
-        const sportsDataResponse = await fetch(`https://golf-live-data.p.rapidapi.com/leaderboard/masters/${TOURNAMENT_YEAR}`, {
+        const sportsDataResponse = await fetch(`https://masters-score-stream-hub.lovable.app/leaderboard/masters/${TOURNAMENT_YEAR}`, {
           headers: {
-            'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-            'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com',
+            'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+            'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app',
             'Cache-Control': 'no-cache'
           }
         });

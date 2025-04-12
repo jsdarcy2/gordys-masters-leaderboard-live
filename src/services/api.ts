@@ -12,7 +12,7 @@ export { useTournamentData } from '@/hooks/use-tournament-data';
 export const API_ENDPOINTS = {
   PGA_TOUR: 'https://statdata.pgatour.com/r/current/leaderboard-v2mini.json',
   ESPN: 'https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard/events/{year}/masters/leaderboard',
-  SPORTS_DATA: 'https://golf-live-data.p.rapidapi.com/leaderboard/masters/{year}',
+  SPORTS_DATA: 'https://masters-score-stream-hub.lovable.app/leaderboard/masters/{year}',
   MASTERS_WEB: 'https://www.masters.com/en_US/scores/index.html'
 };
 
@@ -156,8 +156,8 @@ export const initializeApiHealthMonitoring = () => {
   checkApiHealth(espnEndpoint);
   checkApiHealth(sportsDataEndpoint, {
     headers: {
-      'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-      'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+      'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+      'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
     }
   });
   checkApiHealth(mastersWebEndpoint);
@@ -168,8 +168,8 @@ export const initializeApiHealthMonitoring = () => {
     checkApiHealth(espnEndpoint);
     checkApiHealth(sportsDataEndpoint, {
       headers: {
-        'X-RapidAPI-Key': import.meta.env.VITE_SPORTS_API_KEY || 'fallback-key-for-dev',
-        'X-RapidAPI-Host': 'golf-live-data.p.rapidapi.com'
+        'X-RapidAPI-Key': 'nEUPNJrOuvmshtV5BfQlMr2X2nwNp19eRh3jsn3oXRwhhypbcb',
+        'X-RapidAPI-Host': 'masters-score-stream-hub.lovable.app'
       }
     });
     checkApiHealth(mastersWebEndpoint);
