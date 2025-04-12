@@ -7,6 +7,7 @@
  */
 
 import { PoolParticipant, GolferScore } from "@/types";
+import { getBestFourGolfers } from "@/utils/scoringUtils";
 
 // Google Sheets document ID from the URL
 const SHEETS_DOC_ID = "1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o";
@@ -58,40 +59,52 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
     const nameIndex = headers.indexOf("name");
     const scoreIndex = headers.indexOf("total score");
     const pointsIndex = headers.indexOf("total points");
-    const pick1Index = headers.indexOf("pick 1");
-    const pick2Index = headers.indexOf("pick 2");
-    const pick3Index = headers.indexOf("pick 3");
-    const pick4Index = headers.indexOf("pick 4");
-    const pick1ScoreIndex = headers.indexOf("pick 1 score");
-    const pick2ScoreIndex = headers.indexOf("pick 2 score");
-    const pick3ScoreIndex = headers.indexOf("pick 3 score");
-    const pick4ScoreIndex = headers.indexOf("pick 4 score");
+    
+    // Find pick columns (looking for pick 1, pick 2, pick 3, pick 4, pick 5)
+    const pickIndices: number[] = [];
+    const pickScoreIndices: number[] = [];
+    
+    for (let i = 1; i <= 5; i++) {
+      const pickIndex = headers.indexOf(`pick ${i}`);
+      if (pickIndex !== -1) {
+        pickIndices.push(pickIndex);
+      }
+      
+      const pickScoreIndex = headers.indexOf(`pick ${i} score`);
+      if (pickScoreIndex !== -1) {
+        pickScoreIndices.push(pickScoreIndex);
+      }
+    }
+    
     const tiebreaker1Index = headers.indexOf("tiebreaker 1");
     const tiebreaker2Index = headers.indexOf("tiebreaker 2");
     const paidIndex = headers.indexOf("paid");
     
     // Map row data to PoolParticipant objects
     const standings: PoolParticipant[] = rowData.slice(1).map(row => {
-      const picks = [
-        row[pick1Index] || "",
-        row[pick2Index] || "",
-        row[pick3Index] || "",
-        row[pick4Index] || ""
-      ].filter(pick => pick !== "");
+      // Get all 5 picks
+      const picks: string[] = [];
+      pickIndices.forEach(index => {
+        if (row[index] && row[index].trim() !== "") {
+          picks.push(row[index]);
+        }
+      });
       
+      // Get all pick scores
       const pickScores: Record<string, number> = {};
-      if (row[pick1Index] && row[pick1ScoreIndex]) {
-        pickScores[row[pick1Index]] = parseInt(row[pick1ScoreIndex], 10) || 0;
-      }
-      if (row[pick2Index] && row[pick2ScoreIndex]) {
-        pickScores[row[pick2Index]] = parseInt(row[pick2ScoreIndex], 10) || 0;
-      }
-      if (row[pick3Index] && row[pick3ScoreIndex]) {
-        pickScores[row[pick3Index]] = parseInt(row[pick3ScoreIndex], 10) || 0;
-      }
-      if (row[pick4Index] && row[pick4ScoreIndex]) {
-        pickScores[row[pick4Index]] = parseInt(row[pick4ScoreIndex], 10) || 0;
-      }
+      
+      // Match pick names with their scores
+      picks.forEach((pick, i) => {
+        if (pickScoreIndices[i] !== undefined && row[pickScoreIndices[i]] !== undefined) {
+          const scoreVal = parseInt(row[pickScoreIndices[i]], 10);
+          pickScores[pick] = isNaN(scoreVal) ? 0 : scoreVal;
+        } else {
+          pickScores[pick] = 0;
+        }
+      });
+      
+      // Calculate best 4 golfers
+      const bestFourGolfers = getBestFourGolfers(pickScores);
       
       return {
         position: parseInt(row[positionIndex], 10) || 0,
@@ -102,7 +115,8 @@ export async function fetchPoolStandingsFromGoogleSheets(): Promise<PoolParticip
         pickScores,
         tiebreaker1: row[tiebreaker1Index] ? parseInt(row[tiebreaker1Index], 10) : undefined,
         tiebreaker2: row[tiebreaker2Index] ? parseInt(row[tiebreaker2Index], 10) : undefined,
-        paid: row[paidIndex]?.toLowerCase() === "true" || row[paidIndex]?.toLowerCase() === "yes" || false
+        paid: row[paidIndex]?.toLowerCase() === "true" || row[paidIndex]?.toLowerCase() === "yes" || false,
+        bestFourGolfers
       };
     });
     

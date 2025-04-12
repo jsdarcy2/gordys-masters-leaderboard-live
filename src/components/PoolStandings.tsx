@@ -11,12 +11,12 @@ import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
-const ERROR_THRESHOLD = 2; // Show emergency fallback after 2 consecutive errors
+const ERROR_THRESHOLD = 3; // Only show fallback after 3 consecutive errors
 
 const PoolStandings = () => {
   const [standings, setStandings] = useState<PoolParticipant[]>([]);
@@ -26,7 +26,6 @@ const PoolStandings = () => {
   const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isTournamentActive, setIsTournamentActive] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,25 +41,11 @@ const PoolStandings = () => {
       if (data.length === 0) {
         errorCountRef.current++;
         setError("No data available. Please try again later.");
-        
-        if (errorCountRef.current >= ERROR_THRESHOLD) {
-          setShowFallback(true);
-        }
         return;
-      }
-      
-      if (data.length < 134) {
-        console.warn(`Only received ${data.length} participants, expected 134`);
-        toast({
-          title: "Data inconsistency detected",
-          description: `Expected 134 participants but only received ${data.length}. Refreshing...`,
-          variant: "destructive",
-        });
       }
       
       // Reset error state on success
       errorCountRef.current = 0;
-      setShowFallback(false);
       setStandings(data);
       const timestamp = new Date().toISOString();
       setLastUpdated(timestamp);
@@ -69,17 +54,7 @@ const PoolStandings = () => {
     } catch (err) {
       errorCountRef.current++;
       console.error("Error fetching pool standings:", err);
-      setError("Failed to load pool standings");
-      
-      toast({
-        title: "Error",
-        description: "Failed to load pool standings data. Please try again.",
-        variant: "destructive",
-      });
-      
-      if (errorCountRef.current >= ERROR_THRESHOLD) {
-        setShowFallback(true);
-      }
+      setError("Having trouble connecting to the tournament data");
     } finally {
       setLoading(false);
     }
@@ -99,15 +74,6 @@ const PoolStandings = () => {
       const active = await isTournamentInProgress();
       setIsTournamentActive(active);
       console.log("Tournament active status:", active);
-      
-      // If tournament status changes to active, display a notification
-      if (active) {
-        toast({
-          title: "Tournament In Progress",
-          description: "Live data updates every minute during tournament play.",
-          duration: 5000,
-        });
-      }
     };
     
     checkTournamentStatus();
@@ -120,8 +86,8 @@ const PoolStandings = () => {
     };
   }, [toast]);
 
+  // Initial data loading
   useEffect(() => {
-    // Load fresh data immediately
     loadStandingsData();
     
     return () => {
@@ -147,8 +113,6 @@ const PoolStandings = () => {
       pollingRef.current = setInterval(() => {
         loadStandingsData();
       }, POLLING_INTERVAL);
-    } else {
-      console.log("Tournament not active - polling disabled");
     }
     
     return () => {
@@ -172,18 +136,6 @@ const PoolStandings = () => {
   const totalParticipants = standings.length;
   const filteredCount = filteredStandings.length;
 
-  // If we should show the fallback, render it instead of the normal component
-  if (showFallback) {
-    return (
-      <div className="masters-card">
-        <PoolStandingsFallback 
-          onRetry={handleManualRefresh}
-          message="A tradition unlike any other - we're currently experiencing technical difficulties with the pool standings. Our team at Augusta is working to get the data back online." 
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="masters-card">
       <PoolStandingsHeader 
@@ -195,10 +147,9 @@ const PoolStandings = () => {
       
       <div className="p-4 bg-white">
         {error && (
-          <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertTitle className="text-red-800">Unable to load pool standings</AlertTitle>
-            <AlertDescription className="text-red-700 text-sm">
+          <Alert variant="default" className="mb-4 bg-amber-50 border-amber-200">
+            <AlertTitle className="text-amber-800">Connection Issue</AlertTitle>
+            <AlertDescription className="text-amber-700 text-sm">
               {error}
               <Button 
                 onClick={handleManualRefresh} 
@@ -236,9 +187,8 @@ const PoolStandings = () => {
           <>
             {standings.length === 0 ? (
               <div className="text-center py-8">
-                <AlertTriangle size={24} className="text-amber-500 mx-auto mb-2" />
                 <p className="text-gray-700 font-medium">No pool standings data available</p>
-                <p className="text-gray-500 text-sm mb-4">We couldn't retrieve the current standings</p>
+                <p className="text-gray-500 text-sm mb-4">We're having trouble retrieving the current standings</p>
                 <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
                   <RefreshCcw size={16} className="mr-2" />
                   Refresh Data

@@ -1,7 +1,8 @@
+
 import { GolferScore, PoolParticipant } from "@/types";
 
 /**
- * Calculate a participant's total score based on their best 4 golfer scores
+ * Calculate a participant's total score based on their best 4 golfer scores out of 5
  */
 export const calculateTotalScore = (
   pickScores: Record<string, number>
@@ -59,36 +60,19 @@ export const generateMockGolferScores = (): Record<string, number> => {
 
 /**
  * Get the 4 best-performing golfers from a participant's 5 picks
- * This function now ensures we only ever return exactly 4 golfers (or fewer if less than 4 are available)
  */
 export const getBestFourGolfers = (pickScores: Record<string, number>): string[] => {
-  // Check if we have at least 4 picks
-  if (Object.keys(pickScores).length < 4) {
-    console.warn("Warning: Less than 4 picks available for best four calculation");
-    return Object.keys(pickScores);
+  if (!pickScores || Object.keys(pickScores).length === 0) {
+    return [];
   }
   
-  // If we have exactly 5 picks (normal case), take the best 4 scores
-  if (Object.keys(pickScores).length === 5) {
-    const bestFour = Object.entries(pickScores)
-      .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
-      .slice(0, 4)
-      .map(([name]) => name);
-      
-    console.log("Best four golfers:", bestFour);
-    
-    return bestFour;
-  }
-  
-  // If we have more than 5 picks (unusual case), still only take the best 4
-  const bestFour = Object.entries(pickScores)
+  // Sort golfers by their scores (lowest/best first)
+  const sortedGolfers = Object.entries(pickScores)
     .sort(([, scoreA], [, scoreB]) => scoreA - scoreB)
-    .slice(0, 4)
     .map(([name]) => name);
-    
-  console.log("Best four golfers:", bestFour);
   
-  return bestFour;
+  // Take the best 4 (or fewer if not enough picks)
+  return sortedGolfers.slice(0, 4);
 };
 
 /**
@@ -150,17 +134,18 @@ export const generateMockPoolStandings = (count: number = 134): PoolParticipant[
     
     // Calculate total score from best 4 picks
     const totalScore = calculateTotalScore(pickScores);
+    const bestFourGolfers = getBestFourGolfers(pickScores);
     
     // Add this participant to the pool
     poolParticipants.push({
       position: 0, // Will be calculated after sorting
       name: generateParticipantName(i),
       totalScore: totalScore,
-      totalPoints: totalScore, // For compatibility 
+      totalPoints: -totalScore, // For compatibility (higher is better)
       paid: Math.random() > 0.1, // 90% chance of being paid
       picks,
       pickScores,
-      bestFourTotal: totalScore
+      bestFourGolfers
     });
   }
   
@@ -192,7 +177,7 @@ export const calculatePoolStandings = (
 ): PoolParticipant[] => {
   const poolParticipants: PoolParticipant[] = [];
   
-  // Process each participant's picks - ensure we process ALL participants
+  // Process each participant's picks
   console.log(`Processing ${Object.keys(selectionsData).length} participants from selections data`);
   
   if (Object.keys(selectionsData).length === 0) {
@@ -226,11 +211,11 @@ export const calculatePoolStandings = (
       position: 0, // Will be calculated after sorting
       name: name,
       totalScore: totalScore,
-      totalPoints: totalScore, // For compatibility
+      totalPoints: -totalScore, // For compatibility (higher points is better)
       paid: Math.random() > 0.1, // 90% chance of being paid
       picks: data.picks,
       pickScores: pickScores,
-      bestFourTotal: totalScore
+      bestFourGolfers: bestFourGolfers
     });
   });
   
@@ -253,4 +238,24 @@ export const calculatePoolStandings = (
   });
   
   return poolParticipants.length > 0 ? poolParticipants : generateMockPoolStandings(134);
+};
+
+// Additional utility functions for the scoring/leaderboard
+
+/**
+ * Get color class for golf score display
+ */
+export const getGolfScoreClass = (score: number): string => {
+  if (score < 0) return "text-green-500";
+  if (score > 0) return "text-red-500";
+  return "text-gray-500";
+};
+
+/**
+ * Format golf score with +/- prefix
+ */
+export const formatDisplayScore = (score: number): string => {
+  if (score === 0) return "E";
+  if (score > 0) return `+${score}`;
+  return `${score}`;
 };
