@@ -25,7 +25,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   return (
     <>
       {refreshing && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center pointer-events-none">
           <RefreshCw size={24} className="animate-spin text-masters-green" />
         </div>
       )}
@@ -94,8 +94,8 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                   <td className="px-2 py-3 text-right">{golfer.thru}</td>
                   <td className="px-2 py-3 text-right">
                     {golfer.status !== 'cut' && golfer.status !== 'withdrawn' ? (
-                      <span className="inline-flex items-center font-medium text-[#8B5CF6] bg-[#8B5CF6]/5 px-2 py-0.5 rounded">
-                        <CircleDollarSign size={13} className="mr-1 text-[#8B5CF6]" />
+                      <span className="inline-flex items-center font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">
+                        <CircleDollarSign size={13} className="mr-1 text-indigo-600" />
                         {getMastersPurseAmount(golfer.position)}
                       </span>
                     ) : (

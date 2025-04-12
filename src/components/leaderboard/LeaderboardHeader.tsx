@@ -1,3 +1,4 @@
+
 import React from "react";
 import { RefreshCcw, Calendar, Shield, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -43,7 +44,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
     return (
       <div className="p-3 md:p-4 relative overflow-hidden">
         {/* Masters celebration image as subtle background */}
-        <div className={`absolute inset-0 ${imageOpacity}`}>
+        <div className={`absolute inset-0 ${imageOpacity} pointer-events-none`}>
           <img 
             src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
             alt="" 
@@ -52,7 +53,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
         </div>
         
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-masters-green/95"></div>
+        <div className="absolute inset-0 bg-masters-green/95 pointer-events-none"></div>
         
         <div className="relative z-10 text-white">
           <div className="flex flex-col md:flex-row justify-between gap-2">
@@ -72,7 +73,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                       <span>UPDATING</span>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom">
+                  <TooltipContent side="bottom" className="z-50 bg-white border border-gray-200">
                     <p>Connection being reestablished</p>
                   </TooltipContent>
                 </Tooltip>
@@ -80,7 +81,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             </div>
             <div className="flex items-center">
               <button 
-                className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white"
+                className="bg-white/10 hover:bg-white/20 rounded p-1.5 text-white cursor-pointer"
                 onClick={handleManualRefresh}
                 disabled={refreshing}
               >
@@ -99,7 +100,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   return (
     <div className="p-3 md:p-4 relative overflow-hidden">
       {/* Masters celebration image as subtle background */}
-      <div className={`absolute inset-0 ${imageOpacity}`}>
+      <div className={`absolute inset-0 ${imageOpacity} pointer-events-none`}>
         <img 
           src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
           alt="" 
@@ -108,7 +109,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
       </div>
       
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-masters-green/95"></div>
+      <div className="absolute inset-0 bg-masters-green/95 pointer-events-none"></div>
       
       <div className="relative z-10 text-white">
         <div className="flex flex-col md:flex-row justify-between gap-2 items-start md:items-center">

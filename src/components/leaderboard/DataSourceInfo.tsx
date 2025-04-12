@@ -75,7 +75,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
               <TooltipTrigger>
                 <Info size={14} className="mr-1 text-white/70" />
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent side="bottom" className="z-50 bg-white border border-gray-200">
                 <p className="max-w-xs">{errorMessage}</p>
               </TooltipContent>
             </Tooltip>
