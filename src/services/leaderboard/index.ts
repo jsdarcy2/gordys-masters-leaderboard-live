@@ -1,3 +1,4 @@
+
 import { GolferScore } from "@/types";
 import { API_ENDPOINTS } from "@/services/api";
 import { generateMastersLeaderboard } from "./leaderboardData";
@@ -40,6 +41,12 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
         const totalScore = player.topar === 'E' ? 0 : parseInt(player.topar, 10) || 0;
         const todayScore = player.today === 'E' ? 0 : parseInt(player.today, 10) || 0;
         
+        // Parse round scores
+        const round1Score = player.round1 === 'E' ? 0 : parseInt(player.round1, 10) || undefined;
+        const round2Score = player.round2 === 'E' ? 0 : parseInt(player.round2, 10) || undefined;
+        const round3Score = player.round3 === 'E' ? 0 : parseInt(player.round3, 10) || undefined;
+        const round4Score = player.round4 === 'E' ? 0 : parseInt(player.round4, 10) || undefined;
+        
         // Determine player status
         let playerStatus: "active" | "cut" | "withdrawn" = "active";
         if (player.status) {
@@ -57,7 +64,11 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
           score: totalScore,
           today: todayScore,
           thru: player.thru || player.teetime || 'F',
-          status: playerStatus
+          status: playerStatus,
+          round1: round1Score,
+          round2: round2Score,
+          round3: round3Score,
+          round4: round4Score
         };
       });
     }

@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -10,6 +9,10 @@ export type GolferScore = {
   thru: string | number;
   strokes?: number;
   status?: 'cut' | 'active' | 'withdrawn';
+  round1?: number;  // Thursday scores
+  round2?: number;  // Friday scores
+  round3?: number;  // Saturday scores
+  round4?: number;  // Sunday scores
 }
 
 export interface PoolParticipant {
