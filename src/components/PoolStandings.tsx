@@ -9,6 +9,7 @@ import ParticipantTable from "@/components/pool/ParticipantTable";
 import ShowMoreButton from "@/components/pool/ShowMoreButton";
 import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import SyncStatusBadge from "@/components/pool/SyncStatusBadge";
+import MastersStyleLeaderboard from "@/components/pool/MastersStyleLeaderboard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Info, Ban, FileSpreadsheet } from "lucide-react";
@@ -303,6 +304,13 @@ const PoolStandings = () => {
               </Button>
             </AlertDescription>
           </Alert>
+        )}
+        
+        {!loading && standings.length > 0 && (
+          <MastersStyleLeaderboard 
+            topParticipants={standings.slice(0, 5)} 
+            className="mt-3 mb-6"
+          />
         )}
         
         {!loading && standings.length > 0 && (
