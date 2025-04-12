@@ -42,7 +42,7 @@ const Index = () => {
   );
 };
 
-// Redesigned card component with Tiger Woods celebration and Masters flag
+// Fixed card component with proper click handling throughout
 const Card = ({ 
   icon, 
   title, 
@@ -85,13 +85,8 @@ const Card = ({
   };
 
   return (
-    <div className="relative h-full">
-      <Link 
-        to={href} 
-        className="absolute inset-0 w-full h-full z-10"
-        aria-label={`Navigate to ${title}`}
-      />
-      <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group h-full`}>
+    <div className="relative h-full group">
+      <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full`}>
         {/* Background elements with pointer-events-none */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
@@ -175,6 +170,15 @@ const Card = ({
           <ChevronRight size={18} className="transform transition-transform duration-300 group-hover:translate-x-1" />
         </div>
       </div>
+      
+      {/* Full clickable overlay link */}
+      <Link 
+        to={href} 
+        className="absolute inset-0 w-full h-full z-10"
+        aria-label={`Navigate to ${title}`}
+      >
+        <span className="sr-only">Go to {title}</span>
+      </Link>
     </div>
   );
 };
