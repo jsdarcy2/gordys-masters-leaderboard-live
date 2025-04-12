@@ -20,19 +20,19 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.08]"
+              className="w-full h-full object-cover opacity-[0.06]"
             />
           </div>
           
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.03] bg-masters-green"></div>
-            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
-            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] bg-masters-green"></div>
+            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.02] bg-masters-green"></div>
+            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.03]"></div>
+            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.02] bg-masters-green"></div>
           </div>
           
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-masters-green/10 to-white/70"></div>
           
-          <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
+          <div className="absolute top-3 right-3 opacity-[0.05] pointer-events-none">
             <Flag size={24} className="text-masters-green" />
           </div>
           
@@ -78,19 +78,19 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.08]"
+              className="w-full h-full object-cover opacity-[0.06]"
             />
           </div>
           
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.03] bg-masters-gold"></div>
-            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
-            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] bg-masters-gold"></div>
+            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.02] bg-masters-gold"></div>
+            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.03]"></div>
+            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.02] bg-masters-gold"></div>
           </div>
           
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-masters-gold/30 to-masters-lightgold/20"></div>
           
-          <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
+          <div className="absolute top-3 right-3 opacity-[0.05] pointer-events-none">
             <Flag size={24} className="text-masters-darkgreen" />
           </div>
           
@@ -136,19 +136,19 @@ const Index = () => {
             <img 
               src="/lovable-uploads/da04fdbb-1d5b-4ccc-88b2-56a6c6f96db5.png" 
               alt=""
-              className="w-full h-full object-cover opacity-[0.08]"
+              className="w-full h-full object-cover opacity-[0.06]"
             />
           </div>
           
           <div className="absolute inset-0 w-full h-full pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.03] bg-masters-green"></div>
-            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
-            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] bg-masters-green"></div>
+            <div className="absolute top-0 left-0 w-full h-1/3 opacity-[0.02] bg-masters-green"></div>
+            <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.03]"></div>
+            <div className="absolute top-2/3 left-0 w-full h-1/3 opacity-[0.02] bg-masters-green"></div>
           </div>
           
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-masters-green/10 to-white/70"></div>
           
-          <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
+          <div className="absolute top-3 right-3 opacity-[0.05] pointer-events-none">
             <Flag size={24} className="text-masters-green" />
           </div>
           

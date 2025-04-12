@@ -107,7 +107,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
     return (
       <div className="p-3 md:p-4 relative overflow-hidden">
         {/* Masters celebration image as subtle background */}
-        <div className="absolute inset-0 opacity-[0.07]">
+        <div className="absolute inset-0 opacity-[0.05]">
           <img 
             src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
             alt="" 
@@ -177,7 +177,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   return (
     <div className="p-3 md:p-4 relative overflow-hidden">
       {/* Masters celebration image as subtle background */}
-      <div className="absolute inset-0 opacity-[0.07]">
+      <div className="absolute inset-0 opacity-[0.05]">
         <img 
           src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
           alt="" 

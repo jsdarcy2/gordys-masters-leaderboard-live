@@ -10,17 +10,17 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-masters-cream bg-opacity-70">
       {/* Augusta-inspired subtle background pattern with hints of floral texture - more subtle now */}
-      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.012] pointer-events-none -z-10"></div>
+      <div className="fixed inset-0 bg-[url('/lovable-uploads/7fedc782-7255-440b-827a-d91d5853b279.png')] bg-cover bg-center opacity-[0.008] pointer-events-none -z-10"></div>
       
       {/* Extremely subtle floral accents - almost imperceptible but add depth */}
       <div className="fixed inset-0 pointer-events-none -z-5">
-        <div className="absolute top-0 right-0 w-1/4 h-1/4 opacity-[0.01]">
+        <div className="absolute top-0 right-0 w-1/4 h-1/4 opacity-[0.007]">
           <svg viewBox="0 0 100 100" className="w-full h-full text-pink-200">
             {/* Abstracted azalea shape */}
             <path d="M50,20 Q65,5 80,20 Q95,35 80,50 Q65,65 50,50 Q35,65 20,50 Q5,35 20,20 Q35,5 50,20" fill="currentColor" />
           </svg>
         </div>
-        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 opacity-[0.01]">
+        <div className="absolute bottom-0 left-0 w-1/4 h-1/4 opacity-[0.007]">
           <svg viewBox="0 0 100 100" className="w-full h-full text-yellow-200">
             {/* Abstracted golden bell shape */}
             <path d="M40,80 Q50,60 60,80 L65,30 Q50,15 35,30 L40,80" fill="currentColor" />
@@ -36,7 +36,7 @@ const Layout = ({ children }: LayoutProps) => {
       
       <footer className="bg-gradient-to-r from-masters-darkgreen via-masters-green to-masters-darkgreen text-white py-6 md:py-8 mt-12 border-t-4 border-masters-gold/50 relative overflow-hidden">
         {/* Subtle footer bridge image */}
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-08">
           <img 
             src="/lovable-uploads/cc474ace-bcd8-4bff-95e2-06fc903d211a.png" 
             alt="Augusta National Bridge" 
@@ -48,7 +48,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="absolute inset-0 bg-gradient-to-r from-masters-dark via-masters-green to-masters-dark opacity-85"></div>
         
         {/* Extremely subtle floral accent patterns */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
           <div className="absolute bottom-0 right-0 w-1/3 h-1/3">
             <svg viewBox="0 0 100 100" className="w-full h-full text-white">
               {/* Abstract magnolia pattern */}
