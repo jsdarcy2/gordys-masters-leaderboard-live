@@ -45,7 +45,7 @@ const Index = () => {
   );
 };
 
-// Fixed Card component with cursor and interactive behaviors
+// Card component with fixed overlay z-index and pointer events
 const Card = ({ 
   icon, 
   title, 
@@ -119,27 +119,30 @@ const Card = ({
   return (
     <Link 
       to={href} 
-      className="block h-full cursor-pointer no-underline group"
-      aria-label={`Navigate to ${title}`}
+      className="block h-full no-underline cursor-pointer z-10 relative group"
     >
-      <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full`}>
-        {/* Background elements */}
+      <div 
+        className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full z-0`}
+      >
+        {/* All overlays with absolute positioning and pointer-events-none */}
         {backgroundImage && (
-          <div className="absolute inset-0 pointer-events-none">
-            <img 
-              src={backgroundImage} 
-              alt=""
-              className="w-full h-full object-cover opacity-[0.08]"
-            />
+          <>
+            <div className="absolute inset-0 -z-10 pointer-events-none">
+              <img 
+                src={backgroundImage} 
+                alt=""
+                className="w-full h-full object-cover opacity-[0.08]"
+              />
+            </div>
             
-            <div className="absolute inset-0 w-full h-full pointer-events-none">
+            <div className="absolute inset-0 w-full h-full -z-10 pointer-events-none">
               <div className={`absolute top-0 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
               <div className="absolute top-1/3 left-0 w-full h-1/3 bg-white opacity-[0.04]"></div>
               <div className={`absolute top-2/3 left-0 w-full h-1/3 opacity-[0.03] ${getStripeColor()}`}></div>
             </div>
             
-            <div className={`absolute inset-0 pointer-events-none ${getGradientOverlay()}`}></div>
-          </div>
+            <div className={`absolute inset-0 -z-10 pointer-events-none ${getGradientOverlay()}`}></div>
+          </>
         )}
         
         <div className="absolute top-3 right-3 opacity-[0.06] pointer-events-none">
@@ -149,7 +152,8 @@ const Card = ({
           />
         </div>
         
-        <div className="flex items-center mb-3 relative">
+        {/* Content with proper z-index to ensure clickability */}
+        <div className="flex items-center mb-3 relative z-10">
           <div className={`p-2.5 rounded-full ${getIconColors()}`}>
             {icon}
           </div>
@@ -161,10 +165,10 @@ const Card = ({
             {title}
           </h3>
         </div>
-        <p className="text-gray-700 mb-4 font-medium relative">
+        <p className="text-gray-700 mb-4 font-medium relative z-10">
           {subtitle}
         </p>
-        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative`}>
+        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative z-10`}>
           <span className="font-serif">View details</span>
           <ChevronRight 
             size={18} 
