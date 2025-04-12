@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import Leaderboard from "@/components/Leaderboard";
 import { Separator } from "@/components/ui/separator";
-import { BarChart3, GolfBall, Tv } from "lucide-react";
+import { BarChart3, Golf, Tv } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTournamentData } from "@/hooks/use-tournament-data";
 
@@ -12,7 +11,6 @@ const LeaderboardPage = () => {
   const { dataHealth, consecutiveFailures } = useTournamentData();
   const [isCriticalOutage, setIsCriticalOutage] = useState(false);
   
-  // Monitor for critical outages to update page presentation
   useEffect(() => {
     if (
       (consecutiveFailures && consecutiveFailures >= 5) || 
@@ -24,11 +22,9 @@ const LeaderboardPage = () => {
     }
   }, [dataHealth, consecutiveFailures]);
   
-  // Log component mount for debugging
   useEffect(() => {
     console.log("Leaderboard page mounted");
     
-    // Set page title based on system status
     if (isCriticalOutage) {
       document.title = "Live Coverage - The Masters Tournament";
     } else {
@@ -36,7 +32,6 @@ const LeaderboardPage = () => {
     }
     
     return () => {
-      // Reset title when unmounting
       document.title = "Gordy's Masters Pool";
     };
   }, [isCriticalOutage]);
