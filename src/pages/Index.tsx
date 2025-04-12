@@ -3,7 +3,7 @@ import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
-import { Flag, Trophy, Clock, Flower } from "lucide-react";
+import { Flag, Trophy, Clock } from "lucide-react";
 
 const Index = () => {
   return (

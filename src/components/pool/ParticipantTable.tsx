@@ -93,14 +93,10 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                               <TooltipTrigger asChild>
                                 <button 
                                   onClick={() => openVenmo(participant.name)}
-                                  className="text-blue-500 hover:text-blue-600 transition-colors p-0.5 rounded-full hover:bg-blue-50"
+                                  className="text-blue-500 hover:text-blue-600 transition-colors px-1 py-0.5 rounded-full hover:bg-blue-50 text-xs"
                                   aria-label="Pay via Venmo"
                                 >
-                                  <div className="flex items-center justify-center w-4 h-4">
-                                    <svg viewBox="0 0 24 24" className="w-full h-full fill-current" aria-hidden="true">
-                                      <path d="M3.7,1.2C2.9,1.5,2.1,2.1,1.6,2.8C1.1,3.6,0.9,4.5,0.9,5.4c0,1.3,0.6,3.3,1.6,5.4c1.1,2.1,2.4,4.2,3.6,6.1 c0.8,1.1,1.4,1.9,1.9,2.4c0.5,0.5,0.9,0.8,1.1,0.8c0.2,0,0.6-0.3,1.1-0.8s1.2-1.3,1.9-2.4c1.2-1.9,2.5-4,3.6-6.1 c1.1-2.1,1.6-4.1,1.6-5.4c0-0.9-0.2-1.8-0.7-2.6c-0.5-0.8-1.2-1.4-2.1-1.7c-0.9-0.3-1.8-0.4-2.8-0.1c-1,0.3-1.9,0.9-2.6,1.8 C9,2.2,8.5,1.8,7.8,1.4C7.2,1.1,6.4,0.9,5.7,1C5,1,4.3,1,3.7,1.2z" />
-                                    </svg>
-                                  </div>
+                                  Pay
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent side="right" className="text-xs">

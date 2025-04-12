@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -6,7 +5,6 @@ import { Check, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Updated payment data based on the provided information
 const paymentData = [
   { name: "Kyle Flippen", paid: true },
   { name: "Jim Jones", paid: true },
@@ -147,7 +145,6 @@ const PaymentStatus = () => {
   const [participants, setParticipants] = useState(paymentData);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Simulate loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
@@ -163,13 +160,11 @@ const PaymentStatus = () => {
   const paidCount = participants.filter(p => p.paid).length;
   const unpaidCount = participants.filter(p => !p.paid).length;
   
-  // Venmo payment URL
   const openVenmo = (name: string) => {
-    const venmoUsername = "GordysPool"; // Replace with actual Venmo username
+    const venmoUsername = "GordysPool";
     const paymentNote = `Masters Pool 2024 - ${name}`;
-    const amount = "50"; // Replace with actual amount
+    const amount = "50";
     
-    // Open Venmo with prefilled information
     window.open(`https://venmo.com/${venmoUsername}?txn=pay&note=${encodeURIComponent(paymentNote)}&amount=${amount}`, '_blank');
   };
   
@@ -232,14 +227,10 @@ const PaymentStatus = () => {
                               <TooltipTrigger asChild>
                                 <button
                                   onClick={() => openVenmo(participant.name)}
-                                  className="text-blue-500 hover:text-blue-600"
+                                  className="text-blue-500 hover:text-blue-600 px-1.5 py-0.5 rounded-full hover:bg-blue-50 transition-colors"
                                   aria-label={`Pay via Venmo for ${participant.name}`}
                                 >
-                                  <div className="flex items-center justify-center w-4 h-4">
-                                    <svg viewBox="0 0 24 24" className="w-full h-full fill-current" aria-hidden="true">
-                                      <path d="M19.8 5.1c.6 1 .9 2.1.9 3.2 0 5.5-4.7 12.2-8.6 17.7-4-5.5-8.6-12.1-8.6-17.7 0-1.2.3-2.3.9-3.2 1-1.6 2.7-2.6 4.6-2.6 1.2 0 2.3.4 3.2 1.1.9.7 1.5 1.7 1.8 2.8h.2c.3-1.1 1-2.1 1.8-2.8.9-.7 2-1.1 3.2-1.1 1.9 0 3.6 1 4.6 2.6z" />
-                                    </svg>
-                                  </div>
+                                  <span className="text-xs font-medium">Pay</span>
                                 </button>
                               </TooltipTrigger>
                               <TooltipContent>
