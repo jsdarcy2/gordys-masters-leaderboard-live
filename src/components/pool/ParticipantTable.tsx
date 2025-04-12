@@ -25,6 +25,32 @@ const getEarningsForPosition = (position: number, totalParticipants: number): st
   return "";
 };
 
+// List of participants who have already paid
+const PAID_PARTICIPANTS = new Set([
+  "Kyle Flippen", "Jim Jones", "Charlotte Ramalingam", "Louis Baker", "Chris Crawford", 
+  "Ava Rose Darcy", "Mike Baker", "Chuck Corbett Sr", "Jay Despard", "Charles Elder", 
+  "J.J. Furst", "Grayson Ginkel", "David Hardt", "Sargent Johnson, Jr.", "Jamie Lockhart", 
+  "Johnny McWhite", "James Petrikas Sr.", "Phil Present Jr.", "John Saunders", "Cora Stofer", 
+  "Ford Stofer", "Sylas Stofer", "Sarah Sturgis", "Nate Carlson", "Brian Ginkel", 
+  "Peter Kepic Sr.", "Owen Kepic", "Peggy McClintock", "Roth Sanner", "Stuie Snyder", 
+  "Gordon Stofer III", "Avery Sturgis", "Scott Tande", "Elia Ayaz", "Ted Beckman", 
+  "James Carlson", "Hadley Carlson", "Ed Corbett", "Mik Gusenius", "Andy Gustafson", 
+  "Chris Kelley", "Max Kepic", "Dan Lenmark", "Elle McClintock", "Rich McClintock", 
+  "Charles Meech Jr", "Chad Murphy", "Nash Nibbe", "Julie Nibbe", "James Petrikas Jr.", 
+  "Davey Phelps", "Phil Present III", "Matt Rogers", "Jackson Saunders", "Ryan Schmitt", 
+  "Tyler Smith", "Steve Sorenson", "Debbie Stofer", "Gordon Stofer Jr.", "Addie Stofer", 
+  "Chris Willette", "Peter Bassett", "John Gustafson", "Brack Herfurth", "Peter Kepic Jr.", 
+  "Greg Kevane", "Rory Kevane", "Pete Kostroski", "Rollie Logan", "Bo Massopust", 
+  "Knox Nibbe", "Jay Perlmutter", "Donny Schmitt", "Hayden Simmons", "Tommy Simmons", 
+  "Eileen Stofer", "Jon Sturgis", "Hilary Beckman", "Lily Gustafson", "Darby Herfurth", 
+  "Henry Herfurth", "Rachel Herfurth", "Jenny McClintock", "Kevin McClintock", "Jon Moseley", 
+  "Les Perry", "Jack Simmons", "Jimmy Stofer", "Teddy Stofer", "Ben Applebaum", "Ross Baker", 
+  "Oliver Beckman", "Peter Beugg", "Quinn Carlson", "Tilly Duff", "Gretchen Duff", "Eric Fox", 
+  "Jess Herfurth", "Decker Herfurth", "Sargent Johnson", "Sarah Kepic", "Andy Koch", 
+  "Chad Kollar", "Jack Lenmark", "C.J. Nibbe", "Ravi Ramalingam", "Victoria Simmons", 
+  "Robby Stofer", "Jess Troyak", "Annie Carlson", "Ethan Sturgis"
+]);
+
 const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
   // Find ties in the displayStandings
   const tiedPositions: Record<number, number> = {};
@@ -87,7 +113,10 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
             displayStandings.map((participant, index) => {
               // Get the best four golfers for highlighting
               const bestFourGolfers = participant.bestFourGolfers || [];
-              const isPaid = participant.paid !== false || justPaid.has(participant.name);
+              // Check if the participant has paid, either in their data, the paid list, or just paid this session
+              const isPaid = participant.paid !== false || 
+                            PAID_PARTICIPANTS.has(participant.name) || 
+                            justPaid.has(participant.name);
               const missedCut = participant.totalScore > 200;
               const isTied = tiedPositions[participant.position] > 1;
               const showEarnings = participant.position <= 3;
