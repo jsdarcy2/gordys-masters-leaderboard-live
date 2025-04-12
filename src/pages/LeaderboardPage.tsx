@@ -12,7 +12,13 @@ const LeaderboardPage = () => {
   const { dataHealth, consecutiveFailures } = useTournamentData();
   const [isCriticalOutage, setIsCriticalOutage] = useState(false);
   
+  // Ensure the outage state is set correctly based on API failures
   useEffect(() => {
+    // Force isCriticalOutage to true for immediate testing - remove this in production
+    setIsCriticalOutage(true);
+    
+    // Regular logic (commented out for testing)
+    /*
     if (
       (consecutiveFailures && consecutiveFailures >= 5) || 
       (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3)
@@ -21,10 +27,11 @@ const LeaderboardPage = () => {
     } else {
       setIsCriticalOutage(false);
     }
+    */
   }, [dataHealth, consecutiveFailures]);
   
   useEffect(() => {
-    console.log("Leaderboard page mounted");
+    console.log("Leaderboard page mounted, critical outage:", isCriticalOutage);
     
     if (isCriticalOutage) {
       document.title = "Live Coverage - The Masters Tournament";
@@ -62,7 +69,7 @@ const LeaderboardPage = () => {
         <Separator className="my-3 md:my-4 bg-masters-green/10" />
       </div>
       
-      <Leaderboard />
+      <Leaderboard forceCriticalOutage={isCriticalOutage} />
     </Layout>
   );
 };

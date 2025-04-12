@@ -15,7 +15,11 @@ import EmergencyFallback from "./leaderboard/EmergencyFallback";
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 const CRITICAL_OUTAGE_THRESHOLD = 5;
 
-const Leaderboard = () => {
+interface LeaderboardProps {
+  forceCriticalOutage?: boolean;
+}
+
+const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
   const { 
     leaderboard, 
     loading, 
@@ -39,6 +43,24 @@ const Leaderboard = () => {
   const previousLeaderboard = useRef(leaderboard);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (forceCriticalOutage) {
+      console.log("Forcing critical outage mode from prop");
+      setShowEmergencyFallback(true);
+      return;
+    }
+
+    if (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) {
+      console.log("Setting emergency fallback due to consecutive failures:", consecutiveFailures);
+      setShowEmergencyFallback(true);
+    } else if (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3) {
+      console.log("Setting emergency fallback due to offline status + failures:", consecutiveFailures);
+      setShowEmergencyFallback(true);
+    } else if (dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
+      setShowEmergencyFallback(false);
+    }
+  }, [consecutiveFailures, dataHealth, dataSource, forceCriticalOutage]);
 
   useEffect(() => {
     const loadTournamentInfo = async () => {
@@ -117,16 +139,6 @@ const Leaderboard = () => {
     }
   }, [dataSource, dataYear, lastUpdated]);
 
-  useEffect(() => {
-    if (consecutiveFailures && consecutiveFailures >= CRITICAL_OUTAGE_THRESHOLD) {
-      setShowEmergencyFallback(true);
-    } else if (dataHealth?.status === "offline" && consecutiveFailures && consecutiveFailures >= 3) {
-      setShowEmergencyFallback(true);
-    } else if (dataSource && dataSource !== "mock-data" && dataSource !== "no-data") {
-      setShowEmergencyFallback(false);
-    }
-  }, [consecutiveFailures, dataHealth, dataSource]);
-
   const handleManualRefresh = async () => {
     console.log("Manual refresh requested");
     setRefreshing(true);
@@ -180,6 +192,8 @@ const Leaderboard = () => {
     return `${start.toLocaleDateString('en-US', options)} - ${end.toLocaleDateString('en-US', options)}`;
   };
 
+  console.log("Render Leaderboard, showEmergencyFallback:", showEmergencyFallback);
+
   if (showEmergencyFallback) {
     return (
       <div className="masters-card">
@@ -199,7 +213,10 @@ const Leaderboard = () => {
         />
         
         <div className="p-4 bg-white">
-          <EmergencyFallback onRetry={handleManualRefresh} />
+          <EmergencyFallback 
+            onRetry={handleManualRefresh} 
+            message="We're experiencing technical difficulties with our live scoring. Enjoy the live broadcast while our team resolves the issue."
+          />
         </div>
       </div>
     );

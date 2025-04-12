@@ -14,6 +14,8 @@ const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
   message = "We are having technical difficulties and are eating a pimento sandwich drinking a frosty cold beer...we will be back online shortly",
   onRetry
 }) => {
+  console.log("Rendering EmergencyFallback component with message:", message);
+  
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden border border-masters-green/20">
       <div className="bg-masters-green p-4 text-white flex items-center justify-between">
