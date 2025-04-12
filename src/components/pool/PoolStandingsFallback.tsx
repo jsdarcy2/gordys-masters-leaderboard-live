@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Trophy, Flag, GolfBall } from "lucide-react";
+import { RefreshCw, Trophy, Flag, GolfClub } from "lucide-react";
 import Image from "@/components/ui/image";
 
 interface PoolStandingsFallbackProps {
@@ -61,7 +61,7 @@ const PoolStandingsFallback: React.FC<PoolStandingsFallbackProps> = ({
                   Data recovery in progress...
                 </div>
                 <div className="flex items-center">
-                  <GolfBall size={12} className="mr-1 text-masters-yellow" />
+                  <GolfClub size={12} className="mr-1 text-masters-yellow" />
                   Gordy's Masters Pool
                 </div>
               </div>

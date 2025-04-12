@@ -4,7 +4,7 @@ import Layout from "@/components/Layout";
 import PlayerSelections from "@/components/PlayerSelections";
 import PaymentStatus from "@/components/PaymentStatus";
 import TeamSelectionsTable from "@/components/pool/TeamSelectionsTable";
-import { fetchPlayerSelections } from "@/services/api";
+import { fetchPoolStandings } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -24,9 +24,9 @@ const SelectionsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const selectionsData = await fetchPlayerSelections();
-        const count = Object.keys(selectionsData).length;
-        console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
+        const standingsData = await fetchPoolStandings();
+        const count = standingsData.length;
+        console.log(`Loaded ${count} participants with names:`, standingsData.map(p => p.name));
         setParticipantCount(count);
         
         // Reset error count on success
@@ -83,9 +83,9 @@ const SelectionsPage = () => {
     
     const loadParticipantCount = async () => {
       try {
-        const selectionsData = await fetchPlayerSelections();
-        const count = Object.keys(selectionsData).length;
-        console.log(`Loaded ${count} participants with names:`, Object.keys(selectionsData));
+        const standingsData = await fetchPoolStandings();
+        const count = standingsData.length;
+        console.log(`Loaded ${count} participants with names:`, standingsData.map(p => p.name));
         setParticipantCount(count);
         
         // Reset error count on success

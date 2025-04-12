@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { fetchPlayerSelections, fetchPoolStandings } from "@/services/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,13 +32,29 @@ const PlayerSelections = () => {
         setLoading(true);
         
         // Load both selections and pool standings data
-        const [selectionsData, standingsData] = await Promise.all([
-          fetchPlayerSelections(),
+        const [standingsData] = await Promise.all([
           fetchPoolStandings()
         ]);
         
-        console.log(`Loaded ${Object.keys(selectionsData).length} team selections`);
-        setSelections(selectionsData);
+        // Transform the pool standings data to match the selections format
+        const transformedSelections: {[participant: string]: TeamSelection} = {};
+        
+        standingsData.forEach(participant => {
+          if (participant.name && participant.picks) {
+            const roundScores = participant.picks.map(pick => 
+              participant.pickScores?.[pick] || 0
+            );
+            
+            transformedSelections[participant.name] = {
+              picks: participant.picks || [],
+              roundScores: roundScores,
+              tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+            };
+          }
+        });
+        
+        console.log(`Loaded ${Object.keys(transformedSelections).length} team selections`);
+        setSelections(transformedSelections);
         setPoolStandings(standingsData);
         setError(null);
       } catch (err) {

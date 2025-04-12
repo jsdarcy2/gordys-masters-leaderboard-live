@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -41,7 +42,8 @@ export type DataSource =
   | 'mock-data' 
   | 'no-data' 
   | 'masters-scraper'
-  | 'pgatour-api';
+  | 'pgatour-api'
+  | 'google-sheets';  // Added google-sheets as a valid data source
 
 export type TournamentData = {
   lastUpdated: string;

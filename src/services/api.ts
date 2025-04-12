@@ -157,7 +157,7 @@ export const getBestDataSource = (): DataSource => {
     return 'cached-data'; // Use cached data if Google Sheets is offline
   }
   
-  return 'google-sheets';
+  return 'google-sheets'; // Now this is a valid DataSource
 };
 
 // Get health status for all monitored endpoints

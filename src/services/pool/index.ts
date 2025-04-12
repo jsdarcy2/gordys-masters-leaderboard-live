@@ -65,39 +65,57 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
 
 /**
  * Fetch participant selections
+ * @param participantName Optional name of participant to fetch selections for
  */
-export async function fetchPlayerSelections(participantName: string) {
+export async function fetchPlayerSelections(participantName?: string) {
   try {
-    // First try to get data from the cache
-    if (poolStandingsCache && poolStandingsCache.length > 0) {
-      const participant = poolStandingsCache.find(p => 
-        p.name.toLowerCase() === participantName.toLowerCase()
-      );
+    // Get all participants first
+    const standings = await fetchPoolStandings();
+    
+    // If no participant name provided, return all selections
+    if (!participantName) {
+      const allSelections: Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }> = {};
       
-      if (participant) {
-        return {
-          picks: participant.picks || [],
-          scores: participant.pickScores || {}
-        };
-      }
+      standings.forEach(participant => {
+        if (participant.name) {
+          // Convert pick scores to an array in the same order as picks
+          const roundScores = participant.picks?.map(pick => 
+            participant.pickScores?.[pick] || 0
+          ) || [];
+          
+          allSelections[participant.name] = {
+            picks: participant.picks || [],
+            roundScores,
+            tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+          };
+        }
+      });
+      
+      return allSelections;
     }
     
-    // If not in cache, fetch fresh data
-    const standings = await fetchPoolStandings();
+    // If participant name is provided, find that specific participant
     const participant = standings.find(p => 
       p.name.toLowerCase() === participantName.toLowerCase()
     );
     
     if (participant) {
+      // Convert pick scores to an array in the same order as picks
+      const roundScores = participant.picks?.map(pick => 
+        participant.pickScores?.[pick] || 0
+      ) || [];
+      
       return {
         picks: participant.picks || [],
-        scores: participant.pickScores || {}
+        scores: participant.pickScores || {},
+        roundScores,
+        tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
       };
     }
     
     throw new Error(`Player not found: ${participantName}`);
   } catch (error) {
-    console.error(`Error fetching selections for ${participantName}:`, error);
+    console.error(`Error fetching selections${participantName ? ` for ${participantName}` : ''}:`, error);
     throw error;
   }
 }
