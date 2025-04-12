@@ -34,8 +34,8 @@ export interface PoolParticipant {
 
 export type TournamentRound = 1 | 2 | 3 | 4;
 
-// Simplified DataSource type to only include Masters scores API
-export type DataSource = 'masters-scores-api' | 'cached-data' | 'no-data';
+// Updated DataSource type to include mock-data
+export type DataSource = 'masters-scores-api' | 'cached-data' | 'no-data' | 'mock-data';
 
 export type TournamentData = {
   lastUpdated: string;

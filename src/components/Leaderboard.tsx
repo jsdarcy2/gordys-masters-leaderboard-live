@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,6 +12,7 @@ import LoadingState from "./leaderboard/LoadingState";
 import LeaderboardHeader from "./leaderboard/LeaderboardHeader";
 import LeaderboardTable from "./leaderboard/LeaderboardTable";
 import EmergencyFallback from "./leaderboard/EmergencyFallback";
+import { DataSource } from "@/types";
 
 const TOURNAMENT_YEAR = import.meta.env.VITE_TOURNAMENT_YEAR || new Date().getFullYear().toString();
 
@@ -137,7 +139,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
       setDataSourceError(errorMessage);
     } else if (dataSource === 'no-data') {
       setDataSourceError("Data refresh in progress. Please wait a moment.");
-    } else if (dataSource === 'mock-data') {
+    } else if (dataSource === 'mock-data' as DataSource) {
       setDataSourceError("Estimated scores currently displayed. Live data refresh in progress.");
     } else {
       setDataSourceError(undefined);
@@ -293,7 +295,7 @@ const Leaderboard = ({ forceCriticalOutage = false }: LeaderboardProps) => {
           </Alert>
         )}
         
-        {dataSource === 'mock-data' && (
+        {dataSource === ('mock-data' as DataSource) && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertTitle className="text-blue-800">Estimated Standings</AlertTitle>
