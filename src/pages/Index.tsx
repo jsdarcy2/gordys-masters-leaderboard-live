@@ -3,6 +3,7 @@ import Layout from "@/components/Layout";
 import { Link } from "react-router-dom";
 import PoolStandings from "@/components/PoolStandings";
 import { Flag, Trophy, Clock, ChevronRight } from "lucide-react";
+import Image from "@/components/ui/image";
 
 const Index = () => {
   return (
@@ -13,6 +14,7 @@ const Index = () => {
           title="Tournament" 
           subtitle="Follow the live leaderboard" 
           href="/leaderboard"
+          backgroundImage="/lovable-uploads/9ecfd09f-c722-4155-a926-4b986d130495.png"
           variant="green" />
               
         <Card 
@@ -20,6 +22,7 @@ const Index = () => {
           title="Pool Standings" 
           subtitle="See who's winning the pool" 
           href="/selections"
+          backgroundImage="/lovable-uploads/166641be-8071-4d12-8c62-62e4cc60c622.png"
           highlight={true}
           variant="gold" />
               
@@ -28,6 +31,7 @@ const Index = () => {
           title="Past Champions" 
           subtitle="Celebrating 20 years" 
           href="/archive"
+          backgroundImage="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png"
           variant="green" />
       </div>
       
@@ -38,12 +42,13 @@ const Index = () => {
   );
 };
 
-// Redesigned card component for better readability and visual appeal
+// Redesigned card component with subtle Masters imagery backgrounds
 const Card = ({ 
   icon, 
   title, 
   subtitle, 
   href,
+  backgroundImage,
   highlight = false,
   variant = "green"
 }: { 
@@ -51,6 +56,7 @@ const Card = ({
   title: string; 
   subtitle: string; 
   href: string;
+  backgroundImage?: string;
   highlight?: boolean;
   variant?: "green" | "gold";
 }) => {
@@ -81,6 +87,25 @@ const Card = ({
   return (
     <Link to={href} className="block">
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden group`}>
+        {/* Subtle Masters background image */}
+        {backgroundImage && (
+          <div className="absolute inset-0 pointer-events-none">
+            <Image 
+              src={backgroundImage} 
+              alt=""
+              className="w-full h-full object-cover opacity-[0.04]"
+            />
+            {/* Gradient overlay to ensure text readability */}
+            <div className={`absolute inset-0 ${
+              highlight 
+                ? "bg-gradient-to-br from-masters-gold/30 to-masters-lightgold/20" 
+                : variant === "gold" 
+                  ? "bg-gradient-to-br from-masters-gold/10 to-white/70" 
+                  : "bg-gradient-to-br from-masters-green/10 to-white/70"
+            }`}></div>
+          </div>
+        )}
+        
         {/* Subtle decorative accent */}
         <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04] pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -90,7 +115,7 @@ const Card = ({
           </svg>
         </div>
         
-        <div className="flex items-center mb-3">
+        <div className="flex items-center mb-3 relative z-10">
           <div className={`p-2.5 rounded-full ${
             highlight 
               ? "bg-masters-green/10" 
@@ -110,10 +135,10 @@ const Card = ({
             {title}
           </h3>
         </div>
-        <p className="text-gray-700 mb-4 font-medium">
+        <p className="text-gray-700 mb-4 font-medium relative z-10">
           {subtitle}
         </p>
-        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium`}>
+        <div className={`mt-3 flex items-center justify-between ${getLinkClasses()} text-sm font-medium relative z-10`}>
           <span className="font-serif">View details</span>
           <ChevronRight size={18} className="transform transition-transform duration-300 group-hover:translate-x-1" />
         </div>
