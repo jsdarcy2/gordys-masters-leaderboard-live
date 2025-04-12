@@ -1,7 +1,7 @@
 import React from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
-import { Check, Ban, CircleDollarSign } from "lucide-react";
+import { Check, Ban, CircleDollarSign, Info } from "lucide-react";
 import { 
   Tooltip,
   TooltipContent,
@@ -92,11 +92,11 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="ml-1.5 inline-flex items-center justify-center bg-masters-gold/90 text-white text-xs rounded-full w-5 h-5">
-                                <CircleDollarSign size={10} />
+                              <span className="ml-1.5 inline-flex items-center justify-center bg-masters-gold/90 text-white text-xs rounded-full w-5 h-5 cursor-pointer hover:bg-masters-gold hover:shadow-sm hover:scale-110 transition-all duration-200 group">
+                                <CircleDollarSign size={10} className="group-hover:animate-pulse" />
                               </span>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-masters-gold text-white border-masters-gold">
+                            <TooltipContent className="bg-masters-gold text-white border-masters-gold shadow-md font-medium">
                               <p>
                                 {isTied
                                   ? `${earningsAmount} (tied, may be split)`
