@@ -92,15 +92,16 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="ml-1.5 inline-flex items-center justify-center bg-masters-gold/90 text-white text-xs rounded-full w-5 h-5 cursor-pointer hover:bg-masters-gold hover:shadow-sm hover:scale-110 transition-all duration-200 group">
-                                <CircleDollarSign size={10} className="group-hover:animate-pulse" />
+                              <span className="ml-1.5 inline-flex items-center justify-center text-masters-gold bg-transparent text-xs cursor-help border-b border-dotted border-masters-gold">
+                                <CircleDollarSign size={14} className="mr-0.5" />
+                                <span className="text-xs">{earningsAmount}</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="bg-masters-gold text-white border-masters-gold shadow-md font-medium">
                               <p>
                                 {isTied
-                                  ? `${earningsAmount} (tied, may be split)`
-                                  : `${earningsAmount} prize money`}
+                                  ? `Prize money: ${earningsAmount} (tied, may be split)`
+                                  : `Prize money: ${earningsAmount}`}
                               </p>
                             </TooltipContent>
                           </Tooltip>
