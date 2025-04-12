@@ -1,123 +1,164 @@
 
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavTab } from "@/types";
+import { useLocation, Link } from "react-router-dom";
+import { Menu, X, Star, Tv, Trophy, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { CircleDot, Menu } from "lucide-react";
-import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { Separator } from "@/components/ui/separator";
+import Image from "@/components/ui/image";
+
+const NAV_TABS: NavTab[] = [
+  { id: "standings", label: "Pool Standings", href: "/" },
+  { id: "leaderboard", label: "Masters Leaderboard", href: "/leaderboard" },
+  { id: "watch-live", label: "Watch Live", href: "/watch-live", icon: <Tv size={14} className="text-masters-yellow" /> },
+  { id: "selections", label: "Player Selections", href: "/selections" },
+  { id: "archive", label: "Green Robe Winners", href: "/archive" },
+  { id: "masters-champions", label: "Masters Champions", href: "/masters-champions" },
+  { id: "rules", label: "Pool Rules", href: "/rules" },
+];
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
-  // Define the pages array
-  const pages = [
-    { name: "Home", path: "/" },
-    { name: "Leaderboard", path: "/leaderboard" },
-    { name: "Selections", path: "/selections" },
-    { name: "Pool Standings", path: "/entry" },
-    { 
-      name: "Social", 
-      path: "/social",
-      isNew: true // Mark this as new
-    },
-    { name: "Archives", path: "/archive" },
-    { name: "Rules", path: "/rules" },
-  ];
-
+  const isMobile = useIsMobile();
+  
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
   return (
-    <header className="bg-masters-darkgreen text-white py-3 shadow-md z-20 relative">
-      <div className="container mx-auto px-3 sm:px-4 flex items-center justify-between max-w-7xl">
-        {/* Logo Section */}
-        <div className="text-lg md:text-xl font-bold font-serif">
-          <Link to="/" className="flex items-center">
-            <img
-              src="/lovable-uploads/49c70a9f-9961-4539-a99f-99a33a89875c.png"
-              alt="Gordy's Masters Pool Logo"
-              className="h-8 md:h-9 mr-2"
-            />
-            Gordy's Masters Pool 2025
-          </Link>
-        </div>
-
-        {/* Navigation Section */}
-        <nav className="hidden md:flex space-x-6">
-          {pages.map((page) => (
-            <Link
-              key={page.name}
-              to={page.path}
-              className={`hover:text-masters-yellow transition-colors duration-150 font-medium relative ${
-                location.pathname === page.path
-                  ? "text-masters-yellow underline underline-offset-4"
-                  : ""
-              }`}
-            >
-              {page.name}
-              {page.isNew && (
-                <CircleDot size={8} className="text-masters-yellow absolute -top-1 right-[-10px]" />
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <button
-                onClick={toggleMenu}
-                className={navigationMenuTriggerStyle()}
-                aria-label="Open menu"
+    <header className={`sticky top-0 z-50 transition-all duration-500 ${
+      scrolled 
+        ? "bg-masters-dark/95 shadow-md" 
+        : "bg-gradient-to-r from-masters-dark/90 via-masters-green/90 to-masters-dark/90"
+      } border-b border-masters-gold/20`}>
+      
+      {/* Masters celebration image background - subtle overlay */}
+      <div className="absolute inset-0 w-full h-full opacity-[0.15]">
+        <img 
+          src="/lovable-uploads/b64f5d80-01a5-4e5d-af82-1b8aea8cec9a.png" 
+          alt="Masters Celebration" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      
+      {/* Enhanced overlay with improved glassmorphism - adjusted to ensure text readability */}
+      <div className="absolute inset-0 bg-gradient-to-r from-masters-dark/85 via-masters-green/75 to-masters-dark/85 backdrop-blur-[2px]"></div>
+      
+      <div className="container mx-auto relative z-10">
+        <div className="px-6 py-6 md:py-8 flex flex-col">
+          <div className="flex justify-between items-center">
+            {/* Logo area with refined styling */}
+            <div className="flex flex-col">
+              <div className="relative">
+                <div className="absolute -inset-2 bg-masters-gold/5 blur-md rounded-full"></div>
+                <h1 className="font-serif tracking-wide relative">
+                  <span className="text-xl md:text-3xl font-semibold">
+                    <span className="text-white">Gordy's</span> 
+                    <span className="text-masters-gold ml-1">Masters</span> 
+                    <span className="text-white ml-1">Pool</span>
+                  </span>
+                  <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-masters-yellow/80 text-masters-dark">
+                    <Trophy size={10} className="mr-1" />
+                    2025
+                  </span>
+                </h1>
+                <p className="text-masters-yellow/80 font-serif text-sm italic mt-1">
+                  A tradition unlike any other since 2005
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center">
+              {/* Admin link (subtle) */}
+              <Link
+                to="/admin"
+                className="text-white/40 hover:text-white/70 transition-colors mr-3 md:mr-4"
+                title="Admin Panel"
               >
-                <Menu className="h-4 w-4" />
+                <Settings size={18} />
+              </Link>
+              
+              {/* Mobile menu button with more elegant styling */}
+              <button 
+                onClick={toggleMobileMenu}
+                className="block md:hidden text-white p-2 rounded-md hover:bg-white/10 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
-            </SheetTrigger>
-            <SheetContent className="md:hidden" side="left">
-              <SheetHeader className="text-left">
-                <SheetTitle>Navigation</SheetTitle>
-                <SheetDescription>
-                  Explore the Masters Pool
-                </SheetDescription>
-              </SheetHeader>
-              <nav className="flex flex-col space-y-3 mt-4">
-                {pages.map((page) => (
-                  <SheetClose asChild key={page.name}>
+            </div>
+          </div>
+          
+          {/* Desktop navigation - more elegant, inspired by Augusta */}
+          <nav className="hidden md:block mt-6">
+            <div className="flex justify-center">
+              <ul className="flex space-x-2 bg-masters-dark/50 backdrop-blur-md rounded-full px-4 py-2 shadow-sm border border-white/10">
+                {NAV_TABS.map((tab) => (
+                  <li key={tab.id}>
                     <Link
-                      to={page.path}
-                      className={`block py-2 hover:text-masters-yellow transition-colors duration-200 font-medium relative ${
-                        location.pathname === page.path
-                          ? "text-masters-yellow underline underline-offset-4"
-                          : ""
+                      to={tab.href}
+                      className={`font-serif text-sm transition-all duration-300 px-4 py-2 rounded-full flex items-center ${
+                        location.pathname === tab.href
+                          ? "bg-white/15 text-masters-yellow font-medium shadow-inner"
+                          : "text-white/90 hover:bg-white/5 hover:text-masters-yellow"
                       }`}
-                      onClick={closeMenu}
                     >
-                      {page.name}
-                      {page.isNew && (
-                        <CircleDot size={8} className="text-masters-yellow absolute -top-1 right-[-10px]" />
-                      )}
+                      {tab.icon && <span className="mr-1.5">{tab.icon}</span>}
+                      {tab.label}
                     </Link>
-                  </SheetClose>
+                  </li>
                 ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+              </ul>
+            </div>
+          </nav>
+        </div>
+        
+        {/* Mobile navigation with improved styling */}
+        {isMobileMenuOpen && (
+          <nav className="md:hidden bg-masters-dark/95 backdrop-blur-md border-t border-white/10 animate-smooth-appear rounded-b-lg shadow-md">
+            <ul className="flex flex-col py-2">
+              {NAV_TABS.map((tab) => (
+                <li key={tab.id} className="border-b border-white/5 last:border-b-0">
+                  <Link
+                    to={tab.href}
+                    className={`block py-3.5 px-6 font-serif text-sm flex items-center ${
+                      location.pathname === tab.href
+                        ? "text-masters-yellow bg-white/5"
+                        : "text-white hover:bg-white/5"
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {tab.icon && <span className="mr-2">{tab.icon}</span>}
+                    {tab.label}
+                  </Link>
+                </li>
+              ))}
+              {/* Add admin link to mobile menu */}
+              <li className="border-b border-white/5 last:border-b-0">
+                <Link
+                  to="/admin"
+                  className={`block py-3.5 px-6 font-serif text-sm flex items-center ${
+                    location.pathname === "/admin"
+                      ? "text-masters-yellow bg-white/5"
+                      : "text-white hover:bg-white/5"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings size={14} className="mr-2" />
+                  Admin
+                </Link>
+              </li>
+            </ul>
+          </nav>
         )}
       </div>
     </header>
