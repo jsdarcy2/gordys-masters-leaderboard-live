@@ -45,7 +45,7 @@ const Index = () => {
   );
 };
 
-// Updated Card component to ensure links work properly
+// Fixed Card component with cursor and interactive behaviors
 const Card = ({ 
   icon, 
   title, 
@@ -116,15 +116,14 @@ const Card = ({
     }
   };
 
-  // Using Link directly as the main card element instead of a nested link
   return (
     <Link 
       to={href} 
-      className="relative h-full block group no-underline"
+      className="block h-full cursor-pointer no-underline group"
       aria-label={`Navigate to ${title}`}
     >
       <div className={`rounded-lg p-6 transition-all duration-300 border shadow-card hover:shadow-elegant ${getCardClasses()} relative overflow-hidden h-full`}>
-        {/* Background elements with pointer-events-none */}
+        {/* Background elements */}
         {backgroundImage && (
           <div className="absolute inset-0 pointer-events-none">
             <img 
