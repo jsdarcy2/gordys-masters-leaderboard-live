@@ -16,6 +16,7 @@ interface LeaderboardTableProps {
   changedPositions: Record<string, 'up' | 'down' | null>;
   dataSource?: string;
   onRefresh?: () => void;
+  showPotentialWinnings?: boolean;
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
@@ -23,7 +24,8 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   refreshing,
   changedPositions,
   dataSource,
-  onRefresh
+  onRefresh,
+  showPotentialWinnings = true
 }) => {
   return (
     <>

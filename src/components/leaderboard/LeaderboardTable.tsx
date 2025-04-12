@@ -13,14 +13,14 @@ interface LeaderboardTableProps {
   leaderboard: GolferScore[];
   refreshing: boolean;
   changedPositions: Record<string, 'up' | 'down' | null>;
-  showPotentialWinnings: boolean;
+  showPotentialWinnings?: boolean;
 }
 
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   leaderboard,
   refreshing,
   changedPositions,
-  showPotentialWinnings
+  showPotentialWinnings = true
 }) => {
   return (
     <div className="overflow-x-auto">

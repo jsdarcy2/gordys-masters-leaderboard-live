@@ -6,7 +6,6 @@ export { isTournamentInProgress, getCurrentTournament } from './tournament';
 export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from './leaderboard';
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
-export { fetchLeaderboardFromGoogleSheets } from './googleSheetsApi';
 
 // Masters.com API endpoint - Updating to use our own hosted API
 export const API_ENDPOINTS = {
@@ -49,13 +48,10 @@ export const forceRefreshPoolData = async (): Promise<void> => {
     // Clear caches first
     clearLeaderboardCache();
     
-    // Try to fetch fresh data from Google Sheets
-    const freshSheetData = await fetchLeaderboardFromGoogleSheets();
-    
-    console.log("Forced refresh from Google Sheets:", freshSheetData.length, "golfers");
+    console.log("Forced refresh of leaderboard data");
     return Promise.resolve();
   } catch (error) {
-    console.error("Error forcing refresh from Google Sheets:", error);
+    console.error("Error forcing refresh:", error);
     return Promise.reject(error);
   }
 };
