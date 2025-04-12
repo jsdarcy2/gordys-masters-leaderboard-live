@@ -89,10 +89,10 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
                 <td className={`px-2 py-3 text-right ${getScoreClass(golfer.score)}`}>
                   {formatScore(golfer.score)}
                 </td>
-                <td className={`px-2 py-3 text-right ${getScoreClass(golfer.round1 || 0)}`}>
+                <td className={`px-2 py-3 text-right ${getScoreClass(golfer.round1)}`}>
                   {golfer.round1 !== undefined ? formatScore(golfer.round1) : "-"}
                 </td>
-                <td className={`px-2 py-3 text-right ${getScoreClass(golfer.round2 || 0)}`}>
+                <td className={`px-2 py-3 text-right ${getScoreClass(golfer.round2)}`}>
                   {golfer.round2 !== undefined ? formatScore(golfer.round2) : "-"}
                 </td>
                 <td className={`px-2 py-3 text-right ${getScoreClass(golfer.today)}`}>
