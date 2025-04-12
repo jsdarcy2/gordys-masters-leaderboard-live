@@ -66,7 +66,7 @@ export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
  * Fetch participant selections
  * @param participantName Optional name of participant to fetch selections for
  */
-export async function fetchPlayerSelections(participantName?: string) {
+export async function fetchPlayerSelections(participantName?: string): Promise<Record<string, { picks: string[], roundScores: number[], tiebreakers: [number, number] }>> {
   try {
     // Get all participants first
     const standings = await fetchPoolStandings();
@@ -99,16 +99,14 @@ export async function fetchPlayerSelections(participantName?: string) {
     );
     
     if (participant) {
-      // Convert pick scores to an array in the same order as picks
-      const roundScores = participant.picks?.map(pick => 
-        participant.pickScores?.[pick] || 0
-      ) || [];
-      
+      // For a single participant, return an object with just their name as the key
+      // This ensures the return type is always the same Record<string, {...}> structure
       return {
-        picks: participant.picks || [],
-        scores: participant.pickScores || {},
-        roundScores,
-        tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+        [participantName]: {
+          picks: participant.picks || [],
+          roundScores: participant.picks?.map(pick => participant.pickScores?.[pick] || 0) || [],
+          tiebreakers: [participant.tiebreaker1 || 0, participant.tiebreaker2 || 0]
+        }
       };
     }
     
