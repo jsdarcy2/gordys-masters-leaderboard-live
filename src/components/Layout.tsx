@@ -1,6 +1,7 @@
 
 import { ReactNode } from "react";
 import Header from "@/components/Header";
+import MaintenanceBanner from "@/components/MaintenanceBanner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
@@ -34,6 +35,8 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
       
       <Header />
+      
+      <MaintenanceBanner />
       
       <main className="flex-grow container mx-auto px-3 sm:px-4 py-6 md:py-10 max-w-7xl animate-fade-in">
         {children}
