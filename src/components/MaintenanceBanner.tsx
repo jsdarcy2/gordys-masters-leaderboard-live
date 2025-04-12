@@ -20,7 +20,7 @@ const MaintenanceBanner = ({ isVisible = true }: MaintenanceBannerProps) => {
         <div className="flex flex-col md:flex-row items-center justify-between p-4">
           <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 mr-4 md:mr-6 rounded-full bg-masters-darkgreen/40 overflow-hidden border-2 border-masters-gold/60">
             <Image 
-              src="/lovable-uploads/jim-nantz.png" 
+              src="/lovable-uploads/1e4f20a3-33c8-4c5c-aba1-cc9b244e571d.png" 
               alt="Jim Nantz"
               className="w-full h-full object-cover object-top"
             />
