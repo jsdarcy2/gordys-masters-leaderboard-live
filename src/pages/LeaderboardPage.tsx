@@ -63,7 +63,7 @@ const LeaderboardPage = () => {
             variant="outline"
             size="sm"
             onClick={handleRefreshClick}
-            className="border-masters-green/20 text-masters-green hover:bg-masters-green/5 hover:text-masters-darkgreen"
+            className="border-masters-green/20 text-masters-green hover:bg-masters-green/5 hover:text-masters-darkgreen cursor-pointer"
           >
             <Database size={14} className="mr-1" />
             Refresh Data
