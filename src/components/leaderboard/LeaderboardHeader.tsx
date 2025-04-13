@@ -68,6 +68,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
                 errorMessage="Data refresh in progress"
                 tournamentYear={tournamentYear}
                 hasLiveData={false}
+                onRefresh={onRefresh}
               />
               <TooltipProvider>
                 <Tooltip>
@@ -124,6 +125,7 @@ const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
             errorMessage={errorMessage}
             tournamentYear={tournamentYear}
             hasLiveData={hasLiveData}
+            onRefresh={onRefresh}
           />
           
           <button 

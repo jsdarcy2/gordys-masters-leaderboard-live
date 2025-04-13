@@ -10,10 +10,16 @@ export { fetchLeaderboardData, buildGolferScoreMap, clearLeaderboardCache } from
 export { fetchPoolStandings, fetchPlayerSelections } from './pool';
 export { useTournamentData } from '@/hooks/use-tournament-data';
 
-// Masters API endpoint - Using the official Masters.com JSON endpoint
+// API endpoints
 export const API_ENDPOINTS = {
+  // Primary API: Sportradar Masters API
+  SPORTRADAR_MASTERS: "https://api.sportradar.us/golf/trial/v3/en/tournaments/sr:tournament:975/summary.json",
+  // Fallback API: Masters.com JSON endpoint
   MASTERS_SCORES: "https://www.masters.com/en_US/scores/feeds/2025/scores.json"
 };
+
+// Get the Sportradar API key from env
+export const SPORTRADAR_API_KEY = import.meta.env.VITE_SPORTS_API_KEY || "key_not_set";
 
 // Simple API health check function
 export const checkApiHealth = async (
@@ -41,10 +47,18 @@ export const checkApiHealth = async (
 // Get the best data source (simplified)
 export const getBestDataSource = async (): Promise<DataSource> => {
   try {
-    // First check if our primary API is available
-    const primaryHealthy = await checkApiHealth(API_ENDPOINTS.MASTERS_SCORES);
+    // First check if Sportradar API is available
+    const sportRadarEndpoint = `${API_ENDPOINTS.SPORTRADAR_MASTERS}?api_key=${SPORTRADAR_API_KEY}`;
+    const primaryHealthy = await checkApiHealth(sportRadarEndpoint);
     
     if (primaryHealthy) {
+      return 'sportradar-api';
+    }
+    
+    // Next check if Masters.com API is available
+    const mastersApiHealthy = await checkApiHealth(API_ENDPOINTS.MASTERS_SCORES);
+    
+    if (mastersApiHealthy) {
       return 'masters-scores-api';
     }
     
@@ -60,7 +74,7 @@ export const getBestDataSource = async (): Promise<DataSource> => {
     return 'mock-data';
   } catch (error) {
     console.error("Error determining best data source:", error);
-    return 'masters-scores-api'; // Default fallback
+    return 'sportradar-api'; // Default fallback
   }
 };
 

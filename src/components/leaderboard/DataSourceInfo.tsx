@@ -2,6 +2,7 @@
 import React from "react";
 import { Info, ExternalLink, Calendar, FileSpreadsheet, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import DataSourceBadge from "./DataSourceBadge";
 
 interface DataSourceInfoProps {
   dataSource?: string;
@@ -9,6 +10,7 @@ interface DataSourceInfoProps {
   errorMessage?: string;
   tournamentYear?: string;
   hasLiveData?: boolean;
+  onRefresh?: () => void;
 }
 
 const DataSourceInfo: React.FC<DataSourceInfoProps> = ({ 
@@ -16,7 +18,8 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   lastUpdated,
   errorMessage,
   tournamentYear,
-  hasLiveData = false
+  hasLiveData = false,
+  onRefresh
 }) => {
   const formatLastUpdated = (timestamp: string): string => {
     if (!timestamp) return "Just now";
@@ -44,6 +47,8 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Updating";
       case "masters-scores-api":
         return "Masters Live Scores";
+      case "sportradar-api":
+        return "Sportradar Golf";
       case "mock-data":
         return "Masters Leaderboard";
       case "google-sheets":
@@ -57,6 +62,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     if (dataSource?.toLowerCase() === "google-sheets") {
       return "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
     }
+    if (dataSource?.toLowerCase() === "sportradar-api") {
+      return "https://developer.sportradar.com/docs/read/golf/Golf_v3";
+    }
     return "https://www.masters.com/en_US/scores/index.html";
   };
   
@@ -69,7 +77,9 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   };
   
   // Always show the live signal for our hosted data
-  const shouldShowLiveSignal = dataSource === "masters-scores-api" || hasLiveData;
+  const shouldShowLiveSignal = dataSource === "masters-scores-api" || 
+                              dataSource === "sportradar-api" || 
+                              hasLiveData;
   
   return (
     <div className="flex items-center gap-2 text-sm text-white/90">
@@ -89,21 +99,15 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
           <Info size={14} className="mr-1 text-white/70" />
         )}
         <span>
-          <span className="text-white/70">Source:</span> <span className="text-white font-medium">
-            {getDataSourceLabel()}
+          <span className="text-white/70">Source:</span> 
+          <span className="text-white font-medium ml-1">
+            <DataSourceBadge source={dataSource || ""} onRefresh={onRefresh} className="bg-opacity-20" />
           </span> 
           
           {shouldShowLiveSignal && (
             <span className="ml-1.5 bg-green-500/20 text-white/95 text-xs px-1.5 py-0.5 rounded inline-flex items-center">
               <BadgeCheck size={12} className="mr-0.5 text-green-400" />
               LIVE
-            </span>
-          )}
-          
-          {dataSource?.toLowerCase() === "google-sheets" && (
-            <span className="ml-1.5 bg-yellow-500/20 text-white/95 text-xs px-1.5 py-0.5 rounded inline-flex items-center">
-              <FileSpreadsheet size={12} className="mr-0.5 text-yellow-300" />
-              BACKUP
             </span>
           )}
           

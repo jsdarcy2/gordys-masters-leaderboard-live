@@ -1,6 +1,5 @@
-
 import { GolferScore } from "@/types";
-import { API_ENDPOINTS } from "@/services/api";
+import { API_ENDPOINTS, SPORTRADAR_API_KEY } from "@/services/api";
 import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
 
 // Cache for leaderboard data
@@ -9,7 +8,127 @@ let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL (reduced from 15 minutes)
 
 /**
- * Fetch scores data from Masters.com official JSON endpoint
+ * Fetch scores data from Sportradar Golf API
+ */
+async function fetchSportradarData(): Promise<GolferScore[]> {
+  try {
+    console.log("Fetching data from Sportradar Golf API...");
+    const endpoint = `${API_ENDPOINTS.SPORTRADAR_MASTERS}?api_key=${SPORTRADAR_API_KEY}`;
+    
+    const response = await fetch(endpoint, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      },
+      // Force a new request each time
+      cache: 'no-store'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Sportradar API response error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Sportradar data received");
+    
+    // Extract and process player data based on Sportradar API structure
+    if (data && data.players && Array.isArray(data.players)) {
+      return data.players.map((player: any, index: number) => {
+        // Determine player position - Sportradar uses position or rank
+        const position = player.position || player.rank || index + 1;
+        const numericPosition = typeof position === 'number' ? position : parseInt(String(position).replace(/T/g, ''), 10) || index + 1;
+        
+        // Calculate scores
+        const totalScore = player.total_to_par !== undefined ? player.total_to_par : 0;
+        const todayScore = player.today_to_par !== undefined ? player.today_to_par : 0;
+        
+        // Get round scores
+        const rounds = player.rounds || [];
+        const round1Score = rounds[0]?.to_par !== undefined ? rounds[0].to_par : undefined;
+        const round2Score = rounds[1]?.to_par !== undefined ? rounds[1].to_par : undefined;
+        const round3Score = rounds[2]?.to_par !== undefined ? rounds[2].to_par : undefined;
+        const round4Score = rounds[3]?.to_par !== undefined ? rounds[3].to_par : undefined;
+        
+        // Determine player status (active, cut, withdrawn)
+        let playerStatus: "active" | "cut" | "withdrawn" = "active";
+        const status = (player.status || "").toLowerCase();
+        
+        if (status.includes('cut') || status.includes('mc')) {
+          playerStatus = "cut";
+        } else if (status.includes('wd') || status.includes('withdraw')) {
+          playerStatus = "withdrawn";
+        }
+        
+        return {
+          position: numericPosition,
+          name: player.name || player.first_name + " " + player.last_name,
+          score: totalScore,
+          today: todayScore,
+          status: playerStatus,
+          round1: round1Score,
+          round2: round2Score,
+          round3: round3Score,
+          round4: round4Score,
+          thru: player.thru || player.current_hole || "F"
+        };
+      });
+    }
+    
+    // If Sportradar data structure is different, handle alternate format
+    if (data && data.leaderboard && Array.isArray(data.leaderboard.players)) {
+      return data.leaderboard.players.map((player: any, index: number) => {
+        const position = player.position || player.rank || index + 1;
+        const numericPosition = typeof position === 'number' ? position : parseInt(String(position).replace(/T/g, ''), 10) || index + 1;
+        
+        // Calculate scores - handle format differences
+        const totalScore = player.total_to_par !== undefined ? player.total_to_par : 
+                          player.score_to_par !== undefined ? player.score_to_par : 0;
+        
+        const todayScore = player.today_to_par !== undefined ? player.today_to_par : 
+                          player.round_to_par !== undefined ? player.round_to_par : 0;
+        
+        // Get round scores from rounds or scores array
+        const rounds = player.rounds || player.scores || [];
+        const round1Score = rounds[0]?.to_par !== undefined ? rounds[0].to_par : undefined;
+        const round2Score = rounds[1]?.to_par !== undefined ? rounds[1].to_par : undefined;
+        const round3Score = rounds[2]?.to_par !== undefined ? rounds[2].to_par : undefined;
+        const round4Score = rounds[3]?.to_par !== undefined ? rounds[3].to_par : undefined;
+        
+        // Determine player status
+        let playerStatus: "active" | "cut" | "withdrawn" = "active";
+        const status = (player.status || "").toLowerCase();
+        
+        if (status.includes('cut') || status.includes('mc')) {
+          playerStatus = "cut";
+        } else if (status.includes('wd') || status.includes('withdraw')) {
+          playerStatus = "withdrawn";
+        }
+        
+        return {
+          position: numericPosition,
+          name: player.name || `${player.first_name || ""} ${player.last_name || ""}`.trim(),
+          score: totalScore,
+          today: todayScore,
+          status: playerStatus,
+          round1: round1Score,
+          round2: round2Score,
+          round3: round3Score,
+          round4: round4Score,
+          thru: player.thru || player.current_hole || "F"
+        };
+      });
+    }
+    
+    console.error("Unexpected data format from Sportradar API:", data);
+    throw new Error("Invalid data format from Sportradar API");
+  } catch (error) {
+    console.error("Error fetching from Sportradar API:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch scores data from Masters.com official JSON endpoint as fallback
  */
 async function fetchMastersScoresData(): Promise<GolferScore[]> {
   try {
@@ -28,7 +147,7 @@ async function fetchMastersScoresData(): Promise<GolferScore[]> {
     }
     
     const data = await response.json();
-    console.log("Masters scores data received:", data);
+    console.log("Masters scores data received");
     
     // Map the player data to our GolferScore format
     // The structure might be different from our mock, so we need to check the actual response
@@ -186,36 +305,56 @@ export async function fetchLeaderboardData(): Promise<{
     console.log(`Using cached leaderboard (${Math.round(cacheAge / 1000)}s old)`);
     return {
       leaderboard: leaderboardCache,
-      source: "masters-scores-api", // Always use this source name for consistency
+      source: "sportradar-api", // Always use source name consistent with most recent fetch
       lastUpdated: new Date(lastFetchTime).toISOString()
     };
   }
   
   try {
-    // Try to fetch data from the hosted JSON
-    const scoresData = await fetchMastersScoresData();
-    if (scoresData && scoresData.length > 0) {
-      console.log(`Retrieved ${scoresData.length} players from Masters scores data`);
-      
-      // Update cache
-      leaderboardCache = scoresData;
-      lastFetchTime = now;
-      
-      return {
-        leaderboard: scoresData,
-        source: "masters-scores-api", // Consistently use this source name
-        lastUpdated: new Date().toISOString()
-      };
+    // First try Sportradar API
+    if (SPORTRADAR_API_KEY && SPORTRADAR_API_KEY !== "key_not_set") {
+      try {
+        const scoresData = await fetchSportradarData();
+        if (scoresData && scoresData.length > 0) {
+          console.log(`Retrieved ${scoresData.length} players from Sportradar API`);
+          
+          // Update cache
+          leaderboardCache = scoresData;
+          lastFetchTime = now;
+          
+          return {
+            leaderboard: scoresData,
+            source: "sportradar-api",
+            lastUpdated: new Date().toISOString()
+          };
+        }
+      } catch (sportradarError) {
+        console.warn("Error fetching from Sportradar API, trying Masters.com API:", sportradarError);
+      }
     }
     
-    // If masters API fails, try Google Sheets
-    console.log("Masters API returned no data, trying Google Sheets fallback");
-    throw new Error("Masters API returned no data");
-  } catch (error) {
-    console.warn("Error fetching from Masters API, trying Google Sheets fallback:", error);
-    
+    // Try Masters.com API as first fallback
     try {
-      // Try to get data from Google Sheets
+      const mastersData = await fetchMastersScoresData();
+      if (mastersData && mastersData.length > 0) {
+        console.log(`Retrieved ${mastersData.length} players from Masters.com API`);
+        
+        // Update cache
+        leaderboardCache = mastersData;
+        lastFetchTime = now;
+        
+        return {
+          leaderboard: mastersData,
+          source: "masters-scores-api",
+          lastUpdated: new Date().toISOString()
+        };
+      }
+    } catch (mastersError) {
+      console.warn("Error fetching from Masters.com API, trying Google Sheets:", mastersError);
+    }
+    
+    // Try Google Sheets as second fallback
+    try {
       const sheetsData = await fetchGoogleSheetsLeaderboard();
       if (sheetsData && sheetsData.length > 0) {
         console.log(`Successfully fetched ${sheetsData.length} players from Google Sheets`);
@@ -248,6 +387,15 @@ export async function fetchLeaderboardData(): Promise<{
     return {
       leaderboard: [],
       source: "no-data",
+      lastUpdated: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Error in fetchLeaderboardData:", error);
+    
+    // Return empty array in case of error
+    return {
+      leaderboard: [],
+      source: "error",
       lastUpdated: new Date().toISOString()
     };
   }
