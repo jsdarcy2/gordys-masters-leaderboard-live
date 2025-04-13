@@ -1,3 +1,4 @@
+
 import { GolferScore, DataSource } from "@/types";
 import { API_ENDPOINTS, SPORTRADAR_API_KEY } from "@/services/api";
 import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
@@ -311,8 +312,8 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
-    // First try Sportradar API
-    if (SPORTRADAR_API_KEY && SPORTRADAR_API_KEY !== "") {
+    // First try Sportradar API - using type-safe check for API key
+    if (SPORTRADAR_API_KEY && typeof SPORTRADAR_API_KEY === 'string' && SPORTRADAR_API_KEY.length > 0) {
       try {
         const scoresData = await fetchSportradarData();
         if (scoresData && scoresData.length > 0) {

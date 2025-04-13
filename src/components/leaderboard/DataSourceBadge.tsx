@@ -29,8 +29,8 @@ const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
     );
   }
   
-  // Check if the Sportradar API key is properly set
-  const isSportradarKeyValid = SPORTRADAR_API_KEY && SPORTRADAR_API_KEY !== "";
+  // Check if the Sportradar API key is properly set (using type-safe comparison)
+  const isSportradarKeyValid = SPORTRADAR_API_KEY && typeof SPORTRADAR_API_KEY === 'string' && SPORTRADAR_API_KEY.length > 0;
   
   // If source is sportradar but key is invalid, show warning
   if (source === "sportradar-api" && !isSportradarKeyValid) {
