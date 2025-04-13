@@ -45,31 +45,20 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
         return "Recent Data";
       case "no-data":
         return "Updating";
-      case "masters-scores-api":
-        return "Masters Live Scores";
       case "sportradar-api":
         return "Sportradar Golf";
       case "mock-data":
         return "Masters Leaderboard";
-      case "google-sheets":
-        return "Google Sheets Data";
       default:
         return dataSource;
     }
   };
   
   const getDataSourceLink = () => {
-    if (dataSource?.toLowerCase() === "google-sheets") {
-      return "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
-    }
-    if (dataSource?.toLowerCase() === "sportradar-api") {
-      return "https://developer.sportradar.com/docs/read/golf/Golf_v3";
-    }
-    return "https://www.masters.com/en_US/scores/index.html";
+    return "https://developer.sportradar.com/docs/read/golf/Golf_v3";
   };
   
   const sourceLink = getDataSourceLink();
-  const googleSheetLink = "https://docs.google.com/spreadsheets/d/1UjBLU-_BC-8ieVU0Rj6-Y2jZSHcVnQgIMwvBZzZxw5o/edit?gid=2129153243#gid=2129153243";
   
   const handleExternalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,9 +66,7 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
   };
   
   // Always show the live signal for our hosted data
-  const shouldShowLiveSignal = dataSource === "masters-scores-api" || 
-                              dataSource === "sportradar-api" || 
-                              hasLiveData;
+  const shouldShowLiveSignal = dataSource === "sportradar-api" || hasLiveData;
   
   return (
     <div className="flex items-center gap-2 text-sm text-white/90">
@@ -131,21 +118,6 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
               onClick={handleExternalClick}
             >
               <ExternalLink size={12} className="ml-0.5" />
-            </a>
-          )}
-          
-          {/* Only show Google Sheets backup link if we're not already using Google Sheets */}
-          {dataSource?.toLowerCase() !== "google-sheets" && (
-            <a 
-              href={googleSheetLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="ml-3 text-white/95 hover:text-white hover:bg-white/10 px-1.5 py-0.5 rounded inline-flex items-center cursor-pointer"
-              title="Google Sheet Backup"
-              onClick={handleExternalClick}
-            >
-              <FileSpreadsheet size={12} className="mr-1 text-masters-gold/90" />
-              <span className="text-xs whitespace-nowrap">Google Sheet Backup</span>
             </a>
           )}
         </span>

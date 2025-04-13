@@ -75,46 +75,6 @@ const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
           </Tooltip>
         </TooltipProvider>
       );
-    case "masters-scores-api":
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className={`inline-flex items-center text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full ${className}`}>
-                <BadgeCheck size={12} className="mr-1" />
-                <span>Masters API</span>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="center">
-              <p>Using Masters.com API data</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
-    case "google-sheets":
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className={`inline-flex items-center text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full ${className}`}>
-                <span>Google Sheets</span>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="center">
-              <p>Using Google Sheets backup data</p>
-              {onRefresh && (
-                <button 
-                  onClick={onRefresh}
-                  className="mt-1 text-xs px-2 py-1 bg-blue-100 border border-blue-300 rounded-md hover:bg-blue-200 w-full"
-                >
-                  <RefreshCcw size={12} className="inline mr-1" />
-                  Try Primary Source
-                </button>
-              )}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
     case "cached-data":
       return (
         <TooltipProvider>

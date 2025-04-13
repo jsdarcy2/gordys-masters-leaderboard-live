@@ -37,8 +37,11 @@ export interface PoolParticipant {
 
 export type TournamentRound = 1 | 2 | 3 | 4;
 
-// Data source types
-export type DataSource = 'masters-scores-api' | 'mock-data' | 'cached-data' | 'google-sheets';
+// Data source for leaderboard and pool data
+export type DataSource = 
+  | 'sportradar-api' 
+  | 'mock-data' // Keeping this for fallback/emergency
+  | 'cached-data'; // Keeping this for caching between API calls
 
 export type TournamentData = {
   lastUpdated: string;

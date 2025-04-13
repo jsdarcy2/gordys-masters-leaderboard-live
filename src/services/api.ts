@@ -1,4 +1,3 @@
-
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 import { clearPoolStandingsCache } from "./pool";
@@ -19,7 +18,7 @@ export const API_ENDPOINTS = {
 };
 
 // Get the Sportradar API key from env
-export const SPORTRADAR_API_KEY = import.meta.env.VITE_SPORTS_API_KEY || "key_not_set";
+export const SPORTRADAR_API_KEY = "6U9WiXuo0kwq8PUNTrkAwLhOz60Obg8lZQN0Zval";
 
 // Simple API health check function
 export const checkApiHealth = async (
