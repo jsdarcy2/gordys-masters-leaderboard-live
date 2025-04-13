@@ -7,6 +7,7 @@ import { checkPoolStandingsSync } from "@/services/pool";
 import { Button } from "@/components/ui/button";
 import { forceRefreshPoolData } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { notify } from "@/services/notification";
 
 interface SyncStatusBadgeProps {
   className?: string;
@@ -42,17 +43,19 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
   
   const handleForceRefresh = async () => {
     setRefreshing(true);
-    toast({
-      title: "Refreshing Data",
-      description: "Forcing refresh from Google Sheets..."
-    });
+    notify(
+      "Refreshing Data",
+      "Forcing refresh from Google Sheets...",
+      "info"
+    );
     
     try {
       await forceRefreshPoolData();
-      toast({
-        title: "Refresh Complete",
-        description: "Data has been refreshed from Google Sheets"
-      });
+      notify(
+        "Refresh Complete",
+        "Data has been refreshed from Google Sheets",
+        "success"
+      );
       
       // After refresh, check sync status again
       await checkSync();
@@ -63,11 +66,11 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
       }
     } catch (error) {
       console.error("Error during force refresh:", error);
-      toast({
-        title: "Refresh Failed",
-        description: "Could not refresh data from Google Sheets",
-        variant: "destructive"
-      });
+      notify(
+        "Refresh Failed",
+        "Could not refresh data from Google Sheets",
+        "error"
+      );
     } finally {
       setRefreshing(false);
     }
@@ -157,33 +160,43 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
     );
   }
   
+  // If the data is out of sync
+  const differenceCount = syncStatus.differences.length;
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Badge variant="outline" className={`bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer ${className}`} onClick={handleRefresh}>
-            <XCircle size={14} className="mr-1" />
-            Out of Sync ({syncStatus.differences.length} differences)
+          <Badge variant="outline" className={`bg-amber-50 text-amber-600 hover:bg-amber-100 cursor-pointer ${className}`} onClick={handleRefresh}>
+            <AlertCircle size={14} className="mr-1" />
+            {differenceCount > 10 
+              ? 'Connection Issue' 
+              : `${differenceCount} Data Difference${differenceCount !== 1 ? 's' : ''}`}
           </Badge>
         </TooltipTrigger>
         <TooltipContent className="w-80 p-3">
           <div>
-            <p className="font-medium mb-2">Data Sync Issues:</p>
+            <p className="font-medium mb-2">Data Sync Information:</p>
             <p className="text-sm mb-2">Local: {syncStatus.localCount} participants</p>
             <p className="text-sm mb-2">Sheets: {syncStatus.sheetsCount} participants</p>
             {syncStatus.differences.length > 0 && (
               <div className="mt-2 text-xs">
-                <p className="font-medium">First 5 differences found (of {syncStatus.differences.length}):</p>
-                <ul className="list-disc pl-4 mt-1">
-                  {syncStatus.differences.slice(0, 5).map((diff, index) => (
-                    <li key={index}>
-                      {diff.name}: {' '}
-                      {diff.localScore !== undefined ? diff.localScore : 'missing'} vs{' '}
-                      {diff.sheetsScore !== undefined ? diff.sheetsScore : 'missing'}
-                    </li>
-                  ))}
-                </ul>
-                {syncStatus.differences.length > 5 && (
+                <p className="font-medium">
+                  {differenceCount > 10 
+                    ? 'Google Sheets data differs significantly from local data' 
+                    : `${differenceCount} difference${differenceCount !== 1 ? 's' : ''} found:`}
+                </p>
+                {differenceCount <= 10 && (
+                  <ul className="list-disc pl-4 mt-1">
+                    {syncStatus.differences.slice(0, 5).map((diff, index) => (
+                      <li key={index}>
+                        {diff.name}: {' '}
+                        {diff.localScore !== undefined ? diff.localScore : 'missing'} vs{' '}
+                        {diff.sheetsScore !== undefined ? diff.sheetsScore : 'missing'}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {differenceCount > 5 && differenceCount <= 10 && (
                   <p className="text-amber-600 mt-1">...and {syncStatus.differences.length - 5} more</p>
                 )}
               </div>
@@ -192,7 +205,7 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
               <Button 
                 size="sm" 
                 onClick={handleRefresh}
-                className="text-xs px-2 py-1 bg-white border border-red-200 rounded hover:bg-red-50 transition-colors flex items-center justify-center"
+                className="text-xs px-2 py-1 bg-white border border-amber-200 rounded hover:bg-amber-50 transition-colors flex items-center justify-center"
               >
                 <RefreshCcw size={12} className="mr-1" />
                 Check Sync Status Again
@@ -202,7 +215,7 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
                 size="sm" 
                 onClick={handleForceRefresh}
                 disabled={refreshing}
-                className="text-xs px-2 py-1 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition-colors flex items-center justify-center"
+                className="text-xs px-2 py-1 bg-amber-50 border border-amber-200 rounded hover:bg-amber-100 transition-colors flex items-center justify-center"
               >
                 <RefreshCcw size={12} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
                 {refreshing ? 'Refreshing...' : 'Force Refresh from Sheets'}

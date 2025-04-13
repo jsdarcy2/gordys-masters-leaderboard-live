@@ -10,6 +10,18 @@ let poolStandingsCache: PoolParticipant[] | null = null;
 let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
 
+// Cache for sync check to prevent too many API calls
+let syncStatusCache: {
+  timestamp: number;
+  status: {
+    inSync: boolean;
+    localCount: number;
+    sheetsCount: number;
+    differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
+  }
+} | null = null;
+const SYNC_CACHE_TTL = 60 * 1000; // 1 minute cache TTL for sync status
+
 /**
  * Fetch raw selections data directly without using pool standings
  * This avoids circular dependency
@@ -50,6 +62,14 @@ export async function checkPoolStandingsSync(): Promise<{
   sheetsCount: number;
   differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
 }> {
+  const now = Date.now();
+  
+  // Use cache if it's recent
+  if (syncStatusCache && (now - syncStatusCache.timestamp) < SYNC_CACHE_TTL) {
+    console.log("Using cached sync status");
+    return syncStatusCache.status;
+  }
+  
   try {
     // Get local data
     const localData = await fetchPoolStandings();
@@ -70,18 +90,20 @@ export async function checkPoolStandingsSync(): Promise<{
     // If Google Sheets returned no data, mark everything as out of sync
     if (sheetsData.length === 0) {
       console.warn("Google Sheets returned no data, showing all local data as out of sync");
-      const differences = localData.map(participant => ({
-        name: participant.name,
-        localScore: participant.totalScore,
-        sheetsScore: undefined
-      }));
-      
-      return {
+      const result = {
         inSync: false,
         localCount: localData.length,
         sheetsCount: 0,
-        differences
+        differences: []
       };
+      
+      // Store in cache
+      syncStatusCache = {
+        timestamp: now,
+        status: result
+      };
+      
+      return result;
     }
     
     // Create maps for easier comparison
@@ -102,23 +124,29 @@ export async function checkPoolStandingsSync(): Promise<{
     // Find differences
     const differences: Array<{ name: string, localScore?: number, sheetsScore?: number }> = [];
     
-    // Log full comparison data for debugging
-    console.log("Beginning detailed sync comparison");
+    // Define a threshold for acceptable differences (e.g., names that have insignificant score differences)
+    const SCORE_THRESHOLD = 0; // Consider scores equal if the absolute difference is within this threshold
+    let significantDifferences = 0;
     
     // Check local participants against sheets
     localMap.forEach((score, name) => {
       const sheetsScore = sheetsMap.get(name);
       
       if (!sheetsMap.has(name)) {
-        console.log(`Participant ${name} exists locally but not in sheets`);
+        // Only log every 10th entry to avoid console spam
+        if (differences.length % 10 === 0) {
+          console.log(`Participant ${name} exists locally but not in sheets`);
+        }
         differences.push({ name, localScore: score });
-      } else if (sheetsScore !== score) {
+        significantDifferences++;
+      } else if (Math.abs(sheetsScore! - score) > SCORE_THRESHOLD) {
         console.log(`Score mismatch for ${name}: local=${score}, sheets=${sheetsScore}`);
         differences.push({ 
           name, 
           localScore: score, 
           sheetsScore 
         });
+        significantDifferences++;
       }
     });
     
@@ -127,23 +155,34 @@ export async function checkPoolStandingsSync(): Promise<{
       if (!localMap.has(name)) {
         console.log(`Participant ${name} exists in sheets but not locally`);
         differences.push({ name, sheetsScore: score });
+        significantDifferences++;
       }
     });
     
-    // Log the full list of differences for debugging
-    if (differences.length > 0) {
-      console.log(`Sync check complete. Found ${differences.length} differences`);
-      console.log("First 10 sync differences:", differences.slice(0, 10));
+    // Log summary
+    if (significantDifferences > 0) {
+      console.log(`Sync check complete. Found ${significantDifferences} significant differences out of ${differences.length} total`);
+      if (differences.length > 0) {
+        console.log("First 10 sync differences:", differences.slice(0, 10));
+      }
     } else {
       console.log("Sync check complete. Data is in sync.");
     }
     
-    return {
-      inSync: differences.length === 0,
+    const result = {
+      inSync: significantDifferences === 0,
       localCount: localData.length,
       sheetsCount: sheetsData.length,
       differences
     };
+    
+    // Store in cache
+    syncStatusCache = {
+      timestamp: now,
+      status: result
+    };
+    
+    return result;
   } catch (error) {
     console.error("Error checking sync status:", error);
     return {
