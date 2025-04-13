@@ -1,3 +1,4 @@
+
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 import { clearPoolStandingsCache } from "./pool";
@@ -54,23 +55,8 @@ export const getBestDataSource = async (): Promise<DataSource> => {
       return 'sportradar-api';
     }
     
-    // Next check if Masters.com API is available
-    const mastersApiHealthy = await checkApiHealth(API_ENDPOINTS.MASTERS_SCORES);
-    
-    if (mastersApiHealthy) {
-      return 'masters-scores-api';
-    }
-    
-    // If primary is unavailable, check Google Sheets availability
-    const { checkGoogleSheetsAvailability } = await import('./googleSheetsApi');
-    const sheetsAvailable = await checkGoogleSheetsAvailability();
-    
-    if (sheetsAvailable) {
-      return 'google-sheets';
-    }
-    
-    // Fallback to mock data if both are unavailable
-    return 'mock-data';
+    // If primary is unavailable, fallback to cached data
+    return 'cached-data';
   } catch (error) {
     console.error("Error determining best data source:", error);
     return 'sportradar-api'; // Default fallback

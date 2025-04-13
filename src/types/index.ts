@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 // Masters tournament data types
@@ -41,7 +42,12 @@ export type TournamentRound = 1 | 2 | 3 | 4;
 export type DataSource = 
   | 'sportradar-api' 
   | 'mock-data' // Keeping this for fallback/emergency
-  | 'cached-data'; // Keeping this for caching between API calls
+  | 'cached-data'
+  | 'masters-scores-api'
+  | 'google-sheets'
+  | 'error'
+  | 'no-data'
+  | 'updating';
 
 export type TournamentData = {
   lastUpdated: string;

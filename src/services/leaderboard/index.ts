@@ -1,4 +1,4 @@
-import { GolferScore } from "@/types";
+import { GolferScore, DataSource } from "@/types";
 import { API_ENDPOINTS, SPORTRADAR_API_KEY } from "@/services/api";
 import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
 
@@ -294,7 +294,7 @@ async function fetchGoogleSheetsLeaderboard(): Promise<GolferScore[]> {
  */
 export async function fetchLeaderboardData(): Promise<{
   leaderboard: GolferScore[];
-  source: string;
+  source: DataSource;
   lastUpdated: string;
 }> {
   const now = Date.now();
@@ -312,7 +312,7 @@ export async function fetchLeaderboardData(): Promise<{
   
   try {
     // First try Sportradar API
-    if (SPORTRADAR_API_KEY && SPORTRADAR_API_KEY !== "key_not_set") {
+    if (SPORTRADAR_API_KEY && SPORTRADAR_API_KEY !== "") {
       try {
         const scoresData = await fetchSportradarData();
         if (scoresData && scoresData.length > 0) {
@@ -329,53 +329,13 @@ export async function fetchLeaderboardData(): Promise<{
           };
         }
       } catch (sportradarError) {
-        console.warn("Error fetching from Sportradar API, trying Masters.com API:", sportradarError);
+        console.warn("Error fetching from Sportradar API:", sportradarError);
       }
-    }
-    
-    // Try Masters.com API as first fallback
-    try {
-      const mastersData = await fetchMastersScoresData();
-      if (mastersData && mastersData.length > 0) {
-        console.log(`Retrieved ${mastersData.length} players from Masters.com API`);
-        
-        // Update cache
-        leaderboardCache = mastersData;
-        lastFetchTime = now;
-        
-        return {
-          leaderboard: mastersData,
-          source: "masters-scores-api",
-          lastUpdated: new Date().toISOString()
-        };
-      }
-    } catch (mastersError) {
-      console.warn("Error fetching from Masters.com API, trying Google Sheets:", mastersError);
-    }
-    
-    // Try Google Sheets as second fallback
-    try {
-      const sheetsData = await fetchGoogleSheetsLeaderboard();
-      if (sheetsData && sheetsData.length > 0) {
-        console.log(`Successfully fetched ${sheetsData.length} players from Google Sheets`);
-        
-        // Update cache with Google Sheets data
-        leaderboardCache = sheetsData;
-        lastFetchTime = now;
-        
-        return {
-          leaderboard: sheetsData,
-          source: "google-sheets",
-          lastUpdated: new Date().toISOString()
-        };
-      }
-    } catch (sheetsError) {
-      console.error("Error fetching from Google Sheets fallback:", sheetsError);
     }
     
     // If we have a cache, return it regardless of age in case of error
     if (leaderboardCache && leaderboardCache.length > 0) {
-      console.log("All data sources failed. Returning cached data.");
+      console.log("Sportradar API failed. Returning cached data.");
       return {
         leaderboard: leaderboardCache,
         source: "cached-data",
