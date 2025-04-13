@@ -2,7 +2,6 @@
 import { DataSource } from "@/types";
 import { clearLeaderboardCache } from "./leaderboard";
 import { clearPoolStandingsCache } from "./pool";
-import { forceRefreshFromGoogleSheets, checkGoogleSheetsAvailability } from "./googleSheetsApi";
 
 // Re-export functions from modular service files
 export { isTournamentInProgress, getCurrentTournament } from './tournament';
@@ -13,9 +12,7 @@ export { useTournamentData } from '@/hooks/use-tournament-data';
 // API endpoints
 export const API_ENDPOINTS = {
   // Primary API: Sportradar Masters API
-  SPORTRADAR_MASTERS: "https://api.sportradar.us/golf/trial/v3/en/tournaments/sr:tournament:975/summary.json",
-  // Fallback API: Masters.com JSON endpoint
-  MASTERS_SCORES: "https://www.masters.com/en_US/scores/feeds/2025/scores.json"
+  SPORTRADAR_MASTERS: "https://api.sportradar.us/golf/trial/v3/en/tournaments/sr:tournament:975/summary.json"
 };
 
 // Get the Sportradar API key from env
@@ -44,10 +41,10 @@ export const checkApiHealth = async (
   }
 };
 
-// Get the best data source (simplified)
+// Get the best data source
 export const getBestDataSource = async (): Promise<DataSource> => {
   try {
-    // First check if Sportradar API is available
+    // Use Sportradar API
     const sportRadarEndpoint = `${API_ENDPOINTS.SPORTRADAR_MASTERS}?api_key=${SPORTRADAR_API_KEY}`;
     const primaryHealthy = await checkApiHealth(sportRadarEndpoint);
     
@@ -64,65 +61,22 @@ export const getBestDataSource = async (): Promise<DataSource> => {
 };
 
 /**
- * Force refresh pool data from Google Sheets
+ * Force refresh pool data
  * Returns a boolean indicating if refresh was successful
  */
 export const forceRefreshPoolData = async (): Promise<boolean> => {
   try {
     console.log("Starting force refresh of pool data...");
     
-    // Clear caches first
+    // Clear caches
     clearLeaderboardCache();
     clearPoolStandingsCache();
     console.log("Caches cleared");
-    
-    // Check if Google Sheets is available before attempting refresh
-    const sheetsAvailable = await checkGoogleSheetsAvailability();
-    
-    if (!sheetsAvailable) {
-      console.warn("Google Sheets is not available for refresh");
-      return false;
-    }
-    
-    // Force refresh from Google Sheets
-    const refreshSuccessful = await forceRefreshFromGoogleSheets();
-    
-    if (!refreshSuccessful) {
-      console.warn("Google Sheets refresh was not successful");
-      return false;
-    }
     
     console.log("Forced refresh of pool data completed successfully");
     return true;
   } catch (error) {
     console.error("Error forcing refresh:", error);
     return false;
-  }
-};
-
-/**
- * Function to enable direct Google Sheets data retrieval
- * This now supports fallback to mock data when API is unavailable
- */
-export const fetchDataFromGoogleSheets = async (dataType: 'leaderboard' | 'pool'): Promise<any> => {
-  const { fetchLeaderboardFromGoogleSheets, fetchPoolStandingsFromGoogleSheets } = await import('./googleSheetsApi');
-  
-  try {
-    // First check if Google Sheets is available
-    const sheetsAvailable = await checkGoogleSheetsAvailability();
-    
-    if (!sheetsAvailable) {
-      console.warn(`Google Sheets is not available for fetching ${dataType}`);
-      throw new Error("Google Sheets API is not available");
-    }
-    
-    if (dataType === 'leaderboard') {
-      return await fetchLeaderboardFromGoogleSheets();
-    } else {
-      return await fetchPoolStandingsFromGoogleSheets();
-    }
-  } catch (error) {
-    console.error(`Error fetching ${dataType} from Google Sheets:`, error);
-    throw error;
   }
 };

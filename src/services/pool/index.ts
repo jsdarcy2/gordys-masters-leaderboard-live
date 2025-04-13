@@ -1,6 +1,5 @@
 
 import { PoolParticipant } from "@/types";
-import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
 import { generateEmergencyPoolStandings, calculatePoolStandings } from "./participantUtils";
 import { fetchLeaderboardData } from "@/services/leaderboard";
 import { buildGolferScoreMap } from "@/utils/scoringUtils";
@@ -9,18 +8,6 @@ import { buildGolferScoreMap } from "@/utils/scoringUtils";
 let poolStandingsCache: PoolParticipant[] | null = null;
 let lastFetchTime: number = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes cache TTL
-
-// Cache for sync check to prevent too many API calls
-let syncStatusCache: {
-  timestamp: number;
-  status: {
-    inSync: boolean;
-    localCount: number;
-    sheetsCount: number;
-    differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
-  }
-} | null = null;
-const SYNC_CACHE_TTL = 60 * 1000; // 1 minute cache TTL for sync status
 
 /**
  * Fetch raw selections data directly without using pool standings
@@ -53,149 +40,7 @@ async function fetchRawSelectionsData(): Promise<Record<string, { picks: string[
 }
 
 /**
- * Check if pool standings are in sync with Google Sheets data
- * Returns a sync status object with details about the sync status
- */
-export async function checkPoolStandingsSync(): Promise<{
-  inSync: boolean;
-  localCount: number;
-  sheetsCount: number;
-  differences: Array<{ name: string, localScore?: number, sheetsScore?: number }>;
-}> {
-  const now = Date.now();
-  
-  // Use cache if it's recent
-  if (syncStatusCache && (now - syncStatusCache.timestamp) < SYNC_CACHE_TTL) {
-    console.log("Using cached sync status");
-    return syncStatusCache.status;
-  }
-  
-  try {
-    // Get local data
-    const localData = await fetchPoolStandings();
-    
-    // Get Google Sheets data directly, bypassing any cached data
-    let sheetsData: PoolParticipant[] = [];
-    try {
-      sheetsData = await fetchPoolStandingsFromGoogleSheets();
-      console.log(`Sync check: Successfully fetched ${sheetsData.length} participants from Google Sheets`);
-    } catch (error) {
-      console.error("Error fetching Google Sheets data for sync check:", error);
-      // Instead of failing completely, we'll continue with an empty sheets data array
-      // This will show all local participants as "out of sync" but at least we can show something
-    }
-    
-    console.log(`Sync check: Local data count: ${localData.length}, Sheets data count: ${sheetsData.length}`);
-    
-    // If Google Sheets returned no data, mark everything as out of sync
-    if (sheetsData.length === 0) {
-      console.warn("Google Sheets returned no data, showing all local data as out of sync");
-      const result = {
-        inSync: false,
-        localCount: localData.length,
-        sheetsCount: 0,
-        differences: []
-      };
-      
-      // Store in cache
-      syncStatusCache = {
-        timestamp: now,
-        status: result
-      };
-      
-      return result;
-    }
-    
-    // Create maps for easier comparison
-    const localMap = new Map<string, number>();
-    localData.forEach(participant => {
-      if (participant.name) {
-        localMap.set(participant.name, participant.totalScore);
-      }
-    });
-    
-    const sheetsMap = new Map<string, number>();
-    sheetsData.forEach(participant => {
-      if (participant.name) {
-        sheetsMap.set(participant.name, participant.totalScore);
-      }
-    });
-    
-    // Find differences
-    const differences: Array<{ name: string, localScore?: number, sheetsScore?: number }> = [];
-    
-    // Define a threshold for acceptable differences (e.g., names that have insignificant score differences)
-    const SCORE_THRESHOLD = 0; // Consider scores equal if the absolute difference is within this threshold
-    let significantDifferences = 0;
-    
-    // Check local participants against sheets
-    localMap.forEach((score, name) => {
-      const sheetsScore = sheetsMap.get(name);
-      
-      if (!sheetsMap.has(name)) {
-        // Only log every 10th entry to avoid console spam
-        if (differences.length % 10 === 0) {
-          console.log(`Participant ${name} exists locally but not in sheets`);
-        }
-        differences.push({ name, localScore: score });
-        significantDifferences++;
-      } else if (Math.abs(sheetsScore! - score) > SCORE_THRESHOLD) {
-        console.log(`Score mismatch for ${name}: local=${score}, sheets=${sheetsScore}`);
-        differences.push({ 
-          name, 
-          localScore: score, 
-          sheetsScore 
-        });
-        significantDifferences++;
-      }
-    });
-    
-    // Check sheets participants against local
-    sheetsMap.forEach((score, name) => {
-      if (!localMap.has(name)) {
-        console.log(`Participant ${name} exists in sheets but not locally`);
-        differences.push({ name, sheetsScore: score });
-        significantDifferences++;
-      }
-    });
-    
-    // Log summary
-    if (significantDifferences > 0) {
-      console.log(`Sync check complete. Found ${significantDifferences} significant differences out of ${differences.length} total`);
-      if (differences.length > 0) {
-        console.log("First 10 sync differences:", differences.slice(0, 10));
-      }
-    } else {
-      console.log("Sync check complete. Data is in sync.");
-    }
-    
-    const result = {
-      inSync: significantDifferences === 0,
-      localCount: localData.length,
-      sheetsCount: sheetsData.length,
-      differences
-    };
-    
-    // Store in cache
-    syncStatusCache = {
-      timestamp: now,
-      status: result
-    };
-    
-    return result;
-  } catch (error) {
-    console.error("Error checking sync status:", error);
-    return {
-      inSync: false,
-      localCount: 0,
-      sheetsCount: 0,
-      differences: [{ name: "Error checking sync" }]
-    };
-  }
-}
-
-/**
- * Fetch pool standings exclusively from Google Sheets
+ * Fetch pool standings
  */
 export async function fetchPoolStandings(): Promise<PoolParticipant[]> {
   const now = Date.now();

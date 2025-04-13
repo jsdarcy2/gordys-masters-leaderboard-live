@@ -61,7 +61,7 @@ export function useTournamentData(): UseLeaderboardResult {
     setLastUpdated(data.lastUpdated || new Date().toISOString());
     setDataSource(data.source as DataSource);
     setDataYear(data.year);
-    setHasLiveData(data.source === "masters-scores-api");
+    setHasLiveData(data.source === "sportradar-api");
     
     // Reset failed attempts counter on success
     failedAttempts.current = 0;

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PoolParticipant } from "@/types";
 import { fetchPoolStandings, isTournamentInProgress } from "@/services/api";
@@ -11,10 +12,9 @@ import PoolStandingsFallback from "@/components/pool/PoolStandingsFallback";
 import SyncStatusBadge from "@/components/pool/SyncStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw, Info, Ban, FileSpreadsheet } from "lucide-react";
+import { RefreshCcw, Info, Ban } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { fetchPoolStandingsFromGoogleSheets } from "@/services/googleSheetsApi";
 
 const POLLING_INTERVAL = 60000; // 1 minute in milliseconds
 const PREVIEW_COUNT = 134; // Show all 134 participants by default
@@ -78,46 +78,6 @@ const PoolStandings = () => {
       if (errorCountRef.current >= ERROR_THRESHOLD) {
         setCriticalError(true);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const tryGoogleSheets = async () => {
-    try {
-      setLoading(true);
-      toast({
-        title: "Trying Google Sheets backup",
-        description: "Fetching data from Google Sheets..."
-      });
-      
-      const sheetsData = await fetchPoolStandingsFromGoogleSheets();
-      
-      if (sheetsData && sheetsData.length > 0) {
-        setStandings(sheetsData);
-        setDataSource("google-sheets");
-        setLastUpdated(new Date().toISOString());
-        setCriticalError(false);
-        setError(null);
-        
-        toast({
-          title: "Using Google Sheets data",
-          description: `Successfully retrieved ${sheetsData.length} participants from Google Sheets`,
-        });
-      } else {
-        toast({
-          title: "Google Sheets Error",
-          description: "Could not retrieve data from Google Sheets",
-          variant: "destructive"
-        });
-      }
-    } catch (err) {
-      console.error("Error fetching from Google Sheets:", err);
-      toast({
-        title: "Google Sheets Error",
-        description: "Failed to fetch from Google Sheets backup",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
@@ -208,10 +168,9 @@ const PoolStandings = () => {
         
         <div className="p-4 bg-white">
           <PoolStandingsFallback
-            message="We're having trouble connecting to the data source. You can try refreshing or using our Google Sheets backup."
+            message="We're having trouble connecting to the data source. Please try refreshing."
             onRetry={handleManualRefresh}
             severity="critical"
-            tryGoogleSheets={tryGoogleSheets}
           />
         </div>
       </div>
@@ -231,27 +190,6 @@ const PoolStandings = () => {
       />
       
       <div className="p-4 bg-white">
-        {dataSource === "google-sheets" && (
-          <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-            <FileSpreadsheet className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800 text-sm flex justify-between items-center">
-              <span className="flex items-center">
-                <span>Using Google Sheets backup data. Primary data source is currently unavailable.</span>
-                <SyncStatusBadge className="ml-2" />
-              </span>
-              <Button 
-                onClick={handleManualRefresh} 
-                variant="outline" 
-                size="sm" 
-                className="ml-2 text-xs px-2 py-1 bg-white border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center"
-              >
-                <RefreshCcw size={12} className="mr-1" />
-                Try Primary Source
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-      
         {usingEmergencyData && (
           <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200 flex items-center justify-between">
             <div className="flex items-center">
@@ -296,65 +234,45 @@ const PoolStandings = () => {
                 onClick={handleManualRefresh} 
                 variant="outline" 
                 size="sm" 
-                className="mt-2 bg-white"
+                className="mt-2 w-full text-xs px-2 py-1 bg-white border border-amber-200 rounded hover:bg-amber-50 transition-colors"
               >
-                <RefreshCcw size={14} className="mr-1" />
-                Try Again
+                <RefreshCcw size={12} className="mr-1" />
+                Refresh Data
               </Button>
             </AlertDescription>
           </Alert>
         )}
         
-        {!loading && standings.length > 0 && (
+        <div className="mb-4">
           <SearchBar 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            filteredCount={filteredCount}
+            query={searchQuery} 
+            onChange={setSearchQuery} 
+            matchCount={filteredCount}
+            totalCount={totalParticipants}
           />
-        )}
+        </div>
         
         {loading ? (
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-6 w-10" />
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-6 w-20" />
-              </div>
+          <div className="space-y-2 mt-4">
+            {[...Array(5)].map((_, index) => (
+              <Skeleton key={index} className="h-12 w-full" />
             ))}
           </div>
         ) : (
           <>
-            {standings.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-700 font-medium">No pool standings data available</p>
-                <p className="text-gray-500 text-sm mb-4">We're having trouble retrieving the current standings</p>
-                <div className="flex gap-3 justify-center">
-                  <Button onClick={handleManualRefresh} className="bg-masters-green hover:bg-masters-green/90">
-                    <RefreshCcw size={16} className="mr-2" />
-                    Refresh Data
-                  </Button>
-                  <Button onClick={tryGoogleSheets} variant="outline" className="border-amber-500 text-amber-600">
-                    <FileSpreadsheet size={16} className="mr-2" />
-                    Try Google Sheets
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <ParticipantTable 
-                  displayStandings={displayStandings}
-                  searchQuery={searchQuery}
-                />
-                
-                {filteredStandings.length > PREVIEW_COUNT && !searchQuery && (
-                  <ShowMoreButton 
-                    showAll={showAll}
-                    setShowAll={setShowAll}
-                    totalCount={filteredStandings.length}
-                  />
-                )}
-              </>
+            <ParticipantTable 
+              participants={displayStandings} 
+              isMobile={isMobile}
+              emptyMessage="No participants match your search query."
+            />
+            
+            {filteredStandings.length > PREVIEW_COUNT && (
+              <ShowMoreButton 
+                count={filteredStandings.length} 
+                showAll={showAll} 
+                setShowAll={setShowAll} 
+                previewCount={PREVIEW_COUNT}
+              />
             )}
           </>
         )}

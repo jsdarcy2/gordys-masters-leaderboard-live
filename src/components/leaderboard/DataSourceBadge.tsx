@@ -99,21 +99,6 @@ const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
           </Tooltip>
         </TooltipProvider>
       );
-    case "mock-data":
-      return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
-              <span className={`inline-flex items-center text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full ${className}`}>
-                <span>Mock Data</span>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="center">
-              <p>Using simulated leaderboard data</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
     default:
       return (
         <span className={`inline-flex items-center text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full ${className}`}>

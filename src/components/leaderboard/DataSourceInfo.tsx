@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Info, ExternalLink, Calendar, FileSpreadsheet, BadgeCheck } from "lucide-react";
+import { Info, ExternalLink, Calendar, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import DataSourceBadge from "./DataSourceBadge";
 
@@ -34,23 +34,6 @@ const DataSourceInfo: React.FC<DataSourceInfoProps> = ({
     } catch (e) {
       console.error("Error formatting timestamp:", e);
       return "Just now";
-    }
-  };
-  
-  const getDataSourceLabel = () => {
-    if (!dataSource) return "Updating";
-    
-    switch (dataSource.toLowerCase()) {
-      case "cached-data":
-        return "Recent Data";
-      case "no-data":
-        return "Updating";
-      case "sportradar-api":
-        return "Sportradar Golf";
-      case "mock-data":
-        return "Masters Leaderboard";
-      default:
-        return dataSource;
     }
   };
   

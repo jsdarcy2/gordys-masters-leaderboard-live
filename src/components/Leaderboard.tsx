@@ -48,14 +48,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
         setDataSource(result.source);
         // Reset any other state as needed
         setError(null);
-        
-        if (result.source === "google-sheets") {
-          toast({
-            title: "Using Google Sheets Data",
-            description: "Primary data source is unavailable, using backup Google Sheets data",
-            variant: "default"
-          });
-        }
       }
     } catch (error) {
       console.error("Error refreshing leaderboard:", error);
@@ -85,10 +77,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
           setLastUpdated(result.lastUpdated);
           setDataSource(result.source);
           setError(null);
-          
-          if (result.source === "google-sheets") {
-            setError("Using Google Sheets backup data. Primary source unavailable.");
-          }
         }
       } catch (error) {
         console.error("Error fetching leaderboard data:", error);
@@ -150,38 +138,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
     }
   }, [leaderboard]);
 
-  // Force a Google Sheets refresh
-  const tryGoogleSheets = useCallback(async () => {
-    setRefreshing(true);
-    setCriticalError(false);
-    toast({
-      title: "Trying Google Sheets",
-      description: "Attempting to fetch data from Google Sheets backup",
-    });
-    
-    try {
-      // The fetchLeaderboardData function should handle Google Sheets fallback
-      const result = await fetchLeaderboardData();
-      
-      setLeaderboard(result.leaderboard);
-      setLastUpdated(result.lastUpdated);
-      setDataSource(result.source);
-      setError(null);
-      
-      toast({
-        title: `Data Source: ${result.source}`,
-        description: `Retrieved data from ${result.source}`,
-        variant: "default"
-      });
-    } catch (error) {
-      console.error("Error fetching from Google Sheets:", error);
-      setCriticalError(true);
-      setError("Failed to retrieve data from any source");
-    } finally {
-      setRefreshing(false);
-    }
-  }, [toast]);
-
   if (criticalError) {
     return (
       <div className="masters-card">
@@ -198,9 +154,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
         
         <EmergencyFallback 
           onRetry={refreshData}
-          tryGoogleSheets={tryGoogleSheets}
           severity="critical"
-          message="We're having trouble connecting to the data source. You can try refreshing or using our Google Sheets backup."
+          message="We're having trouble connecting to the data source. You can try refreshing."
         />
       </div>
     );
@@ -220,7 +175,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ forceCriticalOutage = false }
       />
       
       <div className="p-4 relative">
-        {error && dataSource !== "google-sheets" && (
+        {error && (
           <div className="text-red-500 mb-4">
             {error}
           </div>
