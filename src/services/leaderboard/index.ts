@@ -1,7 +1,6 @@
 
 import { GolferScore, DataSource } from "@/types";
 import { API_ENDPOINTS, SPORTRADAR_API_KEY } from "@/services/api";
-import { fetchLeaderboardFromGoogleSheets, checkGoogleSheetsAvailability } from "@/services/googleSheetsApi";
 
 // Cache for leaderboard data
 let leaderboardCache: GolferScore[] | null = null;
@@ -129,169 +128,7 @@ async function fetchSportradarData(): Promise<GolferScore[]> {
 }
 
 /**
- * Fetch scores data from Masters.com official JSON endpoint as fallback
- */
-async function fetchMastersScoresData(): Promise<GolferScore[]> {
-  try {
-    console.log("Fetching data from Masters.com official JSON...");
-    const response = await fetch(API_ENDPOINTS.MASTERS_SCORES, {
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      },
-      // Force a new request each time
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Masters scores API response error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    console.log("Masters scores data received");
-    
-    // Map the player data to our GolferScore format
-    // The structure might be different from our mock, so we need to check the actual response
-    if (data && data.player && Array.isArray(data.player)) {
-      return data.player.map((player: any, index: number) => {
-        // Extract and process player data based on Masters.com scores structure
-        const position = player.pos || String(index + 1);
-        const numericPosition = parseInt(position.replace(/T/g, ''), 10) || index + 1;
-        
-        // Parse score values, handling 'E' (even) as 0
-        const totalScore = player.topar === 'E' ? 0 : parseInt(player.topar, 10) || 0;
-        const todayScore = player.today === 'E' ? 0 : parseInt(player.today, 10) || 0;
-        
-        // Parse round scores - explicitly handle 'E' as 0
-        const round1Score = player.round1 === 'E' ? 0 : 
-                          player.round1 === '' ? undefined : 
-                          parseInt(player.round1, 10) || 0;
-                          
-        const round2Score = player.round2 === 'E' ? 0 : 
-                          player.round2 === '' ? undefined : 
-                          parseInt(player.round2, 10) || 0;
-                          
-        const round3Score = player.round3 === 'E' ? 0 : 
-                          player.round3 === '' ? undefined : 
-                          parseInt(player.round3, 10) || 0;
-                          
-        const round4Score = player.round4 === 'E' ? 0 : 
-                          player.round4 === '' ? undefined : 
-                          parseInt(player.round4, 10) || 0;
-        
-        // Determine player status
-        let playerStatus: "active" | "cut" | "withdrawn" = "active";
-        if (player.status) {
-          const statusLower = player.status.toLowerCase();
-          if (statusLower.includes('cut') || statusLower.includes('mc')) {
-            playerStatus = "cut";
-          } else if (statusLower.includes('wd')) {
-            playerStatus = "withdrawn";
-          }
-        }
-        
-        return {
-          position: numericPosition,
-          name: player.name || player.playerName || 'Unknown',
-          score: totalScore,
-          today: todayScore,
-          status: playerStatus,
-          round1: round1Score,
-          round2: round2Score,
-          round3: round3Score,
-          round4: round4Score,
-          thru: player.thru || "F"
-        };
-      });
-    } else if (data && data.data && data.data.player && Array.isArray(data.data.player)) {
-      // Alternative structure that might be present in the Masters.com JSON
-      return data.data.player.map((player: any, index: number) => {
-        // Extract and process player data based on Masters.com scores structure
-        const position = player.pos || String(index + 1);
-        const numericPosition = parseInt(position.replace(/T/g, ''), 10) || index + 1;
-        
-        // Parse score values, handling 'E' (even) as 0
-        const totalScore = player.topar === 'E' ? 0 : parseInt(player.topar, 10) || 0;
-        const todayScore = player.today === 'E' ? 0 : parseInt(player.today, 10) || 0;
-        
-        // Parse round scores - explicitly handle 'E' as 0
-        const round1Score = player.round1 === 'E' ? 0 : 
-                          player.round1 === '' ? undefined : 
-                          parseInt(player.round1, 10) || 0;
-                          
-        const round2Score = player.round2 === 'E' ? 0 : 
-                          player.round2 === '' ? undefined : 
-                          parseInt(player.round2, 10) || 0;
-                          
-        const round3Score = player.round3 === 'E' ? 0 : 
-                          player.round3 === '' ? undefined : 
-                          parseInt(player.round3, 10) || 0;
-                          
-        const round4Score = player.round4 === 'E' ? 0 : 
-                          player.round4 === '' ? undefined : 
-                          parseInt(player.round4, 10) || 0;
-        
-        // Determine player status
-        let playerStatus: "active" | "cut" | "withdrawn" = "active";
-        if (player.status) {
-          const statusLower = player.status.toLowerCase();
-          if (statusLower.includes('cut') || statusLower.includes('mc')) {
-            playerStatus = "cut";
-          } else if (statusLower.includes('wd')) {
-            playerStatus = "withdrawn";
-          }
-        }
-        
-        return {
-          position: numericPosition,
-          name: player.name || player.playerName || 'Unknown',
-          score: totalScore,
-          today: todayScore,
-          status: playerStatus,
-          round1: round1Score,
-          round2: round2Score,
-          round3: round3Score,
-          round4: round4Score,
-          thru: player.thru || "F"
-        };
-      });
-    }
-    
-    console.error("Unexpected data format from Masters.com:", data);
-    throw new Error("Invalid data format from Masters.com scores data");
-  } catch (error) {
-    console.error("Error fetching from Masters scores data:", error);
-    throw error;
-  }
-}
-
-/**
- * Fetch leaderboard data from Google Sheets as fallback
- */
-async function fetchGoogleSheetsLeaderboard(): Promise<GolferScore[]> {
-  try {
-    console.log("Attempting to fetch data from Google Sheets...");
-    // Check if Google Sheets API is available first
-    const isAvailable = await checkGoogleSheetsAvailability();
-    
-    if (!isAvailable) {
-      console.error("Google Sheets API not available");
-      throw new Error("Google Sheets API not available");
-    }
-    
-    // Fetch leaderboard data from Google Sheets
-    const sheetsData = await fetchLeaderboardFromGoogleSheets();
-    console.log(`Retrieved ${sheetsData.length} players from Google Sheets`);
-    
-    return sheetsData;
-  } catch (error) {
-    console.error("Error fetching from Google Sheets:", error);
-    throw error;
-  }
-}
-
-/**
- * Fetch leaderboard data with caching and fallback
+ * Fetch leaderboard data with caching
  */
 export async function fetchLeaderboardData(): Promise<{
   leaderboard: GolferScore[];
@@ -312,7 +149,7 @@ export async function fetchLeaderboardData(): Promise<{
   }
   
   try {
-    // First try Sportradar API - using type-safe check for API key
+    // Try Sportradar API - using type-safe check for API key
     if (SPORTRADAR_API_KEY && typeof SPORTRADAR_API_KEY === 'string' && SPORTRADAR_API_KEY.length > 0) {
       try {
         const scoresData = await fetchSportradarData();

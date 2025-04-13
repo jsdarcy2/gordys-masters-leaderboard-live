@@ -1,26 +1,26 @@
 
 import React, { useState, useEffect } from "react";
-import { Lock, FileSpreadsheet, RefreshCcw, Eye, EyeOff, Check, X, Database, CloudOff } from "lucide-react";
+import { Lock, FileSpreadsheet, RefreshCcw, Eye, EyeOff, Check, X, Database } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { GolferScore, PoolParticipant, ADMIN_PASSWORD } from "@/types";
-import { fetchDataFromGoogleSheets } from "@/services/api";
 import { getScoreClass, formatScore } from "@/utils/leaderboardUtils";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { fetchPoolStandings } from "@/services/api";
+import { fetchLeaderboardData } from "@/services/leaderboard";
 
 const AdminPanel = () => {
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [showSheet, setShowSheet] = useState(false);
-  const [sheetsLeaderboard, setSheetsLeaderboard] = useState<GolferScore[]>([]);
-  const [sheetsPoolStandings, setSheetsPoolStandings] = useState<PoolParticipant[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<GolferScore[]>([]);
+  const [poolStandings, setPoolStandings] = useState<PoolParticipant[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
   const { toast } = useToast();
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -33,86 +33,36 @@ const AdminPanel = () => {
     }
   };
 
-  const fetchGoogleSheetsData = async (dataType: 'leaderboard' | 'pool') => {
+  const fetchData = async (dataType: 'leaderboard' | 'pool') => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDataFromGoogleSheets(dataType);
       if (dataType === 'leaderboard') {
-        setSheetsLeaderboard(data);
+        const result = await fetchLeaderboardData();
+        setLeaderboardData(result.leaderboard || []);
+        console.log(`Loaded ${dataType} data:`, result.leaderboard?.length || 0, "golfers");
       } else {
-        setSheetsPoolStandings(data);
+        const data = await fetchPoolStandings();
+        setPoolStandings(data);
+        console.log(`Loaded ${dataType} data:`, data.length, "participants");
       }
-      console.log(`Loaded ${dataType} data from Google Sheets:`, data);
       
       // Show success message
       toast({
         title: "Data Loaded",
-        description: `Successfully loaded ${data.length} items from ${useMockData ? "mock data" : "Google Sheets"}`,
+        description: `Successfully loaded data from the Sportradar API`,
       });
-    } catch (error) {
-      console.error(`Error loading ${dataType} data:`, error);
-      setError(`Failed to load ${dataType} data from Google Sheets.`);
+    } catch (err) {
+      console.error(`Error loading ${dataType} data:`, err);
+      setError(`Failed to load ${dataType} data from API.`);
       
       toast({
         title: "Data Load Error",
-        description: `Could not load ${dataType} data. Try using mock data instead.`,
+        description: `Could not load ${dataType} data from the API.`,
         variant: "destructive"
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const toggleMockData = (enabled: boolean) => {
-    setUseMockData(enabled);
-    // Clear data when switching between real and mock data
-    setSheetsLeaderboard([]);
-    setSheetsPoolStandings([]);
-    
-    toast({
-      title: enabled ? "Using Mock Data" : "Using Google Sheets API",
-      description: enabled 
-        ? "Switched to mock data mode. Data is simulated." 
-        : "Switched to Google Sheets API mode.",
-    });
-    
-    // Update the mock data flag in the GoogleSheetsApi module
-    (window as any).USE_MOCK_DATA_FALLBACK = enabled;
-  };
-
-  const loadMockData = () => {
-    const mockData = (window as any).testMockData();
-    if (mockData) {
-      setSheetsLeaderboard(mockData.leaderboard.slice(1).map((row: any) => ({
-        position: parseInt(row[0], 10) || 0,
-        name: row[1] || "Unknown",
-        score: parseInt(row[2], 10) || 0,
-        today: parseInt(row[3], 10) || 0,
-        thru: row[4] || "F",
-        status: (row[5] || "active") as "active" | "cut" | "withdrawn"
-      })));
-      
-      setSheetsPoolStandings(mockData.standings.slice(1).map((row: any) => ({
-        position: parseInt(row[0], 10) || 0,
-        name: row[1] || "Unknown",
-        totalScore: parseInt(row[2], 10) || 0,
-        totalPoints: parseInt(row[3], 10) || 0,
-        picks: [row[4], row[6], row[8], row[10], row[12]].filter(Boolean),
-        pickScores: {
-          [row[4]]: parseInt(row[5], 10) || 0,
-          [row[6]]: parseInt(row[7], 10) || 0,
-          [row[8]]: parseInt(row[9], 10) || 0,
-          [row[10]]: parseInt(row[11], 10) || 0,
-          [row[12]]: parseInt(row[13], 10) || 0,
-        },
-        paid: row[16]?.toLowerCase() === "yes" || false
-      })));
-      
-      toast({
-        title: "Mock Data Loaded",
-        description: "Successfully loaded simulated data for testing",
-      });
     }
   };
 
@@ -123,14 +73,10 @@ const AdminPanel = () => {
     
     // Load data if authenticated
     if (isAuth && showSheet) {
-      if (useMockData) {
-        loadMockData();
-      } else {
-        fetchGoogleSheetsData('leaderboard');
-        fetchGoogleSheetsData('pool');
-      }
+      fetchData('leaderboard');
+      fetchData('pool');
     }
-  }, [showSheet, useMockData]);
+  }, [showSheet]);
 
   if (!authenticated) {
     return (
@@ -179,19 +125,15 @@ const AdminPanel = () => {
             className="flex items-center gap-1"
           >
             {showSheet ? <EyeOff size={16} /> : <Eye size={16} />}
-            {showSheet ? "Hide Sheet Data" : "Show Sheet Data"}
+            {showSheet ? "Hide API Data" : "Show API Data"}
           </Button>
           
           <Button
             size="sm"
             variant="outline"
             onClick={() => {
-              if (useMockData) {
-                loadMockData();
-              } else {
-                fetchGoogleSheetsData('leaderboard');
-                fetchGoogleSheetsData('pool');
-              }
+              fetchData('leaderboard');
+              fetchData('pool');
             }}
             disabled={loading}
             className="flex items-center gap-1"
@@ -227,27 +169,11 @@ const AdminPanel = () => {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-600">Data Source:</span>
-                {useMockData ? (
-                  <span className="flex items-center text-amber-600 bg-amber-50 px-2 py-1 rounded text-xs font-medium">
-                    <Database size={14} className="mr-1" />
-                    Mock Data
-                  </span>
-                ) : (
-                  <span className="flex items-center text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-medium">
-                    <CloudOff size={14} className="mr-1" />
-                    Google Sheets API
-                  </span>
-                )}
+                <span className="flex items-center text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs font-medium">
+                  <Database size={14} className="mr-1" />
+                  Sportradar API
+                </span>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Use Mock Data</span>
-              <Switch 
-                checked={useMockData} 
-                onCheckedChange={toggleMockData} 
-                className="data-[state=checked]:bg-amber-500"
-              />
             </div>
           </div>
           
@@ -282,14 +208,14 @@ const AdminPanel = () => {
                             <RefreshCcw size={24} className="animate-spin mx-auto text-masters-green" />
                           </TableCell>
                         </TableRow>
-                      ) : sheetsLeaderboard.length === 0 ? (
+                      ) : leaderboardData.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                            No leaderboard data from Google Sheets
+                            No leaderboard data available
                           </TableCell>
                         </TableRow>
                       ) : (
-                        sheetsLeaderboard.map((golfer, index) => (
+                        leaderboardData.map((golfer, index) => (
                           <TableRow key={`${golfer.name}-${index}`} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                             <TableCell className="font-medium">{golfer.position}</TableCell>
                             <TableCell>
@@ -338,14 +264,14 @@ const AdminPanel = () => {
                             <RefreshCcw size={24} className="animate-spin mx-auto text-masters-green" />
                           </TableCell>
                         </TableRow>
-                      ) : sheetsPoolStandings.length === 0 ? (
+                      ) : poolStandings.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                            No pool standings data from Google Sheets
+                            No pool standings data available
                           </TableCell>
                         </TableRow>
                       ) : (
-                        sheetsPoolStandings.map((participant, index) => (
+                        poolStandings.map((participant, index) => (
                           <TableRow key={`${participant.name}-${index}`} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                             <TableCell className="font-medium">{participant.position}</TableCell>
                             <TableCell>{participant.name}</TableCell>

@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { RotateCcw, CheckCircle2, AlertCircle, RefreshCcw, Database } from "lucide-react";
+import { CheckCircle2, AlertCircle, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { notify } from "@/services/notification";
 
 interface SyncStatusBadgeProps {
   className?: string;
@@ -16,13 +15,18 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
   className = "",
   onRefresh
 }) => {
-  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
   
   const handleRefresh = () => {
     if (onRefresh) {
+      setRefreshing(true);
       onRefresh();
+      
+      // Set a timeout to reset refreshing state
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 1000);
     }
   };
   
@@ -36,7 +40,21 @@ const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Data updated from Sportradar API</p>
+          <div className="flex flex-col gap-2">
+            <p>Data updated from Sportradar API</p>
+            {onRefresh && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleRefresh}
+                className="text-xs py-1"
+                disabled={refreshing}
+              >
+                <RefreshCcw size={12} className={`mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh Now'}
+              </Button>
+            )}
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

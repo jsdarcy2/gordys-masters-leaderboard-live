@@ -245,9 +245,9 @@ const PoolStandings = () => {
         
         <div className="mb-4">
           <SearchBar 
-            query={searchQuery} 
-            onChange={setSearchQuery} 
-            matchCount={filteredCount}
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            filteredCount={filteredCount}
             totalCount={totalParticipants}
           />
         </div>
@@ -268,10 +268,9 @@ const PoolStandings = () => {
             
             {filteredStandings.length > PREVIEW_COUNT && (
               <ShowMoreButton 
-                count={filteredStandings.length} 
                 showAll={showAll} 
                 setShowAll={setShowAll} 
-                previewCount={PREVIEW_COUNT}
+                totalCount={filteredStandings.length}
               />
             )}
           </>

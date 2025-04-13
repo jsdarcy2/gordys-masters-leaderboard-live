@@ -7,9 +7,10 @@ interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   filteredCount: number;
+  totalCount: number;
 }
 
-const SearchBar = ({ searchQuery, setSearchQuery, filteredCount }: SearchBarProps) => {
+const SearchBar = ({ searchQuery, setSearchQuery, filteredCount, totalCount }: SearchBarProps) => {
   return (
     <div className="mb-4 relative">
       <div className="relative">

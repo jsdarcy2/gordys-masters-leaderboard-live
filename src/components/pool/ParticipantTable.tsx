@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { PoolParticipant } from "@/types";
 import { formatGolfScore } from "@/utils/leaderboardUtils";
@@ -14,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 interface ParticipantTableProps {
-  displayStandings: PoolParticipant[];
-  searchQuery: string;
+  participants: PoolParticipant[];
+  isMobile?: boolean;
+  emptyMessage?: string;
 }
 
 const getEarningsForPosition = (position: number, totalParticipants: number): string => {
@@ -25,7 +25,6 @@ const getEarningsForPosition = (position: number, totalParticipants: number): st
   return "";
 };
 
-// List of participants who have already paid
 const PAID_PARTICIPANTS = new Set([
   "Kyle Flippen", "Jim Jones", "Charlotte Ramalingam", "Louis Baker", "Chris Crawford", 
   "Ava Rose Darcy", "Mike Baker", "Chuck Corbett Sr", "Jay Despard", "Charles Elder", 
@@ -51,7 +50,6 @@ const PAID_PARTICIPANTS = new Set([
   "Robby Stofer", "Jess Troyak", "Annie Carlson", "Ethan Sturgis"
 ]);
 
-// List of all participant names - used to determine who hasn't paid
 const ALL_PARTICIPANTS = new Set([
   "Kyle Flippen", "Jim Jones", "Charlotte Ramalingam", "Louis Baker", "Chris Crawford", 
   "Ava Rose Darcy", "Mike Baker", "Chuck Corbett Sr", "Jay Despard", "Pete Drago", 
@@ -82,32 +80,30 @@ const ALL_PARTICIPANTS = new Set([
   "Jess Troyak", "Annie Carlson", "Ethan Sturgis"
 ]);
 
-// Calculate unpaid participants by filtering PAID_PARTICIPANTS from ALL_PARTICIPANTS
 const UNPAID_PARTICIPANTS = new Set(
   [...ALL_PARTICIPANTS].filter(name => !PAID_PARTICIPANTS.has(name))
 );
 
-const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, searchQuery }) => {
-  // Find ties in the displayStandings
+const ParticipantTable: React.FC<ParticipantTableProps> = ({ 
+  participants, 
+  isMobile = false, 
+  emptyMessage = "No participants match your search" 
+}) => {
   const tiedPositions: Record<number, number> = {};
-  displayStandings.forEach(participant => {
+  participants.forEach(participant => {
     tiedPositions[participant.position] = (tiedPositions[participant.position] || 0) + 1;
   });
 
-  // State to track participants who have paid during this session
   const [justPaid, setJustPaid] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  // Handle when a payment is initiated
   const handlePaymentClick = (participantName: string) => {
-    // Mark the participant as paid
     setJustPaid(prev => {
       const newSet = new Set(prev);
       newSet.add(participantName);
       return newSet;
     });
     
-    // Show confirmation toast
     toast({
       title: "Payment Initiated",
       description: `Thank you for paying! The badge will be hidden now.`,
@@ -137,29 +133,24 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
           </tr>
         </thead>
         <tbody>
-          {displayStandings.length === 0 ? (
+          {participants.length === 0 ? (
             <tr>
               <td colSpan={8} className="text-center py-8 text-gray-500">
-                {searchQuery
-                  ? "No participants match your search"
-                  : "No participants data available"}
+                {emptyMessage}
               </td>
             </tr>
           ) : (
-            displayStandings.map((participant, index) => {
-              // Get the best four golfers for highlighting
+            participants.map((participant, index) => {
               const bestFourGolfers = participant.bestFourGolfers || [];
               
-              // Check if the participant has paid
               const isPaid = PAID_PARTICIPANTS.has(participant.name) || justPaid.has(participant.name);
               
-              // Explicitly check if participant is unpaid
               const isUnpaid = UNPAID_PARTICIPANTS.has(participant.name) && !justPaid.has(participant.name);
               
               const missedCut = participant.totalScore > 200;
               const isTied = tiedPositions[participant.position] > 1;
               const showEarnings = participant.position <= 3;
-              const earningsAmount = getEarningsForPosition(participant.position, displayStandings.length);
+              const earningsAmount = getEarningsForPosition(participant.position, participants.length);
               
               return (
                 <tr
@@ -168,10 +159,6 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                     index % 2 === 0 ? "bg-white" : "bg-masters-light/30"
                   } ${
                     missedCut ? "bg-red-50" : ""
-                  } ${
-                    searchQuery && participant.name.toLowerCase().includes(searchQuery.toLowerCase())
-                      ? "bg-masters-green/10"
-                      : ""
                   } hover:bg-masters-cream/50 transition-colors border-b border-gray-100`}
                 >
                   <td className="px-2 py-3 font-medium">
@@ -211,7 +198,6 @@ const ParticipantTable: React.FC<ParticipantTableProps> = ({ displayStandings, s
                                 rel="noopener noreferrer"
                                 className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded font-normal hover:bg-blue-200 transition-colors flex items-center gap-1"
                                 onClick={(e) => {
-                                  // This doesn't prevent navigation, just triggers the paid status update
                                   handlePaymentClick(participant.name);
                                 }}
                               >
